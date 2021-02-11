@@ -28,11 +28,12 @@ module.exports.security = {
   *                                                                          *
   ***************************************************************************/
 
-  // cors: {
-  //   allRoutes: false,
-  //   allowOrigins: '*',
+   cors: {
+     allRoutes: true,
+     allowOrigins: '*',
+  // allowOrigins: ['http://foobar.com','https://owlhoot.com'],
   //   allowCredentials: false,
-  // },
+  },
 
 
   /****************************************************************************
