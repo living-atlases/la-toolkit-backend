@@ -33,5 +33,6 @@ module.exports.routes = {
   'GET /api/v1/cas-gen': { action: 'cas-gen' },
   'GET /api/v1/cas-gen/:size': { action: 'cas-gen-single' },
   'POST /api/v1/gen-ssh-conf': { action: 'gen-ssh-conf' },
-  'GET /api/v1/ssh-key-gen': { action: 'ssh-key-gen' },
+  'GET /api/v1/ssh-key-gen/:name': { action: 'ssh-key-gen' },
+  'GET /api/v1/ssh-key-scan': { action: 'ssh-key-scan' },
 };

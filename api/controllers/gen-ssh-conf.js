@@ -3,9 +3,6 @@ const yaml = require('write-yaml');
 const dest = sails.config.sshDir;
 const destIncDir = sails.config.asshDir;
 
-console.log(dest);
-console.log(destIncDir);
-
 const basicAsshConf = () => {
   // We create a object with the assh configuration format
   // https://github.com/moul/assh#
