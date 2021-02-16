@@ -11,10 +11,11 @@ const basicAsshConf = () => {
   t.includes = [`/home/ubuntu/.ssh/assh.d/*.yml`];
 
   // This is done in ansible.cfg better
-  // t.defaults = {};
-  // t.defaults.ControlMaster = 'auto';
-  // t.defaults.ControlPath = '/tmp/.ssh/cm/%h-%p-%r.sock';
-  // t.defaults.ControlPersist = 'yes';
+  t.defaults = {};
+  t.defaults.StrictHostKeyChecking = 'no';
+  t.defaults.ControlMaster = 'auto';
+  t.defaults.ControlPath = '/tmp/.ssh/cm/%h-%p-%r.sock';
+  t.defaults.ControlPersist = 'yes';
   return t;
 };
 
@@ -42,7 +43,11 @@ const trans = (serverObjs, user) => {
     } else {
       t.hosts[`${serverObj.name}`].User = user;
     }
-    // Todo User
+    if (serverObj.sshKey !== null) {
+      t.hosts[
+        `${serverObj.name}`
+      ].IdentityFile = `/home/ubuntu/.ssh/${serverObj.sshKey.name}`;
+    }
   });
   return t;
 };
