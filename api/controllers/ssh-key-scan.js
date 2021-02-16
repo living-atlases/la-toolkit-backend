@@ -50,7 +50,7 @@ module.exports = {
         }
       });
       var resultJson = { keys: keys };
-      console.log(resultJson);
+      // console.log(resultJson);
       return this.res.json(resultJson);
     }
     return this.res.json(JSON.parse('{ "keys": [] }'));
