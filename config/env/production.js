@@ -355,4 +355,5 @@ module.exports = {
   },
   sshDir: '/home/ubuntu/.ssh/',
   asshDir: '/home/ubuntu/.ssh/assh.d/',
+  preCmd: '',
 };
