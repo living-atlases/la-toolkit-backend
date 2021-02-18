@@ -10,14 +10,14 @@ var pingTest = (server) => {
   try {
     let cmd = `${preCmd}ping -w 5 -c 1 ${server.ip}`;
     // console.log(cmd);
-    let out = cp.execSync(cmd, {
+    cp.execSync(cmd, {
       cwd: sails.config.sshDir,
       stderr: err,
     });
-    return out.toString();
+    return '';
   } catch (err) {
     // console.log(err);
-    return false;
+    return err;
   }
   // console.log(out.toString());
 };
@@ -27,14 +27,14 @@ var sshTest = (server) => {
   let preCmd = `${sails.config.preCmd} `;
 
   try {
-    let out = cp.execSync(`${preCmd}ssh ${server.name} hostname`, {
+    cp.execSync(`${preCmd}ssh ${server.name} hostname`, {
       cwd: sails.config.sshDir,
       stderr: err,
     });
-    return out.toString();
+    return '';
   } catch (err) {
     //console.log(err);
-    return false;
+    return err;
   }
   // console.log(out.toString());
 };
@@ -44,14 +44,13 @@ var sudoTest = (server) => {
   let preCmd = `${sails.config.preCmd} `;
 
   try {
-    let out = cp.execSync(`${preCmd}ssh ${server.name} sudo hostname`, {
+    cp.execSync(`${preCmd}ssh ${server.name} sudo hostname`, {
       cwd: sails.config.sshDir,
       stderr: err,
     });
-    return out.toString();
+    return '';
   } catch (err) {
-    //console.log(err);
-    return false;
+    return err;
   }
   // console.log(out.toString());
 };
@@ -82,12 +81,20 @@ module.exports = {
     let resultJson = {};
     inputs.servers.forEach((server) => {
       resultJson[server.name] = {};
-      let ping = pingTest(server) ? true : false;
+      let pingOut = pingTest(server);
+      let ping = pingOut.length === 0 ? true : false;
       resultJson[server.name]['ping'] = ping;
-      let ssh = sshTest(server) ? true : false;
+      resultJson[server.name]['out'] = pingOut;
+      let sshOut = sshTest(server);
+      resultJson[server.name]['out'] =
+        resultJson[server.name]['out'] + '\n' + sshOut;
+      let ssh = sshOut.length === 0 ? true : false;
       resultJson[server.name]['ssh'] = ssh;
-      let sudo = sudoTest(server) ? true : false;
+      let sudoOut = sudoTest(server);
+      let sudo = sudoOut.length === 0 ? true : false;
       resultJson[server.name]['sudo'] = sudo;
+      resultJson[server.name]['out'] =
+        resultJson[server.name]['out'] + '\n' + sudoOut;
     });
     console.log(resultJson);
     return this.res.json(resultJson);
