@@ -14,7 +14,7 @@ const basicAsshConf = () => {
   t.defaults = {};
   t.defaults.StrictHostKeyChecking = 'no';
   t.defaults.ControlMaster = 'auto';
-  t.defaults.ControlPath = '/tmp/.ssh/cm/%h-%p-%r.sock';
+  t.defaults.ControlPath = '/home/ubuntu/.ssh/%h-%p-%r.sock';
   t.defaults.ControlPersist = 'yes';
   return t;
 };
