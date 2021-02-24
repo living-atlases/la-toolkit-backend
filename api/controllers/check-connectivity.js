@@ -56,7 +56,7 @@ var sudoTest = (server) => {
 };
 
 module.exports = {
-  friendlyName: 'Test connectivity',
+  friendlyName: 'Check connectivity',
 
   description: '',
 

@@ -355,5 +355,7 @@ module.exports = {
   },
   sshDir: '/home/ubuntu/.ssh/',
   asshDir: '/home/ubuntu/.ssh/assh.d/',
+  projectsDir: '/home/ubuntu/ansible/',
+  baseBrandingLocation: '/home/ubuntu/base-branding',
   preCmd: '',
 };
