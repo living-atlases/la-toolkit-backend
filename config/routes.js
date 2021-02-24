@@ -37,4 +37,5 @@ module.exports.routes = {
   'GET /api/v1/ssh-key-scan': { action: 'ssh-key-scan' },
   'POST /api/v1/ssh-key-import': { action: 'ssh-key-import' },
   'POST /api/v1/test-connectivity': { action: 'test-connectivity' },
+  'GET /api/v1/image-proxy/*': { action: 'image-proxy', skipAssets: false },
 };
