@@ -1,5 +1,6 @@
 // https://github.com/wankdanker/node-object-mapper
 var objectMapper = require('object-mapper');
+const { projectShortname } = require('./utils.js');
 
 module.exports = function (inputs) {
   var map = {
@@ -8,10 +9,7 @@ module.exports = function (inputs) {
     LA_pkg_name: {
       key: 'LA_pkg_name',
       transform: (value, obj) => {
-        let shortName = obj.LA_project_shortname.toLowerCase()
-          .replace(/[^\d.-\w]/g, '')
-          .replace(/\./g, '-');
-        return shortName.length === 0 ? 'la' : shortName;
+        return projectShortname(obj.LA_project_shortname, obj.LA_uuid);
       },
     },
     LA_domain: 'LA_domain',
