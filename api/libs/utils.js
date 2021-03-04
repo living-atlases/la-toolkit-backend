@@ -74,12 +74,15 @@ module.exports.ttyd = async (
       preCmd = preCmd.replace('exec', `exec -w ${cwd}`);
       cwd = null;
     }
+
+    console.log(`Resulting cwd: ${cwd}`);
+
     var extraArgs = `${once ? '--once ' : ''}`;
     // -t disableReconnect=true
     // --max-clients 1
     var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true -p 2011 ${extraArgs}${cmd}`;
 
-    var ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
+    var ttydCmd = `${preCmd}${scriptArgs}`.trim().split(' ');
 
     console.log(`cmd: ${ttydCmd.join(' ')}`);
 
