@@ -2,7 +2,11 @@ const cp = require('child_process');
 
 var pingTest = (server) => {
   let err;
-  let preCmd = `${sails.config.preCmd} `;
+
+  let preCmd = sails.config.preCmd;
+  if (preCmd !== '') {
+    preCmd = preCmd + ' ';
+  }
 
   if (server.gateways.length > 0) {
     preCmd = `${preCmd}ssh ${server.gateways[0]} `;
@@ -24,7 +28,10 @@ var pingTest = (server) => {
 
 var sshTest = (server) => {
   let err;
-  let preCmd = `${sails.config.preCmd} `;
+  let preCmd = sails.config.preCmd;
+  if (preCmd !== '') {
+    preCmd = preCmd + ' ';
+  }
 
   try {
     cp.execSync(`${preCmd}ssh ${server.name} hostname`, {
@@ -41,7 +48,10 @@ var sshTest = (server) => {
 
 var sudoTest = (server) => {
   let err;
-  let preCmd = `${sails.config.preCmd} `;
+  let preCmd = sails.config.preCmd;
+  if (preCmd !== '') {
+    preCmd = preCmd + ' ';
+  }
 
   try {
     cp.execSync(`${preCmd}ssh ${server.name} sudo hostname`, {

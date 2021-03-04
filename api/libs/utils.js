@@ -68,10 +68,10 @@ module.exports.ttyd = async (
     // once here, all resources are available
     console.log(`cwd: ${cwd}`);
 
-    let preCmd = `${sails.config.preCmd} `;
+    let preCmd = sails.config.preCmd;
     // During devel set work dir
     if (preCmd !== '') {
-      preCmd = preCmd.replace('exec', `exec -w ${cwd}`);
+      preCmd = preCmd.replace('exec', `exec -w ${cwd} `);
       cwd = null;
     }
 
@@ -82,7 +82,7 @@ module.exports.ttyd = async (
     // --max-clients 1
     var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true -p 2011 ${extraArgs}${cmd}`;
 
-    var ttydCmd = `${preCmd}${scriptArgs}`.trim().split(' ');
+    var ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
 
     console.log(`cmd: ${ttydCmd.join(' ')}`);
 

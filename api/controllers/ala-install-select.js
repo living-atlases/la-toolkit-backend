@@ -2,13 +2,13 @@ const cp = require('child_process');
 
 var alaInstallSelect = (version) => {
   let err;
-  let preCmd = `${sails.config.preCmd} `;
+  let preCmd = sails.config.preCmd;
 
   try {
     if (preCmd !== '') {
       preCmd = preCmd.replace(
         'exec',
-        'exec -w /home/ubuntu/ansible/ala-install'
+        'exec -w /home/ubuntu/ansible/ala-install '
       );
     }
     cp.execSync(`${preCmd}git checkout tags/${version}`, {
