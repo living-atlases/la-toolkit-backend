@@ -12,10 +12,17 @@ module.exports = {
       required: true,
     },
   },
+  exits: {
+    success: {
+      description: 'All done.',
+    },
+    termError: {
+      description: 'term error.',
+      responseType: 'serverError',
+    },
+  },
 
-  exits: {},
-
-  fn: async function (inputs) {
+  fn: async function (inputs, exits) {
     // console.log(inputs.cmd);
     var projectPath = projectShortname(inputs.cmd.shortName, inputs.cmd.uuid);
     var invPath = `/home/ubuntu/ansible/la-inventories/${projectPath}/${projectPath}-inventories/`;
@@ -48,7 +55,13 @@ module.exports = {
     var env = {};
     // TODO move this to log directory
     env.ANSIBLE_LOG_PATH = `/home/ubuntu/ansible.log`;
-    ttyd(cmd, false, invPath, env);
-    return;
+
+    try {
+      await ttyd(cmd, false, invPath, env);
+      return exits.success();
+    } catch (e) {
+      console.log(`ttyd ansiblew call failed (${e})`);
+      throw 'termError';
+    }
   },
 };
