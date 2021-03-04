@@ -71,7 +71,8 @@ module.exports.ttyd = async (
     let preCmd = sails.config.preCmd;
     // During devel set work dir
     if (preCmd !== '') {
-      preCmd = preCmd.replace('exec', `exec -w ${cwd} `);
+      preCmd = preCmd.replace('exec', `exec -w ${cwd}`);
+      preCmd = preCmd + ' ';
       cwd = null;
     }
 
@@ -80,7 +81,7 @@ module.exports.ttyd = async (
     var extraArgs = `${once ? '--once ' : ''}`;
     // -t disableReconnect=true
     // --max-clients 1
-    var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true -p 2011 ${extraArgs}${cmd}`;
+    var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true --check-origin -p 2011 ${extraArgs}${cmd}`;
 
     var ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
 
@@ -97,11 +98,12 @@ module.exports.ttyd = async (
     sails.ttydPid = ttyd.pid;
 
     // Wait til listenning
+    /* It seems that this not work well under docker
     waitOnOpts.reverse = false;
     waitOnOpts.timeout = 2000;
-    await waitOn(waitOnOpts);
+    await waitOn(waitOnOpts); */
 
-    // await delay(2000);
+    await delay(2000);
 
     ttyd.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);

@@ -8,8 +8,9 @@ var alaInstallSelect = (version) => {
     if (preCmd !== '') {
       preCmd = preCmd.replace(
         'exec',
-        'exec -w /home/ubuntu/ansible/ala-install '
+        'exec -w /home/ubuntu/ansible/ala-install'
       );
+      preCmd = preCmd + ' ';
     }
     cp.execSync(`${preCmd}git checkout tags/${version}`, {
       cwd: sails.config.projectDir,
