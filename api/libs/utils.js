@@ -67,11 +67,18 @@ module.exports.ttyd = async (
     await waitOn(waitOnOpts);
     // once here, all resources are available
     console.log(`cwd: ${cwd}`);
+    console.log(`env: ${JSON.stringify(env)}`);
 
     let preCmd = sails.config.preCmd;
     // During devel set work dir
     if (preCmd !== '') {
       preCmd = preCmd.replace('exec', `exec -w ${cwd}`);
+
+      let envDocker = '';
+      for (var [key, value] of Object.entries(env)) {
+        envDocker = envDocker + ` --env ${key}=${value}`;
+      }
+      preCmd = preCmd.replace('exec', `exec ${envDocker.trim()}`);
       preCmd = preCmd + ' ';
       cwd = null;
     }

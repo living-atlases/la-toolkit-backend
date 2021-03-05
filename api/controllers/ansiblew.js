@@ -53,12 +53,21 @@ module.exports = {
     cmd = cmd + ` ${inputs.cmd.deployServices.join(' ')}`;
 
     var env = {};
-    // TODO move this to log directory
-    env.ANSIBLE_LOG_PATH = `/home/ubuntu/ansible.log`;
 
+    let now = new Date();
+    let logDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 19)
+      .replace('T', '_');
+
+    const logFolder = '/home/ubuntu/ansible/logs/';
+    env.ANSIBLE_LOG_PATH = `${logFolder}ansible-${logDate}.log`;
+    env.ANSIBLE_LOG_FOLDER = logFolder;
+    env.ANSIBLE_LOG_FILE = `results-${logDate}.json`;
     try {
-      await ttyd(cmd, false, invPath, env);
-      return exits.success();
+      await ttyd(cmd, true, invPath, env);
+      // return exits.success();
+      return this.res.json(JSON.parse(`{ "logsSuffix": "${logDate}" }`));
     } catch (e) {
       console.log(`ttyd ansiblew call failed (${e})`);
       throw 'termError';
