@@ -46,4 +46,5 @@ module.exports.routes = {
     skipAssets: false,
   },
   'POST /api/v1/ansiblew': { action: 'ansiblew' },
+  'POST /api/v1/ansiblew-results': { action: 'ansiblew-results' },
 };

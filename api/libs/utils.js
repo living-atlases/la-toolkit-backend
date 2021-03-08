@@ -2,6 +2,7 @@ const spawn = require('child_process').spawn;
 const kill = require('tree-kill');
 const pkill = require('pkill');
 const waitOn = require('wait-on');
+const p = require('path');
 
 module.exports.projectShortname = (name, uuid) => {
   let shortName = name
@@ -130,3 +131,9 @@ module.exports.ttyd = async (
   }
   console.log('finished ttyd call');
 };
+
+const logFolder = '/home/ubuntu/ansible/logs/';
+module.exports.logsFolder = logFolder;
+module.exports.logsFile = (folder, suffix) =>
+  p.join(folder, `ansible-${suffix}.log`);
+module.exports.resultsFile = (suffix) => `results-${suffix}.json`;

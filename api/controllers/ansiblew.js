@@ -1,4 +1,10 @@
-const { projectShortname, ttyd } = require('../libs/utils.js');
+const {
+  projectShortname,
+  ttyd,
+  logsFolder,
+  resultsFile,
+  logsFile,
+} = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'Ansiblew',
@@ -60,10 +66,9 @@ module.exports = {
       .slice(0, 19)
       .replace('T', '_');
 
-    const logFolder = '/home/ubuntu/ansible/logs/';
-    env.ANSIBLE_LOG_PATH = `${logFolder}ansible-${logDate}.log`;
-    env.ANSIBLE_LOG_FOLDER = logFolder;
-    env.ANSIBLE_LOG_FILE = `results-${logDate}.json`;
+    env.ANSIBLE_LOG_FOLDER = logsFolder;
+    env.ANSIBLE_LOG_PATH = logsFile(logsFolder, logDate);
+    env.ANSIBLE_LOG_FILE = resultsFile(logDate);
     try {
       await ttyd(cmd, true, invPath, env);
       // return exits.success();
