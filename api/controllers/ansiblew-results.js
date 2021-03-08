@@ -46,8 +46,13 @@ module.exports = {
         logsFile(logsLocation, inputs.logsSuffix),
         'utf8'
       );
+      let logsColorized = fs.readFileSync(
+        logsFile(logsLocation, inputs.logsSuffix, true),
+        'utf8'
+      );
       let logsEnc = Base64.encode(logs);
-      var resultJson = `{ "results": ${results}, "logs": "${logsEnc}" }`;
+      let logsColorizedEnc = Base64.encode(logsColorized);
+      var resultJson = `{ "results": ${results}, "logs": "${logsEnc}", "logsColorized": "${logsColorizedEnc}" }`;
       return this.res.json(JSON.parse(resultJson));
     } catch (e) {
       console.log(e);

@@ -28,7 +28,7 @@ module.exports = {
     },
   },
 
-  fn: async function (inputs, exits) {
+  fn: async function (inputs) {
     // console.log(inputs.cmd);
     var projectPath = projectShortname(inputs.cmd.shortName, inputs.cmd.uuid);
     var invPath = `/home/ubuntu/ansible/la-inventories/${projectPath}/${projectPath}-inventories/`;
@@ -68,7 +68,9 @@ module.exports = {
 
     env.ANSIBLE_LOG_FOLDER = logsFolder;
     env.ANSIBLE_LOG_PATH = logsFile(logsFolder, logDate);
-    env.ANSIBLE_LOG_FILE = resultsFile(logDate);
+    env.ANSIBLE_LOG_FILE = logsFile('', logDate, (colorized = true));
+    env.ANSIBLE_JSON_FILE = resultsFile(logDate);
+    env.ANSIBLE_FORCE_COLOR = true;
     try {
       await ttyd(cmd, true, invPath, env);
       // return exits.success();

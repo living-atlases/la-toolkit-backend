@@ -134,6 +134,6 @@ module.exports.ttyd = async (
 
 const logFolder = '/home/ubuntu/ansible/logs/';
 module.exports.logsFolder = logFolder;
-module.exports.logsFile = (folder, suffix) =>
-  p.join(folder, `ansible-${suffix}.log`);
+module.exports.logsFile = (folder, suffix, colorized = false) =>
+  p.join(folder, `ansible-${colorized ? 'colorized-' : ''}${suffix}.log`);
 module.exports.resultsFile = (suffix) => `results-${suffix}.json`;
