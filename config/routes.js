@@ -47,4 +47,9 @@ module.exports.routes = {
   },
   'POST /api/v1/ansiblew': { action: 'ansiblew' },
   'POST /api/v1/ansiblew-results': { action: 'ansiblew-results' },
+  'GET /api/v1/get-generator-versions': { action: 'get-generator-versions' },
+  'GET /api/v1/generator-select/:version': {
+    action: 'generator-select',
+    skipAssets: false,
+  },
 };
