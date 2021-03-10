@@ -105,6 +105,15 @@ module.exports = function (inputs) {
     LA_variable_google_api_key: 'LA_variable_google_api_key',
     LA_variable_maxmind_account_id: 'LA_variable_maxmind_account_id',
     LA_variable_maxmind_account_key: 'LA_variable_maxmind_account_key',
+    LA_variable_map_zone_name: 'LA_variable_map_zone_name',
+    LA_theme: 'LA_theme',
+    LA_collectory_map_centreMapLat: 'LA_collectory_map_centreMapLat',
+    LA_collectory_map_centreMapLng: 'LA_collectory_map_centreMapLng',
+    LA_spatial_map_lan: 'LA_spatial_map_lan',
+    LA_spatial_map_lng: 'LA_spatial_map_lng',
+    LA_regions_map_bounds: 'LA_regions_map_bounds',
+    LA_spatial_map_bbox: 'LA_spatial_map_bbox',
+    LA_spatial_map_areaSqKm: 'LA_spatial_map_areaSqKm',
   };
 
   let objMapped = objectMapper(inputs.conf, map);
