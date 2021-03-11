@@ -114,6 +114,12 @@ module.exports = function (inputs) {
     LA_regions_map_bounds: 'LA_regions_map_bounds',
     LA_spatial_map_bbox: 'LA_spatial_map_bbox',
     LA_spatial_map_areaSqKm: 'LA_spatial_map_areaSqKm',
+    LA_variable_orgAddress: 'LA_variable_orgAddress',
+    LA_variable_orgCity: 'LA_variable_orgCity',
+    LA_variable_orgStateProvince: 'LA_variable_orgStateProvince',
+    LA_variable_orgPostcode: 'LA_variable_orgPostcode',
+    LA_variable_orgCountry: 'LA_variable_orgCountry',
+    LA_server_ips: 'LA_server_ips',
   };
 
   let objMapped = objectMapper(inputs.conf, map);
@@ -121,6 +127,19 @@ module.exports = function (inputs) {
   if (!objMapped.LA_use_spatial) objMapped.LA_use_regions = false;
 
   if (!objMapped.LA_use_species) objMapped.LA_use_species_lists = false;
+
+  let debug = false;
+
+  if (debug) {
+    for (var [key, value] of Object.entries(objMapped)) {
+      if (
+        key !== 'LA_pkg_name' &&
+        (typeof value === 'string' || typeof value === 'number')
+      ) {
+        objMapped[key] = `_GEN_${value}_GEN_`;
+      }
+    }
+  }
 
   const dest = {
     'generator-living-atlas': {
