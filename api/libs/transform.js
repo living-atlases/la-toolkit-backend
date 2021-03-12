@@ -88,24 +88,7 @@ module.exports = function (inputs) {
     LA_doi_hostname: 'LA_doi_hostname',
     LA_doi_path: 'LA_doi_path',
     LA_doi_url: 'LA_doi_url',
-    LA_variable_pac4j_cookie_signing_key:
-      'LA_variable_pac4j_cookie_signing_key',
-    LA_variable_pac4j_cookie_encryption_key:
-      'LA_variable_pac4j_cookie_encryption_key',
-    LA_variable_cas_webflow_signing_key: 'LA_variable_cas_webflow_signing_key',
-    LA_variable_cas_webflow_encryption_key:
-      'LA_variable_cas_webflow_encryption_key',
-    LA_variable_ansible_user: 'LA_variable_ansible_user',
-    LA_variable_favicon_url: 'LA_variable_favicon_url',
-    LA_variable_support_email: 'LA_variable_support_email',
-    LA_variable_orgEmail: 'LA_variable_orgEmail',
-    LA_variable_email_sender: 'LA_variable_email_sender',
-    LA_variable_downloads_terms_of_use: 'LA_variable_downloads_terms_of_use',
-    LA_variable_privacy_policy_url: 'LA_variable_privacy_policy_url',
-    LA_variable_google_api_key: 'LA_variable_google_api_key',
-    LA_variable_maxmind_account_id: 'LA_variable_maxmind_account_id',
-    LA_variable_maxmind_account_key: 'LA_variable_maxmind_account_key',
-    LA_variable_map_zone_name: 'LA_variable_map_zone_name',
+    LA_server_ips: 'LA_server_ips',
     LA_theme: 'LA_theme',
     LA_collectory_map_centreMapLat: 'LA_collectory_map_centreMapLat',
     LA_collectory_map_centreMapLng: 'LA_collectory_map_centreMapLng',
@@ -114,12 +97,38 @@ module.exports = function (inputs) {
     LA_regions_map_bounds: 'LA_regions_map_bounds',
     LA_spatial_map_bbox: 'LA_spatial_map_bbox',
     LA_spatial_map_areaSqKm: 'LA_spatial_map_areaSqKm',
+    LA_additionalVariables: 'LA_additionalVariables',
+    // VariablesDesc (sorted)
+    LA_variable_ansible_user: 'LA_variable_ansible_user',
+    LA_variable_caches_auth_enabled: 'LA_variable_caches_auth_enabled',
+    LA_variable_caches_collections_enabled:
+      'LA_variable_caches_collections_enabled',
+    LA_variable_caches_layers_enabled: 'LA_variable_caches_layers_enabled',
+    LA_variable_caches_logs_enabled: 'LA_variable_caches_logs_enabled',
+    LA_variable_cas_webflow_encryption_key:
+      'LA_variable_cas_webflow_encryption_key',
+    LA_variable_cas_webflow_signing_key: 'LA_variable_cas_webflow_signing_key',
+    LA_variable_downloads_terms_of_use: 'LA_variable_downloads_terms_of_use',
+    LA_variable_email_sender: 'LA_variable_email_sender',
+    LA_variable_favicon_url: 'LA_variable_favicon_url',
+    LA_variable_google_api_key: 'LA_variable_google_api_key',
+    LA_variable_header_and_footer_baseurl:
+      'LA_variable_header_and_footer_baseurl',
+    LA_variable_map_zone_name: 'LA_variable_map_zone_name',
+    LA_variable_maxmind_account_id: 'LA_variable_maxmind_account_id',
+    LA_variable_maxmind_license_key: 'LA_variable_maxmind_license_key',
     LA_variable_orgAddress: 'LA_variable_orgAddress',
     LA_variable_orgCity: 'LA_variable_orgCity',
-    LA_variable_orgStateProvince: 'LA_variable_orgStateProvince',
-    LA_variable_orgPostcode: 'LA_variable_orgPostcode',
     LA_variable_orgCountry: 'LA_variable_orgCountry',
-    LA_server_ips: 'LA_server_ips',
+    LA_variable_orgEmail: 'LA_variable_orgEmail',
+    LA_variable_orgPostcode: 'LA_variable_orgPostcode',
+    LA_variable_orgStateProvince: 'LA_variable_orgStateProvince',
+    LA_variable_pac4j_cookie_encryption_key:
+      'LA_variable_pac4j_cookie_encryption_key',
+    LA_variable_pac4j_cookie_signing_key:
+      'LA_variable_pac4j_cookie_signing_key',
+    LA_variable_privacy_policy_url: 'LA_variable_privacy_policy_url',
+    LA_variable_support_email: 'LA_variable_support_email',
   };
 
   let objMapped = objectMapper(inputs.conf, map);
