@@ -12,10 +12,21 @@ var alaInstallSelect = (version) => {
       );
       preCmd = preCmd + ' ';
     }
-    cp.execSync(`${preCmd}git checkout tags/${version}`, {
-      cwd: sails.config.projectDir,
-      stderr: err,
-    });
+    if (version !== 'upstream' && version !== 'custom') {
+      cp.execSync(`${preCmd}git checkout tags/${version}`, {
+        cwd: sails.config.projectDir,
+        stderr: err,
+      });
+    } else if (version === 'upstream') {
+      cp.execSync(`${preCmd}git fetch origin master`, {
+        cwd: sails.config.projectDir,
+        stderr: err,
+      });
+      cp.execSync(`${preCmd}git pull --rebase origin master`, {
+        cwd: sails.config.projectDir,
+        stderr: err,
+      });
+    }
     return '';
   } catch (err) {
     console.log(err);
