@@ -137,3 +137,5 @@ module.exports.logsFolder = logFolder;
 module.exports.logsFile = (folder, suffix, colorized = false) =>
   p.join(folder, `ansible-${colorized ? 'colorized-' : ''}${suffix}.log`);
 module.exports.resultsFile = (suffix) => `results-${suffix}.json`;
+
+module.exports.appConf = `${sails.config.projectsDir}la-toolkit-conf.json`;

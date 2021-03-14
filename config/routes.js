@@ -39,6 +39,7 @@ module.exports.routes = {
   'POST /api/v1/test-connectivity': { action: 'check-connectivity' },
   'GET /api/v1/image-proxy/*': { action: 'image-proxy', skipAssets: false },
   'POST /api/v1/save-conf': { action: 'save-conf' },
+  'GET /api/v1/get-conf': { action: 'get-conf' },
   'GET /api/v1/gen/:uuid/:download': { action: 'gen' },
   'GET /api/v1/term': { action: 'term' },
   'GET /api/v1/ala-install-select/:version': {

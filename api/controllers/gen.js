@@ -2,7 +2,7 @@ const tmp = require('tmp');
 const archiver = require('archiver');
 const p = require('path');
 const fs = require('fs');
-const projectFile = `${sails.config.projectsDir}projects.json`;
+const { appConf } = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'Generate and Download',
@@ -47,7 +47,7 @@ module.exports = {
     // temporal directory
     const tmpobj = tmp.dirSync({ unsafeCleanup: true });
 
-    var projects = JSON.parse(fs.readFileSync(projectFile, 'utf8'));
+    var projects = JSON.parse(fs.readFileSync(appConf, 'utf8'))['projectsMap'];
     let conf = projects[inputs.uuid];
 
     const yoRc = sails.helpers.transform(conf);
@@ -75,13 +75,13 @@ module.exports = {
       archive.pipe(res);
 
       console.log('Starting to zip');
-      archive.on('error', function (err) {
+      archive.on('error', (err) => {
         console.log(err.message);
         throw 'zipError';
       });
 
       //on stream closed we can end the request
-      archive.on('end', function () {
+      archive.on('end', () => {
         console.log('Archive wrote %d bytes', archive.pointer());
         // Manual temporal dir cleanup
         tmpobj.removeCallback();

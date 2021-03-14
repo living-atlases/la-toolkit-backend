@@ -1,8 +1,8 @@
-const fs = require('fs').promises;
-const dest = `${sails.config.projectsDir}projects.json`;
+const fs = require('fs');
+const { appConf } = require('../libs/utils.js');
 
 module.exports = {
-  friendlyName: 'Save projects conf',
+  friendlyName: 'Save app conf',
 
   description: '',
 
@@ -15,6 +15,47 @@ module.exports = {
         return _.isObject(value);
       },
     },
+    projectsMap: {
+      type: 'json',
+      description: 'The same projects as map',
+      required: true,
+      custom: function (value) {
+        return _.isObject(value);
+      },
+    },
+    currentProject: {
+      type: 'json',
+      description: 'Current project',
+      required: false,
+      custom: function (value) {
+        return _.isObject(value);
+      },
+    },
+    currentStep: {
+      type: 'number',
+      description: 'A projects list',
+      required: false,
+    },
+    status: {
+      type: 'string',
+      description: 'The app status',
+      required: true,
+    },
+    firstUsage: {
+      type: 'bool',
+      description: 'First use?',
+      required: true,
+    },
+    alaInstallReleases: {
+      type: 'json',
+      description: 'ala-install releases',
+      required: false,
+    },
+    generatorReleases: {
+      type: 'json',
+      description: 'generator releases',
+      required: false,
+    },
   },
 
   exits: {
@@ -24,7 +65,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    fs.writeFile(dest, JSON.stringify(inputs.projects, null, 2), {
+    fs.writeFileSync(appConf, JSON.stringify(inputs, null, 2), {
       encoding: 'utf8',
     });
 
