@@ -138,7 +138,7 @@ module.exports = {
           : { os: { name: '', version: '' } };
       resultJson[server.name]['os'] = osVersion;
     });
-    console.log(resultJson);
+    // console.log(resultJson);
     return this.res.json(resultJson);
   },
 };
