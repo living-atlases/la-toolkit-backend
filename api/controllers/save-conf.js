@@ -56,6 +56,11 @@ module.exports = {
       description: 'generator releases',
       required: false,
     },
+    sshKeys: {
+      type: 'json',
+      description: 'ssh keys',
+      required: false,
+    },
   },
 
   exits: {
