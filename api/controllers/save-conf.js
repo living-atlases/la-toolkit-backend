@@ -70,7 +70,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    fs.writeFileSync(appConf, JSON.stringify(inputs, null, 2), {
+    fs.writeFileSync(appConf(), JSON.stringify(inputs, null, 2), {
       encoding: 'utf8',
     });
 

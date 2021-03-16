@@ -3,8 +3,9 @@ const kill = require('tree-kill');
 const pkill = require('pkill');
 const waitOn = require('wait-on');
 const p = require('path');
+const sails = require('sails');
 
-module.exports.projectShortname = (name, uuid) => {
+const projectShortname = (name, uuid) => {
   let shortName = name
     .toLowerCase()
     .replace(/[^\d.-\w]/g, '')
@@ -47,7 +48,7 @@ const ttydKill = async () => {
   });
 };
 
-module.exports.ttyd = async (
+const ttyd = async (
   cmd,
   once = false,
   cwd = '/home/ubuntu',
@@ -133,9 +134,18 @@ module.exports.ttyd = async (
 };
 
 const logFolder = '/home/ubuntu/ansible/logs/';
-module.exports.logsFolder = logFolder;
-module.exports.logsFile = (folder, suffix, colorized = false) =>
+const logsFolder = logFolder;
+const logsFile = (folder, suffix, colorized = false) =>
   p.join(folder, `ansible-${colorized ? 'colorized-' : ''}${suffix}.log`);
-module.exports.resultsFile = (suffix) => `results-${suffix}.json`;
+const resultsFile = (suffix) => `results-${suffix}.json`;
 
-module.exports.appConf = `${sails.config.projectsDir}la-toolkit-conf.json`;
+const appConf = () => `${sails.config.projectsDir}la-toolkit-conf.json`;
+
+module.exports = {
+  projectShortname,
+  ttyd,
+  logsFolder,
+  logsFile,
+  resultsFile,
+  appConf,
+};

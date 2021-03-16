@@ -142,12 +142,13 @@ test('long name valid', async (t) => {
   const names = [
     '回尚芸策出多探政検済浜朝毎。車記隠地実問底欠葉下女保月兄介禄情内線裁。的点回父政埼芸岡',
     'LA Wäkßandâ',
+    'Biodiversitäts-Atlas Österreich',
     'Лорем ипсум долор сит амет, фастидии ехпетенда при ид.',
     '議さだや設9売サコヱ助送首し康美イヤエテ決竹ハキ約泣ヘハ式追だじけ',
   ];
   for (name in names) {
     testObj.LA_project_name = names[name];
-    testObj.LA_project_shortname = names[name].substring(0, 10);
+    testObj.LA_project_shortname = names[name]; // .substring(0, 10);
     t.is(validate({ conf: JSON.stringify(testObj) }), '');
     let src = { conf: testObj };
     let dest = transform(src);

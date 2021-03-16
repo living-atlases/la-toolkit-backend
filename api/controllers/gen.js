@@ -47,7 +47,9 @@ module.exports = {
     // temporal directory
     const tmpobj = tmp.dirSync({ unsafeCleanup: true });
 
-    var projects = JSON.parse(fs.readFileSync(appConf, 'utf8'))['projectsMap'];
+    var projects = JSON.parse(fs.readFileSync(appConf(), 'utf8'))[
+      'projectsMap'
+    ];
     let conf = projects[inputs.uuid];
 
     const yoRc = sails.helpers.transform(conf);
