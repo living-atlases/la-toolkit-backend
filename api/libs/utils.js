@@ -52,7 +52,7 @@ const ttyd = async (
   cmd,
   once = false,
   cwd = '/home/ubuntu',
-  env = process.env
+  env = {} // process.env
 ) => {
   // kill any previous ttyd process
   await ttydKill();
@@ -76,16 +76,20 @@ const ttyd = async (
     if (preCmd !== '') {
       preCmd = preCmd.replace('exec', `exec -w ${cwd}`);
 
-      let envDocker = '';
-      for (var [key, value] of Object.entries(env)) {
-        envDocker = envDocker + ` --env ${key}=${value}`;
+      if (Object.entries(env).length !== 0) {
+        let envDocker = '';
+        for (var [key, value] of Object.entries(env)) {
+          envDocker = envDocker + ` --env ${key}=${value}`;
+        }
+        preCmd = preCmd.replace('exec', `exec ${envDocker.trim()}`);
       }
-      preCmd = preCmd.replace('exec', `exec ${envDocker.trim()}`);
+
       preCmd = preCmd + ' ';
       cwd = null;
     }
 
     console.log(`Resulting cwd: ${cwd}`);
+    console.log(`Resulting preCmd: ${preCmd}`);
 
     var extraArgs = `${once ? '--once ' : ''}`;
     // -t disableReconnect=true
@@ -95,6 +99,12 @@ const ttyd = async (
     var ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
 
     console.log(`cmd: ${ttydCmd.join(' ')}`);
+
+    if (ttydCmd.indexOf('  ') !== -1) {
+      console.warn(
+        'WARNING: The cmd has some double space. This will make the spawn fail'
+      );
+    }
 
     const ttyd = spawn(ttydCmd.shift(), ttydCmd, {
       cwd: cwd,
