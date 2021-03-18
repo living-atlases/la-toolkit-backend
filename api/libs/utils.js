@@ -3,7 +3,6 @@ const kill = require('tree-kill');
 const pkill = require('pkill');
 const waitOn = require('wait-on');
 const p = require('path');
-const sails = require('sails');
 
 const projectShortname = (name, uuid) => {
   let shortName = name
