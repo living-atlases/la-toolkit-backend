@@ -93,7 +93,7 @@ const ttyd = async (
     var extraArgs = `${once ? '--once ' : ''}`;
     // -t disableReconnect=true
     // --max-clients 1
-    var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true --check-origin -p 2011 ${extraArgs}${cmd}`;
+    var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true --check-origin -p 2011 ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
 
     var ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
 
