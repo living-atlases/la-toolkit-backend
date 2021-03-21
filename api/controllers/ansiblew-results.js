@@ -55,8 +55,14 @@ module.exports = {
       var resultJson = `{ "results": ${results}, "logs": "${logsEnc}", "logsColorized": "${logsColorizedEnc}" }`;
       return this.res.json(JSON.parse(resultJson));
     } catch (e) {
+      switch (e.code) {
+        case 'ENOENT':
+          return this.res.notFound();
+        default:
+          res.status(500);
+      }
       console.log(e);
-      throw 'notFound';
+      this.res.send('Error retrieving the logs');
     }
   },
 };
