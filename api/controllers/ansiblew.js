@@ -74,7 +74,9 @@ module.exports = {
     try {
       await ttyd(cmd, true, invPath, env);
       // return exits.success();
-      return this.res.json(JSON.parse(`{ "logsSuffix": "${logDate}" }`));
+      return this.res.json(
+        JSON.parse(`{ "cmd": "${cmd}", "logsSuffix": "${logDate}" }`)
+      );
     } catch (e) {
       console.log(`ttyd ansiblew call failed (${e})`);
       throw 'termError';
