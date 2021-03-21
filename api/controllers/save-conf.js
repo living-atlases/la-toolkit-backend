@@ -70,10 +70,14 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    fs.writeFileSync(appConf(), JSON.stringify(inputs, null, 2), {
-      encoding: 'utf8',
-    });
-
-    return exits.success();
+    try {
+      fs.writeFileSync(appConf(), JSON.stringify(inputs, null, 2), {
+        encoding: 'utf8',
+      });
+      return exits.success();
+    } catch (e) {
+      console.error(e);
+      this.res.serverError(e);
+    }
   },
 };
