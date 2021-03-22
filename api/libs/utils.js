@@ -3,6 +3,7 @@ const kill = require('tree-kill');
 const pkill = require('pkill');
 const waitOn = require('wait-on');
 const p = require('path');
+const fs = require('fs');
 
 const projectShortname = (name, uuid) => {
   let shortName = name
@@ -11,6 +12,22 @@ const projectShortname = (name, uuid) => {
     .replace(/\./g, '-');
   return shortName.length === 0 ? `la-${uuid}` : shortName;
 };
+
+const logFolder = '/home/ubuntu/ansible/logs/';
+const logsFolder = logFolder;
+const logsFile = (folder, prefix, suffix, colorized = false) =>
+  p.join(
+    folder,
+    `${prefix}-ansible-${colorized ? 'colorized-' : ''}${suffix}.log`
+  );
+const resultsFile = (prefix, suffix) => `${prefix}-results-${suffix}.json`;
+const exitCodeFile = (folder, prefix, suffix) =>
+  p.join(folder, `${prefix}-exit-${suffix}.out`);
+const appConf = () => `${sails.config.projectsDir}la-toolkit-conf.json`;
+const logsProdDevLocation = () =>
+  process.env.NODE_ENV === 'production'
+    ? logsFolder
+    : `${sails.config.projectsDir}logs`;
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -51,7 +68,10 @@ const ttyd = async (
   cmd,
   once = false,
   cwd = '/home/ubuntu',
-  env = {} // process.env
+  env = {},
+  logsPrefix,
+  logsSuffix
+  // process.env
 ) => {
   // kill any previous ttyd process
   await ttydKill();
@@ -133,6 +153,15 @@ const ttyd = async (
 
     ttyd.on('close', (code) => {
       console.log(`child process exited with code ${code} with ${ttyd.pid}`);
+      if (logsSuffix !== null && logsPrefix !== null) {
+        fs.writeFileSync(
+          exitCodeFile(logsProdDevLocation(), logsPrefix, logsSuffix),
+          `${code}`,
+          {
+            encoding: 'utf8',
+          }
+        );
+      }
       // sails.ttydPid = null;
     });
   } catch (werr) {
@@ -142,19 +171,13 @@ const ttyd = async (
   console.log('finished ttyd call');
 };
 
-const logFolder = '/home/ubuntu/ansible/logs/';
-const logsFolder = logFolder;
-const logsFile = (folder, suffix, colorized = false) =>
-  p.join(folder, `ansible-${colorized ? 'colorized-' : ''}${suffix}.log`);
-const resultsFile = (suffix) => `results-${suffix}.json`;
-
-const appConf = () => `${sails.config.projectsDir}la-toolkit-conf.json`;
-
 module.exports = {
   projectShortname,
   ttyd,
   logsFolder,
   logsFile,
   resultsFile,
+  exitCodeFile,
+  logsProdDevLocation,
   appConf,
 };

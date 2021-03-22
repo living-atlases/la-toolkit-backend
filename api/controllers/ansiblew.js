@@ -67,15 +67,24 @@ module.exports = {
       .replace('T', '_');
 
     env.ANSIBLE_LOG_FOLDER = logsFolder;
-    env.ANSIBLE_LOG_PATH = logsFile(logsFolder, logDate);
-    env.ANSIBLE_LOG_FILE = logsFile('', logDate, (colorized = true));
-    env.ANSIBLE_JSON_FILE = resultsFile(logDate);
+    env.ANSIBLE_LOG_PATH = logsFile(logsFolder, projectPath, logDate);
+    env.ANSIBLE_LOG_FILE = logsFile(
+      '',
+      projectPath,
+      logDate,
+      (colorized = true)
+    );
+    env.ANSIBLE_JSON_FILE = resultsFile(projectPath, logDate);
     env.ANSIBLE_FORCE_COLOR = true;
+    let logsPrefix = projectPath;
+    let logsSuffix = logDate;
     try {
-      await ttyd(cmd, true, invPath, env);
+      await ttyd(cmd, true, invPath, env, logsPrefix, logsSuffix);
       // return exits.success();
       return this.res.json(
-        JSON.parse(`{ "cmd": "${cmd}", "logsSuffix": "${logDate}" }`)
+        JSON.parse(
+          `{ "cmd": "${cmd}", "logsPrefix": "${logsPrefix}", "logsSuffix": "${logsSuffix}" }`
+        )
       );
     } catch (e) {
       console.log(`ttyd ansiblew call failed (${e})`);
