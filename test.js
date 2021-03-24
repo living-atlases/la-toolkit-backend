@@ -131,11 +131,13 @@ const G = 'promptValues';
 const src = { conf: defObj };
 let dest = transform(src);
 
+/*
+Now this is generated in the la-toolkit and checked via check-dir-name call
 test('pkgname transform', async (t) => {
   const src = { conf: { LA_project_shortname: 'GBIF.ES' } };
   let dest = transform(src);
   t.is(dest[P][G].LA_pkg_name, 'gbif-es');
-});
+}); */
 
 test('long name valid', async (t) => {
   const testObj = defObj;

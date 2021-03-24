@@ -5,14 +5,6 @@ const waitOn = require('wait-on');
 const p = require('path');
 const fs = require('fs');
 
-const projectShortname = (name, uuid) => {
-  let shortName = name
-    .toLowerCase()
-    .replace(/[^\d.-\w]/g, '')
-    .replace(/\./g, '-');
-  return shortName.length === 0 ? `la-${uuid}` : shortName;
-};
-
 const logFolder = '/home/ubuntu/ansible/logs/';
 const logsFolder = logFolder;
 const logsFile = (folder, prefix, suffix, colorized = false) =>
@@ -172,7 +164,6 @@ const ttyd = async (
 };
 
 module.exports = {
-  projectShortname,
   ttyd,
   logsFolder,
   logsFile,

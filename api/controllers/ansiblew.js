@@ -1,10 +1,4 @@
-const {
-  projectShortname,
-  ttyd,
-  logsFolder,
-  resultsFile,
-  logsFile,
-} = require('../libs/utils.js');
+const { ttyd, logsFolder, resultsFile, logsFile } = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'Ansiblew',
@@ -30,7 +24,7 @@ module.exports = {
 
   fn: async function (inputs) {
     // console.log(inputs.cmd);
-    var projectPath = projectShortname(inputs.cmd.shortName, inputs.cmd.uuid);
+    var projectPath = inputs.cmd.dirName;
     var invPath = `/home/ubuntu/ansible/la-inventories/${projectPath}/${projectPath}-inventories/`;
     var cmd = `./ansiblew`;
     cmd = cmd + ` --alainstall=/home/ubuntu/ansible/ala-install`;

@@ -1,17 +1,12 @@
 // https://github.com/wankdanker/node-object-mapper
 var objectMapper = require('object-mapper');
-const { projectShortname } = require('./utils.js');
 
 module.exports = function (inputs) {
   var map = {
+    LA_uuid: 'LA_uuid',
     LA_project_name: 'LA_project_name',
     LA_project_shortname: 'LA_project_shortname',
-    LA_pkg_name: {
-      key: 'LA_pkg_name',
-      transform: (value, obj) => {
-        return projectShortname(obj.LA_project_shortname, obj.LA_uuid);
-      },
-    },
+    LA_pkg_name: 'LA_pkg_name',
     LA_domain: 'LA_domain',
     LA_use_ala_bie: 'LA_use_species',
     LA_use_spatial: 'LA_use_spatial',

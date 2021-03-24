@@ -53,4 +53,5 @@ module.exports.routes = {
     action: 'generator-select',
     skipAssets: false,
   },
+  'POST /api/v1/check-dir-name': { action: 'check-dir-name' },
 };
