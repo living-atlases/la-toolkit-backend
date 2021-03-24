@@ -3,11 +3,18 @@ const cp = require('child_process');
 var alaInstallSelect = (version) => {
   let err;
   let preCmd = sails.config.preCmd;
-  let alaInstallLocation = '/home/ubuntu/ansible/ala-install';
+  let alaInstallLocation =
+    process.env.NODE_ENV === 'production'
+      ? '/home/ubuntu/ansible/ala-install'
+      : sails.config.projectDir;
 
+  console.log(`Resulting cwd: ${alaInstallLocation}`);
   try {
     if (preCmd !== '') {
-      preCmd = preCmd.replace('exec', `exec -w ${alaInstallLocation}`);
+      preCmd = preCmd.replace(
+        'exec',
+        `exec -w /home/ubuntu/ansible/ala-install`
+      );
       preCmd = preCmd + ' ';
     }
     if (version !== 'upstream' && version !== 'custom') {

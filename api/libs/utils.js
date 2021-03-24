@@ -119,7 +119,7 @@ const ttyd = async (
 
     const ttyd = spawn(ttydCmd.shift(), ttydCmd, {
       cwd: cwd,
-      env: env,
+      env: { ...process.env, ...env, NODE_DEBUG: 'child_process' },
     }); /* .on('error', (err) => {
       console.log(err);
       throw Error(err);
