@@ -21,6 +21,7 @@ var pingTest = (server) => {
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
+      timeout: defExecTimeout,
       stderr: err,
     });
     return '';
