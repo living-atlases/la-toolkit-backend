@@ -1,5 +1,10 @@
 const cp = require('child_process');
 const { defExecTimeout } = require('../libs/utils.js');
+
+const log = (preCmd, cmd) => {
+  console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
+};
+
 var pingTest = (server) => {
   let err;
 
@@ -13,7 +18,7 @@ var pingTest = (server) => {
   }
   try {
     let cmd = `${preCmd}ping -w 5 -c 1 ${server.ip}`;
-    // console.log(cmd);
+    log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
       stderr: err,
@@ -34,7 +39,9 @@ var sshTest = (server) => {
   }
 
   try {
-    cp.execSync(`${preCmd}ssh ${server.name} hostname`, {
+    let cmd = `${preCmd}ssh ${server.name} hostname`;
+    log(preCmd, cmd);
+    cp.execSync(cmd, {
       cwd: sails.config.sshDir,
       timeout: defExecTimeout,
       stderr: err,
@@ -55,7 +62,9 @@ var sudoTest = (server) => {
   }
 
   try {
-    cp.execSync(`${preCmd}ssh ${server.name} sudo hostname`, {
+    let cmd = `${preCmd}ssh ${server.name} sudo hostname`;
+    log(preCmd, cmd);
+    cp.execSync(cmd, {
       cwd: sails.config.sshDir,
       timeout: defExecTimeout,
       stderr: err,
@@ -75,14 +84,13 @@ var osVersionTest = (server) => {
   }
 
   try {
-    let out = cp.execSync(
-      `${preCmd}ssh ${server.name} sudo cat /etc/os-release | egrep "^NAME=|^VERSION_ID=" | sed 's/=/:/' | sed 's/^NAME:/{"name":/' | sed 's/VERSION_ID:/"version":/' |  sed '1 s/$/,/' | sed '$ s/$/}/'`,
-      {
-        cwd: sails.config.sshDir,
-        timeout: defExecTimeout,
-        stderr: err,
-      }
-    );
+    let cmd = `${preCmd}ssh ${server.name} sudo cat /etc/os-release | egrep "^NAME=|^VERSION_ID=" | sed 's/=/:/' | sed 's/^NAME:/{"name":/' | sed 's/VERSION_ID:/"version":/' |  sed '1 s/$/,/' | sed '$ s/$/}/'`;
+    log(preCmd, cmd);
+    let out = cp.execSync(cmd, {
+      cwd: sails.config.sshDir,
+      timeout: defExecTimeout,
+      stderr: err,
+    });
     return out;
   } catch (err) {
     return err;
