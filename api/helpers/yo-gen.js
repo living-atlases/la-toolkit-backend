@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 const fsn = require('fs');
 const p = require('path');
 const brandOrign = sails.config.baseBrandingLocation;
+const { defExecTimeout } = require('../libs/utils.js');
 
 async function yoGen(pkgName, path, yoRc) {
   return new Promise(function (resolve, reject) {
@@ -19,6 +20,7 @@ async function yoGen(pkgName, path, yoRc) {
               console.log(`Copying branding from ${brandOrign}`);
               cp.execSync(`cp -a ${brandOrign} ${pkgName}-branding`, {
                 cwd: path,
+                timeout: defExecTimeout,
                 stderr: errC,
               });
             }
@@ -26,7 +28,7 @@ async function yoGen(pkgName, path, yoRc) {
             console.log('Generating inventories');
             cp.execSync(
               'yo living-atlas --replay-dont-ask --force', //  --debug",
-              { cwd: path, stderr: errY }
+              { cwd: path, timeout: defExecTimeout, stderr: errY }
             );
             if (errY) console.log(errY);
             if (
@@ -36,7 +38,7 @@ async function yoGen(pkgName, path, yoRc) {
             ) {
               cp.execSync(
                 `cp -f ${pkgName}-branding/app/js/settings.js.sample ${pkgName}-branding/app/js/settings.js`,
-                { cwd: path, stderr: errCF }
+                { cwd: path, timeout: defExecTimeout, stderr: errCF }
               );
             }
             if (errCF) console.log(errCF);

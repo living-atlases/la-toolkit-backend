@@ -1,5 +1,5 @@
 const { ttyd } = require('../libs/utils.js');
-const { logsFolder, logsFile } = require('../libs/utils.js');
+const { logsProdFolder, logsFile } = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'Term',
@@ -32,7 +32,7 @@ module.exports = {
     // console.log('Executing bash');
     try {
       let log = logsFile(
-        logsFolder,
+        logsProdFolder,
         inputs.logsPrefix,
         inputs.logsSuffix,
         true

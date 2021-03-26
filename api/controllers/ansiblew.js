@@ -1,4 +1,9 @@
-const { ttyd, logsFolder, resultsFile, logsFile } = require('../libs/utils.js');
+const {
+  ttyd,
+  logsProdFolder,
+  resultsFile,
+  logsFile,
+} = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'Ansiblew',
@@ -60,8 +65,8 @@ module.exports = {
       .slice(0, 19)
       .replace('T', '_');
 
-    env.ANSIBLE_LOG_FOLDER = logsFolder;
-    env.ANSIBLE_LOG_PATH = logsFile(logsFolder, projectPath, logDate);
+    env.ANSIBLE_LOG_FOLDER = logsProdFolder;
+    env.ANSIBLE_LOG_PATH = logsFile(logsProdFolder, projectPath, logDate);
     env.ANSIBLE_LOG_FILE = logsFile(
       '',
       projectPath,

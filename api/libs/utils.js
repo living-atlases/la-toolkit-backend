@@ -5,8 +5,7 @@ const waitOn = require('wait-on');
 const p = require('path');
 const fs = require('fs');
 
-const logFolder = '/home/ubuntu/ansible/logs/';
-const logsFolder = logFolder;
+const logsProdFolder = '/home/ubuntu/ansible/logs/';
 const logsFile = (folder, prefix, suffix, colorized = false) =>
   p.join(
     folder,
@@ -19,8 +18,8 @@ const appConf = () => `${sails.config.projectsDir}la-toolkit-conf.json`;
 const ttydPort = () => sails.config.ttydPort;
 const logsProdDevLocation = () =>
   process.env.NODE_ENV === 'production'
-    ? logsFolder
-    : `${sails.config.projectsDir}logs`;
+    ? logsProdFolder
+    : `${sails.config.logsDir}`;
 const defExecTimeout = 20000;
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -147,7 +146,10 @@ const ttyd = async (
 
     ttyd.on('close', (code) => {
       console.log(`child process exited with code ${code} with ${ttyd.pid}`);
-      if (logsSuffix !== null && logsPrefix !== null) {
+      if (
+        typeof logsSuffix !== 'undefined' &&
+        typeof logsPrefix !== 'undefined'
+      ) {
         fs.writeFileSync(
           exitCodeFile(logsProdDevLocation(), logsPrefix, logsSuffix),
           `${code}`,
@@ -167,7 +169,7 @@ const ttyd = async (
 
 module.exports = {
   ttyd,
-  logsFolder,
+  logsProdFolder,
   logsFile,
   resultsFile,
   exitCodeFile,
