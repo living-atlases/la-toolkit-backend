@@ -1,5 +1,6 @@
 const cp = require('child_process');
 const fs = require('fs');
+const { defExecTimeout } = require('../libs/utils.js');
 
 var genName = (name) => `${sails.config.sshDir}${name}`;
 
@@ -9,7 +10,7 @@ var sshKeyGen = (name) => {
     `ssh-keygen -q -t rsa -b 2048 -f ${genName(
       name
     )} -N "" -C "Generated-by-la-toolkit"`,
-    { cwd: sails.config.sshDir, stderr: err }
+    { cwd: sails.config.sshDir, stderr: err, timeout: defExecTimeout }
   );
   if (err) {
     console.log(err);

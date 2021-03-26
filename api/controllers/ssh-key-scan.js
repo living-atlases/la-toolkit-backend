@@ -1,11 +1,17 @@
 const cp = require('child_process');
 const fs = require('fs');
+const { defExecTimeout } = require('../libs/utils.js');
 
 var sshKeyScan = () => {
   let err;
   let out = cp.execSync(
     `for i in $(ls ${sails.config.sshDir}*pub) ; do N=$(basename $i .pub); echo -n "$Nł"; grep -q ENCRYPTED ${sails.config.sshDir}/$N; if [[ $? -eq 0 ]]; then echo -n "1ł"; else echo -n "0ł"; fi; ssh-keygen -l -f ${sails.config.sshDir}/$N | sed 's/ /ł/1' | sed 's/ /ł/1' ; done;`,
-    { shell: '/bin/bash', cwd: sails.config.sshDir, stderr: err }
+    {
+      shell: '/bin/bash',
+      cwd: sails.config.sshDir,
+      stderr: err,
+      timeout: defExecTimeout,
+    }
   );
   if (err) {
     console.log(err);

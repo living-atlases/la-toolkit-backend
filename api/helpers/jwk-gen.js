@@ -1,10 +1,10 @@
-const cp = require("child_process");
-
+const cp = require('child_process');
+const { defExecTimeout } = require('../libs/utils.js');
 var jwkGen = (size) => {
   let err;
   let out = cp.execSync(
     `java -jar /usr/local/bin/jwk-gen.jar -t oct -s '${size}' | grep -v 'Full' | jq '.k' | sed 's/^"//' | sed 's/"$//g' | tr -d '\n'`,
-    { cwd: "/tmp", stderr: err }
+    { cwd: '/tmp', timeout: defExecTimeout, stderr: err }
   );
   if (err) {
     console.log(err);
@@ -14,24 +14,24 @@ var jwkGen = (size) => {
 };
 
 module.exports = {
-  friendlyName: "jwk gen",
+  friendlyName: 'jwk gen',
 
-  description: "",
+  description: '',
 
   sync: true,
 
   inputs: {
     size: {
-      type: "number",
+      type: 'number',
       example: 256,
-      description: "The size.",
+      description: 'The size.',
       required: true,
     },
   },
 
   exits: {
     success: {
-      description: "All done.",
+      description: 'All done.',
     },
   },
 

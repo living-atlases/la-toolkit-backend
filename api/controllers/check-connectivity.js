@@ -1,5 +1,5 @@
 const cp = require('child_process');
-
+const { defExecTimeout } = require('../libs/utils.js');
 var pingTest = (server) => {
   let err;
 
@@ -36,6 +36,7 @@ var sshTest = (server) => {
   try {
     cp.execSync(`${preCmd}ssh ${server.name} hostname`, {
       cwd: sails.config.sshDir,
+      timeout: defExecTimeout,
       stderr: err,
     });
     return '';
@@ -56,6 +57,7 @@ var sudoTest = (server) => {
   try {
     cp.execSync(`${preCmd}ssh ${server.name} sudo hostname`, {
       cwd: sails.config.sshDir,
+      timeout: defExecTimeout,
       stderr: err,
     });
     return '';
@@ -77,6 +79,7 @@ var osVersionTest = (server) => {
       `${preCmd}ssh ${server.name} sudo cat /etc/os-release | egrep "^NAME=|^VERSION_ID=" | sed 's/=/:/' | sed 's/^NAME:/{"name":/' | sed 's/VERSION_ID:/"version":/' |  sed '1 s/$/,/' | sed '$ s/$/}/'`,
       {
         cwd: sails.config.sshDir,
+        timeout: defExecTimeout,
         stderr: err,
       }
     );
