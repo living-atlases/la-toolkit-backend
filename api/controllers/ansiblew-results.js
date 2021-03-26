@@ -39,15 +39,24 @@ module.exports = {
 
   fn: async function (inputs) {
     try {
-      // As the ansible callbacks are not a correct json object is like {},{},{}, we transform it to [{},{},{}]
-      let exitCode = fs.readFileSync(
-        exitCodeFile(
-          logsProdDevLocation(),
-          inputs.logsPrefix,
-          inputs.logsSuffix
-        ),
-        'utf8'
+      // If the user close the terminal the exit before a normal exit the exit file is not created
+      let exitCode = 100;
+      let exFile = exitCodeFile(
+        logsProdDevLocation(),
+        inputs.logsPrefix,
+        inputs.logsSuffix
       );
+      if (fs.existsSync(exFile)) {
+        // if not exit 100 (unknown)
+        let exitCodeRead = fs.readFileSync(exFile, 'utf8');
+        exitCode =
+          exitCodeRead === 'null'
+            ? 100
+            : typeof parseInt(exitCodeRead) !== 'number'
+            ? 100
+            : parseInt(exitCodeRead);
+      }
+      // As the ansible callbacks are not a correct json object is like {},{},{}, we transform it to [{},{},{}]
       let results =
         '[' +
         fs
