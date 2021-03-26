@@ -16,6 +16,7 @@ const resultsFile = (prefix, suffix) => `${prefix}-results-${suffix}.json`;
 const exitCodeFile = (folder, prefix, suffix) =>
   p.join(folder, `${prefix}-exit-${suffix}.out`);
 const appConf = () => `${sails.config.projectsDir}la-toolkit-conf.json`;
+const ttydPort = () => sails.config.ttydPort;
 const logsProdDevLocation = () =>
   process.env.NODE_ENV === 'production'
     ? logsFolder
@@ -70,7 +71,7 @@ const ttyd = async (
   await ttydPkill();
   // Wait to the ttyd port is free
   var waitOnOpts = {
-    resources: ['http://localhost:2011/'],
+    resources: [`http://localhost:${ttydPort()}/`],
     timeout: 10000,
     // tcpTimeout: 10000,
     reverse: true,
@@ -105,7 +106,7 @@ const ttyd = async (
     var extraArgs = `${once ? '--once ' : ''}`;
     // -t disableReconnect=true
     // --max-clients 1
-    var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true --check-origin -p 2011 ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
+    var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true --check-origin -p ${ttydPort()} ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
 
     var ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
 

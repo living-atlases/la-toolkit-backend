@@ -54,4 +54,5 @@ module.exports.routes = {
     skipAssets: false,
   },
   'POST /api/v1/check-dir-name': { action: 'check-dir-name' },
+  'POST /api/v1/term-logs': { action: 'term-logs' },
 };
