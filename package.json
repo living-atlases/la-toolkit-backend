@@ -1,8 +1,8 @@
 {
   "name": "la-toolkit-backend",
   "private": true,
-  "version": "0.0.0",
-  "description": "a Sails application",
+  "version": "1.0.18",
+  "description": "LA Toolkit Backend",
   "keywords": [],
   "dependencies": {
     "@sailshq/connect-redis": "^3.2.1",
