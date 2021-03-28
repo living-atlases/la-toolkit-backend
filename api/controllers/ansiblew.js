@@ -29,9 +29,11 @@ module.exports = {
 
   fn: async function (inputs) {
     // console.log(inputs.cmd);
-    var projectPath = inputs.cmd.dirName;
-    var invPath = `/home/ubuntu/ansible/la-inventories/${projectPath}/${projectPath}-inventories/`;
-    var cmd = `./ansiblew`;
+    let projectPath = inputs.cmd.dirName;
+    let invBase = '/home/ubuntu/ansible/la-inventories/';
+    let invDir = `${projectPath}/${projectPath}-inventories/`;
+    let invPath = `${invBase}${invDir}`;
+    let cmd = `./ansiblew`;
     cmd = cmd + ` --alainstall=/home/ubuntu/ansible/ala-install`;
     if (inputs.cmd.debug) {
       cmd = cmd + ' --debug';
@@ -82,7 +84,7 @@ module.exports = {
       // return exits.success();
       return this.res.json(
         JSON.parse(
-          `{ "cmd": "${cmd}", "logsPrefix": "${logsPrefix}", "logsSuffix": "${logsSuffix}" }`
+          `{ "cmd": "${cmd}", "logsPrefix": "${logsPrefix}", "logsSuffix": "${logsSuffix}", "invDir": "${invDir}" }`
         )
       );
     } catch (e) {
