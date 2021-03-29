@@ -93,6 +93,9 @@ module.exports = function (inputs) {
     LA_spatial_map_bbox: 'LA_spatial_map_bbox',
     LA_spatial_map_areaSqKm: 'LA_spatial_map_areaSqKm',
     LA_additionalVariables: 'LA_additionalVariables',
+    LA_etc_hosts: 'LA_etc_hosts',
+    LA_hostnames: 'LA_hostnames',
+    LA_ssh_keys: 'LA_ssh_keys',
     // VariablesDesc (sorted)
     LA_variable_ansible_user: 'LA_variable_ansible_user',
     LA_variable_caches_auth_enabled: 'LA_variable_caches_auth_enabled',
