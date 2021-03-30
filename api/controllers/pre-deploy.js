@@ -27,7 +27,7 @@ module.exports = {
     let invBase = '/home/ubuntu/ansible/la-inventories/';
     let invDir = `${projectPath}/${projectPath}-pre-deploy/`;
     let invPath = `${invBase}${invDir}`;
-
+    let mainInvDir = `../${projectPath}-inventories/${projectPath}-inventory.ini`;
     let cwd = invPath;
 
     let preCmd = sails.config.preCmd;
@@ -50,7 +50,7 @@ module.exports = {
       stderr: err,
     });
 
-    let baseCmd = `ansible-playbook -i inventory.yml pre-deploy.yml`;
+    let baseCmd = `ansible-playbook -i ${mainInvDir} -i inventory.yml pre-deploy.yml`;
 
     console.log(`Resulting cwd: ${cwd}`);
     console.log(`Resulting preCmd: ${preCmd}`);
