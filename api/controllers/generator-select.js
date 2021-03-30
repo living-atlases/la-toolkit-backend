@@ -21,7 +21,7 @@ var generatorSelect = (version) => {
     if (currentVersion.toString().trim() !== version) {
       cp.execSync(`${preCmd}npm install -g generator-living-atlas@${version}`, {
         cwd: sails.config.projectDir,
-        timeout: 60000,
+        timeout: 120000,
         stderr: err,
       });
     }

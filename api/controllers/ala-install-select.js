@@ -17,16 +17,18 @@ var alaInstallSelect = (version) => {
       );
       preCmd = preCmd + ' ';
     }
+    if (version !== 'custom') {
+      cp.execSync(`${preCmd}git fetch --tags origin master`, {
+        cwd: alaInstallLocation,
+        stderr: err,
+      });
+    }
     if (version !== 'upstream' && version !== 'custom') {
       cp.execSync(`${preCmd}git checkout tags/${version}`, {
         cwd: alaInstallLocation,
         stderr: err,
       });
     } else if (version === 'upstream') {
-      cp.execSync(`${preCmd}git fetch origin master`, {
-        cwd: alaInstallLocation,
-        stderr: err,
-      });
       cp.execSync(`${preCmd}git pull --rebase origin master`, {
         cwd: alaInstallLocation,
         stderr: err,
