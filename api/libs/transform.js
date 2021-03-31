@@ -108,6 +108,11 @@ module.exports = function (inputs) {
     LA_variable_cas_webflow_signing_key: 'LA_variable_cas_webflow_signing_key',
     LA_variable_downloads_terms_of_use: 'LA_variable_downloads_terms_of_use',
     LA_variable_email_sender: 'LA_variable_email_sender',
+    /* Enc this LA_variable_email_sender_password: 'LA_variable_email_sender_password', */
+    LA_variable_email_sender_server: 'LA_variable_email_sender_server',
+    LA_variable_email_sender_server_port:
+      'LA_variable_email_sender_server_port',
+    LA_variable_email_sender_server_tls: 'LA_variable_email_sender_server_tls',
     LA_variable_favicon_url: 'LA_variable_favicon_url',
     LA_variable_google_api_key: 'LA_variable_google_api_key',
     LA_variable_header_and_footer_baseurl:
