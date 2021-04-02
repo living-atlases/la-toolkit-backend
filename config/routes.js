@@ -58,4 +58,5 @@ module.exports.routes = {
   'GET /api/v1/get-backend-version': { action: 'get-backend-version' },
   'POST /api/v1/pre-deploy': { action: 'pre-deploy' },
   'POST /api/v1/post-deploy': { action: 'post-deploy' },
+  'POST /api/v1/test-host-services': { action: 'test-host-services' },
 };
