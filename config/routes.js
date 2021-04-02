@@ -41,7 +41,7 @@ module.exports.routes = {
   'POST /api/v1/save-conf': { action: 'save-conf' },
   'GET /api/v1/get-conf': { action: 'get-conf' },
   'GET /api/v1/gen/:uuid/:download': { action: 'gen' },
-  'GET /api/v1/term': { action: 'term' },
+  'POST /api/v1/term': { action: 'term' },
   'GET /api/v1/ala-install-select/:version': {
     action: 'ala-install-select',
     skipAssets: false,
