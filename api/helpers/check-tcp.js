@@ -31,7 +31,7 @@ module.exports = {
     inputs.ports.forEach(async (port) => {
       servers.forEach(async (server) => {
         // ssh $VM "nc -4 -w 120 $HOST $PORT"
-        let cmd = `nc -4 -w 60 ${host} ${port}`;
+        let cmd = `nc -4 -w 30 ${host} ${port}`;
         let result = await sails.helpers.sshCmd.with({
           server: server,
           cmd: cmd,
