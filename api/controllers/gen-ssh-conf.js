@@ -12,7 +12,9 @@ const basicAsshConf = () => {
 
   // This is done in ansible.cfg better
   t.defaults = {};
-  t.defaults.StrictHostKeyChecking = 'no';
+  if (process.env.NODE_ENV !== 'production') {
+    t.defaults.StrictHostKeyChecking = 'no';
+  }
   t.defaults.ControlMaster = 'auto';
   t.defaults.ControlPath = '/home/ubuntu/.ssh/%h-%p-%r.sock';
   t.defaults.ControlPersist = 'yes';
