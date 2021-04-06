@@ -1,6 +1,6 @@
 const test = require('ava');
-const transform = require('./api/libs/transform.js');
-const validate = require('./api/libs/validate.js');
+const transform = require('../api/libs/transform.js');
+const validate = require('../api/libs/validate.js');
 const sails = require('sails');
 
 const {
@@ -8,7 +8,7 @@ const {
   domainRegexp,
   hostnameRegexp,
   shortNameRegexp,
-} = require('./api/libs/regexp.js');
+} = require('../api/libs/regexp.js');
 
 const defObj = {
   LA_project_name: 'Atlas of Living Australia',
@@ -132,12 +132,46 @@ const src = { conf: defObj };
 let dest = transform(src);
 
 /*
-Now this is generated in the la-toolkit and checked via check-dir-name call
-test('pkgname transform', async (t) => {
-  const src = { conf: { LA_project_shortname: 'GBIF.ES' } };
-  let dest = transform(src);
-  t.is(dest[P][G].LA_pkg_name, 'gbif-es');
-}); */
+   Now this is generated in the la-toolkit and checked via check-dir-name call
+   test('pkgname transform', async (t) => {
+   const src = { conf: { LA_project_shortname: 'GBIF.ES' } };
+   let dest = transform(src);
+   t.is(dest[P][G].LA_pkg_name, 'gbif-es');
+   }); */
+
+test.before((t) => {
+  // This runs before all tests
+  sails.lift(
+    {
+      // Your Sails app's configuration files will be loaded automatically,
+      // but you can also specify any other special overrides here for testing purposes.
+
+      // For example, we might want to skip the Grunt hook,
+      // and disable all logs except errors and warnings:
+      hooks: { grunt: false },
+      log: { level: 'warn' },
+      port: 13370,
+      sshDir: '/var/tmp/la-toolkit/.ssh/',
+      asshDir: '/var/tmp/la-toolkit/.ssh/assh.d/',
+      projectsDir: '/var/tmp/la-toolkit/config/',
+      logsDir: '/var/tmp/la-toolkit/logs/',
+      baseBrandingLocation: '/data/la-generator/base-branding',
+      preCmd: 'docker exec -u ubuntu la-toolkit',
+      ttydMinPort: 20011,
+      ttydMaxPort: 20100,
+    },
+    function (err) {
+      if (err) {
+        return;
+      }
+
+      // here you can load fixtures, etc.
+      // (for example, you might want to create some records in the database)
+
+      return;
+    }
+  );
+});
 
 test('long name valid', async (t) => {
   const testObj = defObj;
@@ -251,4 +285,21 @@ test('bie false also species lists', async (t) => {
   };
   let dest = transform(src);
   t.is(dest[P][G].LA_use_species_lists, false);
+});
+
+test('port pool test', async (t) => {
+  const { ttyd, ttyFreePort, pidKill, delay } = require('../api/libs/utils.js');
+  let port = await ttyFreePort();
+  let p1 = await ttyd('bash', port, false, '/tmp');
+  await delay(4000);
+  let port1 = await ttyFreePort();
+  console.log(`port free: ${port1}`);
+  t.not(port, port1);
+  let p2 = await ttyd('bash', port1, true, '/tmp');
+  await delay(4000);
+  let port2 = await ttyFreePort();
+  console.log(`port free: ${port}`);
+  t.not(port1, port2);
+  await pidKill(p1);
+  await pidKill(p2);
 });

@@ -1,5 +1,6 @@
 const {
   ttyd,
+  ttyFreePort,
   logsProdFolder,
   resultsFile,
   logsFile,
@@ -102,11 +103,16 @@ module.exports = {
     let logsPrefix = projectPath;
     let logsSuffix = logDate;
     try {
-      await ttyd(cmd, true, inputs.invPath, env, logsPrefix, logsSuffix);
+      let port = await ttyFreePort();
+      await ttyd(cmd, port, true, inputs.invPath, env, logsPrefix, logsSuffix);
       // return exits.success();
-      return JSON.parse(
-        `{ "cmd": "${cmd}", "logsPrefix": "${logsPrefix}", "logsSuffix": "${logsSuffix}", "invDir": "${inputs.invDir}" }`
-      );
+      return {
+        cmd: '${cmd}',
+        port: port,
+        logsPrefix: '${logsPrefix}',
+        logsSuffix: '${logsSuffix}',
+        invDir: '${inputs.invDir}',
+      };
     } catch (e) {
       console.log(`ttyd ansiblew call failed (${e})`);
       throw 'termError';

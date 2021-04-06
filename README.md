@@ -12,10 +12,12 @@ module.exports = {
   logsDir: '/var/tmp/la-toolkit/logs/',
   baseBrandingLocation: '/data/la-generator/base-branding',
   preCmd: 'docker exec -u ubuntu la-toolkit',
-  ttydPort: '20110',
+  ttydMinPort: 20011,
+  ttydMaxPort: 20100,
 };
 };
 ```
+The ttyd ports configuration should match the la-toolkit docker compose ports configuration.
 
 ### Production configuration
 
@@ -27,8 +29,8 @@ In production, the previous variables are specified in `config/env/production.js
   projectsDir: '/home/ubuntu/ansible/la-inventories/',
   baseBrandingLocation: '/home/ubuntu/base-branding',
   preCmd: '',
-  ttydPort: '2011',
-
+  ttydMinPort: 2011,
+  ttydMaxPort: 2100,
 ```
 
 And match the directories of the [la-toolkit](https://github.com/living-atlases/la-toolkit/) dockerfiles.

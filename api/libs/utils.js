@@ -1,9 +1,9 @@
 const spawn = require('child_process').spawn;
-const kill = require('tree-kill');
-const pkill = require('pkill');
-const waitOn = require('wait-on');
 const p = require('path');
 const fs = require('fs');
+const PortPool = require('./port-pool.js');
+const sails = require('sails');
+const kill = require('tree-kill');
 
 const logsProdFolder = '/home/ubuntu/ansible/logs/';
 const logsFile = (folder, prefix, suffix, colorized = false) =>
@@ -15,7 +15,7 @@ const resultsFile = (prefix, suffix) => `${prefix}-results-${suffix}.json`;
 const exitCodeFile = (folder, prefix, suffix) =>
   p.join(folder, `${prefix}-exit-${suffix}.out`);
 const appConf = () => `${sails.config.projectsDir}la-toolkit-conf.json`;
-const ttydPort = () => sails.config.ttydPort;
+
 const logsProdDevLocation = () =>
   process.env.NODE_ENV === 'production'
     ? logsProdFolder
@@ -23,6 +23,12 @@ const logsProdDevLocation = () =>
 const defExecTimeout = 20000;
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+const portPool = new PortPool(
+  sails.config.ttydMinPort,
+  sails.config.ttydMaxPort
+);
+const ttyFreePort = () => portPool.getNext();
 
 const ttydPkill = async () => {
   return new Promise((resolve) => {
@@ -39,11 +45,11 @@ const ttydPkill = async () => {
   });
 };
 
-const ttydKill = async () => {
-  return new Promise(async (resolve) => {
-    if (typeof sails.ttydPid === 'number') {
-      console.log(`Killing ttyd with pid ${sails.ttydPid}`);
-      kill(sails.ttydPid, 'SIGKILL', (kerr) => {
+const pidKill = async (pid) => {
+  return new Promise((resolve) => {
+    if (typeof pid === 'number') {
+      console.log(`Killing proc with pid ${pid}`);
+      kill(pid, 'SIGKILL', (kerr) => {
         if (kerr) {
           console.log(err);
           resolve('termError');
@@ -51,39 +57,39 @@ const ttydKill = async () => {
         resolve();
       });
     } else {
-      console.log('Not killing unknown ttyd pid');
+      console.log('Not killing unknown pid');
       resolve();
     }
   });
 };
 
+const ttydKill = async () => {
+  return pidKill(sails.ttydPid);
+};
+
+/* const ttyFreePort = async () => await portPool.getNext(); */
+
 const ttyd = async (
   cmd,
-  once = false,
+  port,
+  once = true,
   cwd = '/home/ubuntu',
   env = {},
   logsPrefix,
   logsSuffix
   // process.env
 ) => {
-  // kill any previous ttyd process
-  await ttydKill();
-  await ttydPkill();
-  // Wait to the ttyd port is free
-  var waitOnOpts = {
-    resources: [`http://localhost:${ttydPort()}/`],
-    timeout: 10000,
-    // tcpTimeout: 10000,
-    reverse: true,
-    verbose: true,
-  };
   try {
-    await waitOn(waitOnOpts);
     // once here, all resources are available
     console.log(`cwd: ${cwd}`);
     console.log(`env: ${JSON.stringify(env)}`);
+    console.log(
+      `port ${port} of ports: ${sails.config.ttydMinPort}-${sails.config.ttydMaxPort}`
+    );
 
     let preCmd = sails.config.preCmd;
+
+    console.log(`preCmd: ${preCmd}`);
     // During devel set work dir
     if (preCmd !== '') {
       preCmd = preCmd.replace('exec', `exec -w ${cwd}`);
@@ -106,7 +112,7 @@ const ttyd = async (
     var extraArgs = `${once ? '--once ' : ''}`;
     // -t disableReconnect=true
     // --max-clients 1
-    var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true --check-origin -p ${ttydPort()} ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
+    var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true --check-origin -p ${port} ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
 
     var ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
 
@@ -121,18 +127,16 @@ const ttyd = async (
     const ttyd = spawn(ttydCmd.shift(), ttydCmd, {
       cwd: cwd,
       env: { ...process.env, ...env, NODE_DEBUG: 'child_process' },
-    }); /* .on('error', (err) => {
-      console.log(err);
-      throw Error(err);
-    }); */
-    console.log(`ttyd pid: ${ttyd.pid}`);
+    });
+
     sails.ttydPid = ttyd.pid;
+    console.log(`ttyd pid: ${ttyd.pid}`);
 
     // Wait til listenning
     /* It seems that this not work well under docker
-    waitOnOpts.reverse = false;
-    waitOnOpts.timeout = 2000;
-    await waitOn(waitOnOpts); */
+       waitOnOpts.reverse = false;
+       waitOnOpts.timeout = 2000;
+       await waitOn(waitOnOpts); */
 
     await delay(2000);
 
@@ -158,8 +162,8 @@ const ttyd = async (
           }
         );
       }
-      // sails.ttydPid = null;
     });
+    return ttyd.pid;
   } catch (werr) {
     console.log(`ttyd call failed (${werr})`);
     //throw Error(werr);
@@ -176,4 +180,7 @@ module.exports = {
   logsProdDevLocation,
   appConf,
   defExecTimeout,
+  ttyFreePort,
+  pidKill,
+  delay,
 };

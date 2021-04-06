@@ -358,5 +358,6 @@ module.exports = {
   projectsDir: '/home/ubuntu/ansible/la-inventories/',
   baseBrandingLocation: '/home/ubuntu/base-branding',
   preCmd: '',
-  ttydPort: '2011',
+  ttydMinPort: 2011,
+  ttydMaxPort: 2100,
 };

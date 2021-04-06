@@ -1,4 +1,4 @@
-const { ttyd } = require('../libs/utils.js');
+const { ttyd, ttyFreePort } = require('../libs/utils.js');
 const { logsProdFolder, logsFile } = require('../libs/utils.js');
 
 module.exports = {
@@ -37,8 +37,10 @@ module.exports = {
         inputs.logsSuffix,
         true
       );
-      await ttyd(`less +G -r ${log}`, true);
-      return exits.success();
+      let port = await ttyFreePort();
+      let cmd = `less +G -r ${log}`;
+      await ttyd(cmd, port, true);
+      this.res.json({ cmd: cmd, port: port });
     } catch (e) {
       console.log(`ttyd log less call failed (${e})`);
       throw 'termError';

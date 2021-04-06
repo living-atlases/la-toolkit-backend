@@ -20,6 +20,10 @@ module.exports = {
     let results = {};
     servers.forEach((s) => (results[s] = {}));
 
+    // reply empty
+    this.res.json(results);
+    return;
+
     try {
       Object.entries(map).forEach(async ([server, services]) => {
         // Check on each server each service

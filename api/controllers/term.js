@@ -1,4 +1,4 @@
-const { ttyd } = require('../libs/utils.js');
+const { ttyd, ttyFreePort } = require('../libs/utils.js');
 const { appConf } = require('../libs/utils.js');
 const fs = require('fs');
 
@@ -30,8 +30,14 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    // console.log('Executing bash');
+    if (inputs.uuid) {
+      console.log('Executing ssh');
+    } else {
+      console.log('Executing bash');
+    }
     try {
+      let port = await ttyFreePort();
+      let cmd;
       if (inputs.uuid) {
         // Double check that this server belongs to this project
         var projects = JSON.parse(fs.readFileSync(appConf(), 'utf8'))[
@@ -48,14 +54,16 @@ module.exports = {
           }
         });
         if (found) {
-          await ttyd(`ssh ${inputs.server}`);
+          cmd = `ssh ${inputs.server}`;
+          await ttyd(cmd, port);
         } else {
           throw 'termError';
         }
       } else {
-        await ttyd('bash');
+        cmd = 'bash';
+        await ttyd(cmd, port);
       }
-      return exits.success();
+      this.res.json({ cmd: cmd, port: port });
     } catch (e) {
       console.log(`ttyd bash call failed (${e})`);
       throw 'termError';
