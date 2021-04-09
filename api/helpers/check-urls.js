@@ -38,7 +38,7 @@ module.exports = {
       let protocol = pUrl.protocol;
       let port = pUrl.protocol === 'http:' ? '80' : '443 -S';
       let pathname = pUrl.pathname;
-      let args = `-H ${protocol}//${hostname} -I ${host} -t 20 -p ${port} -u ${pathname}`;
+      let args = `-H ${protocol}//${hostname} -I ${host} -t 20 -p ${port} -u '${pathname}'`;
       servers.forEach(async (server) => {
         // console.log(`url: ${url} in (${server}) ----> ${args}`);
         await sails.helpers.nagiosCheck.with({
