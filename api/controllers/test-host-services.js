@@ -65,7 +65,7 @@ module.exports = {
     servers.forEach((s) => (results[s] = {}));
 
     const checkSshBase =
-      '/usr/local/bin/check_by_ssh -F /home/ubuntu/.ssh/config';
+      '/usr/local/bin/check_by_ssh -F /home/ubuntu/.ssh/config -j';
     const plugins = 'sudo /usr/lib/nagios/plugins/';
     //  -H ala-install-test-1 -n ala-1 -s uptime:uptime:mysql:https -C uptime -C uptime -C 'sudo /usr/lib/nagios/plugins/check_mysql' -C '/usr/lib/nagios/plugins/check_tcp -H localhost -p 443'
 
@@ -176,6 +176,7 @@ module.exports = {
                 }
               );
           } catch (err) {
+            // Process typical: 'check_by_ssh: Error parsing output' error when the services are not deployed/ready
             console.error(
               err.output != null && err.output[1] != null
                 ? err.output[1].toString()
