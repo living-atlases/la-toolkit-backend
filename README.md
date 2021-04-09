@@ -34,3 +34,20 @@ In production, the previous variables are specified in `config/env/production.js
 ```
 
 And match the directories of the [la-toolkit](https://github.com/living-atlases/la-toolkit/) dockerfiles.
+
+
+### Run sails
+
+During development you can run sails with forever to easy reload with code changes
+
+```
+npm install -g forever
+forever -w app.js
+```
+
+Or without `forewer` and `watch` just:
+
+
+```
+sails lift
+```
