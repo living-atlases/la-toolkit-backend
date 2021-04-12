@@ -1,0 +1,105 @@
+'
+' Update diagram.png with:
+' java -jar plantuml.jar diagram.txt
+'
+' https://plantuml.com/
+'
+' or with watch:
+' while inotifywait -e close_write diagram.txt; do java -jar plantuml.jar diagram.txt ; done
+
+@startuml
+class Project {
+ + id
+ + longName
+ + shortName
+ + dirName
+ + domain
+ + useSSL
+ + additionalVariables
+ + status
+ + cmdHistory
+ + lastCmd
+}
+
+class Server {
+ + id
+ + name
+ + ip
+ + sshPort
+ + sshUser
+ + aliases
+ + gateways
+ + sshKey
+ + osName
+ + osVersion
+}
+
+class Service {
+ + id
+ + nameInt
+ + initPath
+ + use
+ + usesSubdomain
+ + suburl
+ + status
+}
+
+class ServiceDeploy {
+ + id
+ + additionalVariables
+ + status
+}
+
+class SshKey {
+ + id
+ + publicKey
+ + type
+ + desc
+}
+
+class Variable {
+ + nameInt
+ + service
+ + value
+}
+
+class CmdHistoryEntry {
+}
+
+class Cmd {
+}
+
+class AnsibleCmd {
+}
+
+class DeployCmd {
+}
+
+class PreDeployCmd {
+}
+
+class PostDeployCmd {
+}
+
+Project "1" *-- "many" Project : has hubs
+Project "1" *-- "many" Server : has
+Project "1" *-- "many" Service : has
+Project "1" *-- "many" Variable : has
+Project "1" *-- "many" ServiceDeploy : has
+Project "1" *-- "many" CmdHistoryEntry : executed
+
+Server "1" *-- "many" ServiceDeploy : contains
+
+SshKey "1" *-- "many" Server : opens
+
+Service "1" *-- "many" ServiceDeploy : has
+
+
+CmdHistoryEntry "1" --- "1" Cmd : is
+
+Cmd <|-- AnsibleCmd
+AnsibleCmd <|-- DeployCmd
+DeployCmd <|-- PreDeployCmd
+DeployCmd <|-- PostDeployCmd
+
+@enduml
