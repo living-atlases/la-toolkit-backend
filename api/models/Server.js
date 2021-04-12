@@ -6,12 +6,13 @@
  */
 
 module.exports = {
+  tableName: 'servers',
   attributes: {
     // Basic
-    uuid: {
+    /* uuid: {
       type: 'string',
       unique: true,
-    },
+    }, */
     name: { type: 'string' },
     aliases: { type: 'json' },
 
@@ -31,12 +32,12 @@ module.exports = {
     osVersion: { type: 'string' },
 
     // Relations
-    project: {
+    projectId: {
       collection: 'project',
       via: 'servers',
     },
-    services: { collection: 'service', via: 'servers' },
-    sshKey: { model: 'sshKey' },
+    sshKeyId: { model: 'sshKey' },
+    serviceDeploys: { collection: 'serviceDeploy', via: 'serverId' },
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
     //  ╠═╝╠╦╝║║║║║ ║ ║╚╗╔╝║╣ ╚═╗

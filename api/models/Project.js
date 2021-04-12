@@ -6,17 +6,19 @@
  */
 
 module.exports = {
+  tableName: 'projects',
   attributes: {
     // Basic
-    uuid: {
+    /* uuid: {
       type: 'string',
       unique: true,
-    },
+    }, */
     longName: { type: 'string', allowNull: false },
     shortName: { type: 'string', allowNull: false },
     dirName: { type: 'string' },
     domain: { type: 'string', allowNull: false },
     useSSL: { type: 'boolean', allowNull: false, defaultsTo: true },
+    isHub: { type: 'boolean', allowNull: false, defaultsTo: false },
 
     // Additional
     theme: { type: 'string', allowNull: false },
@@ -33,6 +35,11 @@ module.exports = {
     servers: { model: 'server' },
     services: { model: 'service' },
     variables: { model: 'variable' },
+    cmdHistoryEntries: { model: 'cmdHistoryEntry' },
+    groups: {
+      collection: 'group',
+      via: 'projects',
+    },
 
     // Status vars
     status: { type: 'string', allowNull: false, defaultsTo: 'created' },

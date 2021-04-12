@@ -81,6 +81,17 @@ class PreDeployCmd {
 class PostDeployCmd {
 }
 
+class User {
+ + id
+ + username
+ + password
+}
+
+class Group {
+ + id
+ + name
+}
+
 Project "1" *-- "many" Project : has hubs
 Project "1" *-- "many" Server : has
 Project "1" *-- "many" Service : has
@@ -94,8 +105,10 @@ SshKey "1" *-- "many" Server : opens
 
 Service "1" *-- "many" ServiceDeploy : has
 
-
 CmdHistoryEntry "1" --- "1" Cmd : is
+
+Group "many" *-- "many" User : belongs
+Project "many" *-- "many" Group : belongs
 
 Cmd <|-- AnsibleCmd
 AnsibleCmd <|-- DeployCmd

@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+  tableName: 'variables',
   attributes: {
     // Basic
     nameInt: { type: 'string', allowNull: false },
@@ -16,7 +17,7 @@ module.exports = {
     status: { type: 'string', defaultsTo: 'undeployed' },
 
     // Relations
-    project: {
+    projectId: {
       collection: 'project',
       via: 'variables',
     },

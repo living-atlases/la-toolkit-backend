@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+  tableName: 'ssh_keys',
   attributes: {
     // Basic
     name: { type: 'string', allowNull: false },
@@ -20,7 +21,7 @@ module.exports = {
     // Relations
     servers: {
       collection: 'server',
-      via: 'sshKey',
+      via: 'sshKeyId',
     },
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗

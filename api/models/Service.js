@@ -6,13 +6,14 @@
  */
 
 module.exports = {
+  tableName: 'services',
   attributes: {
     // Basic
-    uuid: {
+    /* uuid: {
       type: 'string',
       unique: true,
       allowNull: false,
-    },
+    }, */
     nameInt: { type: 'string', allowNull: false },
     use: { type: 'boolean', allowNull: false, defaultsTo: false },
 
@@ -25,11 +26,11 @@ module.exports = {
     status: { type: 'string', defaultsTo: 'unknown' },
 
     // Relations
-    servers: { collection: 'server', via: 'services' },
     project: {
       collection: 'project',
       via: 'services',
     },
+    serviceDeploys: { collection: 'serviceDeploy', via: 'serviceId' },
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
     //  ╠═╝╠╦╝║║║║║ ║ ║╚╗╔╝║╣ ╚═╗
