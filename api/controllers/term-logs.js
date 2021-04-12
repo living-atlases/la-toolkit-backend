@@ -1,4 +1,4 @@
-const { ttyd, ttyFreePort } = require('../libs/utils.js');
+const { ttyd, ttyFreePort } = require('../libs/ttyd-utils.js');
 const { logsProdFolder, logsFile } = require('../libs/utils.js');
 
 module.exports = {

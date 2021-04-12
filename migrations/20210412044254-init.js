@@ -55,7 +55,7 @@ exports.up = function (db) {
     });
   });
   exports.down = function (db) {
-    db.dropCollection('projects').then((r) => {
+    return db.dropCollection('projects').then((r) => {
       db.dropCollection('servers').then((r) => {
         db.dropCollection('services').then((r) => {
           db.dropCollection('service_deploys').then((r) => {

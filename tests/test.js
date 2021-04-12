@@ -2,6 +2,7 @@ const test = require('ava');
 const transform = require('../api/libs/transform.js');
 const validate = require('../api/libs/validate.js');
 const sails = require('sails');
+const { delay } = require('../api/libs/utils.js');
 
 const {
   projectNameRegexp,
@@ -288,7 +289,7 @@ test('bie false also species lists', async (t) => {
 });
 
 test('port pool test', async (t) => {
-  const { ttyd, ttyFreePort, pidKill, delay } = require('../api/libs/utils.js');
+  const { ttyd, ttyFreePort, pidKill } = require('../api/libs/ttyd-utils.js');
   let port = await ttyFreePort();
   let p1 = await ttyd('bash', port, false, '/tmp');
   await delay(4000);

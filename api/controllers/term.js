@@ -1,4 +1,4 @@
-const { ttyd, ttyFreePort } = require('../libs/utils.js');
+const { ttyd, ttyFreePort } = require('../libs/ttyd-utils.js');
 const { appConf } = require('../libs/utils.js');
 const fs = require('fs');
 

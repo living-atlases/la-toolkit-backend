@@ -1,10 +1,5 @@
-const {
-  ttyd,
-  ttyFreePort,
-  logsProdFolder,
-  resultsFile,
-  logsFile,
-} = require('../libs/utils.js');
+const { ttyd, ttyFreePort } = require('../libs/ttyd-utils.js');
+const { logsProdFolder, resultsFile, logsFile } = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'ansible with ttyd',
