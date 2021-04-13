@@ -9,10 +9,6 @@ module.exports = {
   tableName: 'projects',
   attributes: {
     // Basic
-    /* uuid: {
-      type: 'string',
-      unique: true,
-    }, */
     longName: { type: 'string', allowNull: false },
     shortName: { type: 'string', allowNull: false },
     dirName: { type: 'string' },
@@ -32,17 +28,33 @@ module.exports = {
     generatorRelease: { type: 'string', allowNull: true },
 
     // Relations
-    servers: { model: 'server' },
-    services: { model: 'service' },
-    variables: { model: 'variable' },
-    cmdHistoryEntries: { model: 'cmdHistoryEntry' },
+    servers: { collection: 'server', via: 'projectId' },
+    services: { collection: 'service', via: 'projectId' },
+    serviceDeploys: { collection: 'serviceDeploy', via: 'projectId' },
+    variables: { collection: 'variable', via: 'projectId' },
+    cmdHistoryEntries: { collection: 'cmdHistoryEntry', via: 'projectId' },
+    lastCmdEntryId: { model: 'cmdHistoryEntry' },
+
     groups: {
       collection: 'group',
       via: 'projects',
     },
 
     // Status vars
-    status: { type: 'string', allowNull: false, defaultsTo: 'created' },
+
+    status: {
+      type: 'string',
+      allowNull: false,
+      defaultsTo: 'created',
+      isIn: [
+        'created',
+        'basicDefined',
+        'advancedDefined',
+        'reachable',
+        'firstDeploy',
+        'inProduction',
+      ],
+    },
     isCreated: { type: 'boolean', allowNull: false, defaultsTo: false },
     fstDeployed: { type: 'boolean', allowNull: false, defaultsTo: false },
     advancedEdit: { type: 'boolean', allowNull: false, defaultsTo: false },

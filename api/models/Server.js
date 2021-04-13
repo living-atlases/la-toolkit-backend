@@ -23,9 +23,21 @@ module.exports = {
     gateways: { type: 'json' },
 
     // Status
-    reachable: { type: 'string', defaultsTo: 'unknown' },
-    sshReachable: { type: 'string', defaultsTo: 'unknown' },
-    sudoEnabled: { type: 'string', defaultsTo: 'unknown' },
+    reachable: {
+      type: 'string',
+      defaultsTo: 'unknown',
+      isIn: ['unknown', 'success', 'failed'],
+    },
+    sshReachable: {
+      type: 'string',
+      defaultsTo: 'unknown',
+      isIn: ['unknown', 'success', 'failed'],
+    },
+    sudoEnabled: {
+      type: 'string',
+      defaultsTo: 'unknown',
+      isIn: ['unknown', 'success', 'failed'],
+    },
 
     // Facts
     osName: { type: 'string' },
@@ -33,8 +45,7 @@ module.exports = {
 
     // Relations
     projectId: {
-      collection: 'project',
-      via: 'servers',
+      model: 'project',
     },
     sshKeyId: { model: 'sshKey' },
     serviceDeploys: { collection: 'serviceDeploy', via: 'serverId' },

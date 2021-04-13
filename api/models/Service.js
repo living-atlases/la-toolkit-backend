@@ -9,11 +9,6 @@ module.exports = {
   tableName: 'services',
   attributes: {
     // Basic
-    /* uuid: {
-      type: 'string',
-      unique: true,
-      allowNull: false,
-    }, */
     nameInt: { type: 'string', allowNull: false },
     use: { type: 'boolean', allowNull: false, defaultsTo: false },
 
@@ -22,13 +17,9 @@ module.exports = {
     suburl: { type: 'string', allowNull: false },
     usesSubdomain: { type: 'boolean', allowNull: false, defaultsTo: true },
 
-    // Status
-    status: { type: 'string', defaultsTo: 'unknown' },
-
     // Relations
-    project: {
-      collection: 'project',
-      via: 'services',
+    projectId: {
+      model: 'project',
     },
     serviceDeploys: { collection: 'serviceDeploy', via: 'serviceId' },
 

@@ -10,16 +10,19 @@ module.exports = {
   attributes: {
     // Basic
     nameInt: { type: 'string', allowNull: false },
-    service: { type: 'string', allowNull: false },
+    service: { type: 'string', allowNull: false }, // to what service name this belongs to
     value: { type: 'json' },
 
     // Status
-    status: { type: 'string', defaultsTo: 'undeployed' },
+    status: {
+      type: 'string',
+      defaultsTo: 'undeployed',
+      isIn: ['deployed', 'undeployed'],
+    },
 
     // Relations
     projectId: {
-      collection: 'project',
-      via: 'variables',
+      model: 'project',
     },
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗

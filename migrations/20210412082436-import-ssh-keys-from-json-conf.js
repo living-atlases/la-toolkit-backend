@@ -17,6 +17,7 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = async function (db) {
+  // await sailsLoadSync();
   let conf = await appConfSync();
 
   await SshKey.createEach(conf['sshKeys']);

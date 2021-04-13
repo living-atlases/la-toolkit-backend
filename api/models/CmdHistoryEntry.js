@@ -9,10 +9,6 @@ module.exports = {
   tableName: 'cmd_history_entries',
   attributes: {
     // Basic
-    /* uuid: {
-      type: 'string',
-      unique: true,
-    }, */
     // Location info
     logsPrefix: { type: 'string', allowNull: false },
     logsSuffix: { type: 'string', allowNull: false },
@@ -20,12 +16,15 @@ module.exports = {
     // previously cmd
     rawCmd: { type: 'string', allowNull: false },
     // unknown, aborted, success, failed
-    result: { type: 'string', defaultsTo: 'unknown' },
+    result: {
+      type: 'string',
+      defaultsTo: 'unknown',
+      isIn: ['unknown', 'aborted', 'success', 'failed'],
+    },
 
     // Relations
     projectId: {
-      collection: 'project',
-      via: 'cmdHistoryEntries',
+      model: 'project',
     },
     cmd: { collection: 'cmd', via: 'cmdHistoryEntryId' },
 

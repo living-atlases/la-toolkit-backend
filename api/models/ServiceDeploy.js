@@ -10,10 +10,16 @@ module.exports = {
   attributes: {
     additionalVariables: { type: 'string', allowNull: false },
     // Status
-    status: { type: 'string', defaultsTo: 'unknown' },
+    status: {
+      type: 'string',
+      defaultsTo: 'unknown',
+      isIn: ['unknown', 'success', 'failed'],
+    },
 
-    serviceId: { collection: 'service', via: 'serviceDeploys' },
-    serverId: { collection: 'server', via: 'serviceDeploys' },
+    serviceId: { model: 'service' },
+    serverId: { model: 'server' },
+    projectId: { model: 'project' },
+
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
     //  ╠═╝╠╦╝║║║║║ ║ ║╚╗╔╝║╣ ╚═╗
     //  ╩  ╩╚═╩╩ ╩╩ ╩ ╩ ╚╝ ╚═╝╚═╝
