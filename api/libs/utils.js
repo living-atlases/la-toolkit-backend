@@ -1,4 +1,3 @@
-const spawn = require('child_process').spawn;
 const p = require('path');
 const fs = require('fs');
 const sails = require('sails');
@@ -36,7 +35,8 @@ const sailsLoadSync = () => {
 
 const appConfSync = async () => {
   await sailsLoadSync();
-  return JSON.parse(fs.readFileSync(appConf(), 'utf8'));
+  let conf = await fs.readFileSync(appConf(), 'utf8');
+  return JSON.parse(conf);
 };
 
 module.exports = {
