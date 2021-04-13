@@ -291,16 +291,16 @@ test('bie false also species lists', async (t) => {
 test('port pool test', async (t) => {
   const { ttyd, ttyFreePort, pidKill } = require('../api/libs/ttyd-utils.js');
   let port = await ttyFreePort();
-  let p1 = await ttyd('bash', port, false, '/tmp');
+  let pid1 = await ttyd('bash', port, false, '/tmp');
   await delay(4000);
   let port1 = await ttyFreePort();
   console.log(`port free: ${port1}`);
   t.not(port, port1);
-  let p2 = await ttyd('bash', port1, true, '/tmp');
+  let pid2 = await ttyd('bash', port1, true, '/tmp');
   await delay(4000);
   let port2 = await ttyFreePort();
   console.log(`port free: ${port}`);
   t.not(port1, port2);
-  await pidKill(p1);
-  await pidKill(p2);
+  await pidKill(pid1);
+  await pidKill(pid2);
 });

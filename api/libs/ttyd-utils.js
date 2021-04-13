@@ -3,6 +3,7 @@ const fs = require('fs');
 const PortPool = require('./port-pool.js');
 const sails = require('sails');
 const kill = require('tree-kill');
+const { delay } = require('./utils.js');
 
 const portPool = new PortPool(
   sails.config.ttydMinPort,
