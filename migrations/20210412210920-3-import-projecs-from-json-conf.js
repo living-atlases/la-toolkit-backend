@@ -48,17 +48,6 @@ exports.up = async function (db) {
     for (const s of servers) {
       let sUuid = s.uuid;
       delete s.uuid;
-      if (s.sshKey != null) {
-        let sName = s.sshKey.name;
-        let sshKey = await SshKey.findOne({ name: sName });
-        if (sshKey) {
-          s.sshKeyId = sshKey.id;
-        }
-
-        delete s.sshKey;
-        // In some point
-        delete s.uuid;
-      }
       s.projectId = createdP.id;
       if (p.sshUser == null) {
         delete s.sshUser;
@@ -96,17 +85,17 @@ exports.up = async function (db) {
       cmd.updatedAt = d;
       delete cH.date;
       cH.projectId = createdP.id;
-      delete cH.postDeployCmd;
-      delete cH.preDeployCmd;
-      delete cH.deployCmd;
       let cHcreated = await CmdHistoryEntry.create(cH).fetch();
       cmd.cmdHistoryEntryId = cHcreated.id;
       cmd.type =
         cH.preDeployCmd != null
-          ? 'pre-deploy'
+          ? 'preDeploy'
           : cH.postDeployCmd != null
-          ? 'post-deploy'
+          ? 'postDeploy'
           : 'deploy';
+      delete cH.postDeployCmd;
+      delete cH.preDeployCmd;
+      delete cH.deployCmd;
 
       if (lastCmdEntry != null && lastCmdEntry.uuid === cHUuid) {
         // Update project with the lastCmdEntry id or just use the date?
@@ -114,11 +103,11 @@ exports.up = async function (db) {
       await Cmd.create(cmd).fetch();
     }
     // let pMigrated =
-    await Project.findOne({ id: createdP.id })
+    /* await Project.findOne({ id: createdP.id })
       .populate('servers')
       .populate('services')
       .populate('variables')
-      .populate('serviceDeploys');
+      .populate('serviceDeploys'); */
     // console.log(pMigrated);
   }
   sails.lower();
@@ -141,5 +130,5 @@ exports.down = async function (db) {
 };
 
 exports._meta = {
-  version: 5,
+  version: 3,
 };

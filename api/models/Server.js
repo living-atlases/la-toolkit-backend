@@ -47,7 +47,7 @@ module.exports = {
     projectId: {
       model: 'project',
     },
-    sshKeyId: { model: 'sshKey' },
+    sshKey: { type: 'json' },
     serviceDeploys: { collection: 'serviceDeploy', via: 'serverId' },
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗

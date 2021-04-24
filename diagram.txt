@@ -50,13 +50,6 @@ class ServiceDeploy {
  + status
 }
 
-class SshKey {
- + id
- + publicKey
- + type
- + desc
-}
-
 class Variable {
  + nameInt
  + service
@@ -100,8 +93,6 @@ Project "1" *-- "many" ServiceDeploy : has
 Project "1" *-- "many" CmdHistoryEntry : executed
 
 Server "1" *-- "many" ServiceDeploy : contains
-
-SshKey "1" *-- "many" Server : opens
 
 Service "1" *-- "many" ServiceDeploy : has
 

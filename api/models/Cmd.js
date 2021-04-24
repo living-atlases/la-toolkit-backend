@@ -9,16 +9,16 @@ module.exports = {
   tableName: 'cmds',
   attributes: {
     // Basic
-    // Types: ansible, deploy, pre-deploy, post-deploy, la-pipelines, bash
+    // Types: ansible, deploy, preDeploy, postDeploy, laPipelines, bash
     type: {
       type: 'string',
       allowNull: false,
       isIn: [
         'ansible',
         'deploy',
-        'pre-deploy',
-        'post-deploy',
-        'la-pipelines',
+        'preDeploy',
+        'postDeploy',
+        'laPipelines',
         'bash',
       ],
     },
