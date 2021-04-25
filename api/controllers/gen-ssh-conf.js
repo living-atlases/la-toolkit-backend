@@ -76,9 +76,9 @@ module.exports = {
       description: 'ansible ssh user',
       required: true,
     },
-    uuid: {
-      type: 'json',
-      description: 'project uuid',
+    id: {
+      type: 'string',
+      description: 'project id',
       required: true,
     },
     name: {
@@ -97,7 +97,7 @@ module.exports = {
   fn: async function (inputs, exits) {
     var serversTransformed = trans(inputs.servers, inputs.user);
     yaml(
-      `${destIncDir}assh-${inputs.name}-${inputs.uuid}.yml`,
+      `${destIncDir}assh-${inputs.name}-${inputs.id}.yml`,
       serversTransformed,
       (err) => {
         if (err) {

@@ -3,7 +3,7 @@ var objectMapper = require('object-mapper');
 
 module.exports = function (inputs) {
   var map = {
-    LA_uuid: 'LA_id',
+    LA_id: 'LA_id',
     LA_project_name: 'LA_project_name',
     LA_project_shortname: 'LA_project_shortname',
     LA_pkg_name: 'LA_pkg_name',

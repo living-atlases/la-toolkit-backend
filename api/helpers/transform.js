@@ -16,6 +16,6 @@ module.exports = {
   },
 
   fn: function (inputs, exits) {
-    return exits.success(transform(inputs));
+    return exits.success(transform(inputs.conf));
   },
 };

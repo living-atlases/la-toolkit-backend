@@ -22,6 +22,7 @@ module.exports = {
     mapBoundsFstPoint: { type: 'json', allowNull: false },
     mapBoundsSndPoint: { type: 'json', allowNull: false },
     additionalVariables: { type: 'string', allowNull: false },
+    genConf: { type: 'json', allowNull: false },
 
     // Software vars
     alaInstallRelease: { type: 'string', allowNull: true },

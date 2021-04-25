@@ -12,20 +12,20 @@ module.exports = {
       description: 'Suggested din name',
       required: true,
     },
-    uuid: {
+    id: {
       type: 'string',
-      description: 'project uuid',
+      description: 'project id',
       required: true,
     },
   },
 
   fn: async function (inputs) {
     const dirName = inputs.dirName;
-    const uuid = inputs.uuid;
+    const id = inputs.id;
     const projectDir = sails.config.projectsDir;
     let result;
     // Exits that dir?
-    //   has same uuid?
+    //   has same id?
     //     return old dirName
     //   else
     //     return dirName-count not existent
@@ -38,9 +38,8 @@ module.exports = {
         'utf8'
       );
       let yoRcJ = JSON.parse(yoRc);
-      let otherUuid =
-        yoRcJ['generator-living-atlas']['promptValues']['LA_uuid'];
-      if (uuid === otherUuid) {
+      let otherId = yoRcJ['generator-living-atlas']['promptValues']['LA_id'];
+      if (id === otherId) {
         // ok, it's the same, we can use the same dirName
         result = dirName;
       } else {

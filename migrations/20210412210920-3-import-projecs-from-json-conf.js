@@ -18,7 +18,12 @@ exports.setup = function (options, seedLink) {
 exports.up = async function (db) {
   let conf = await appConfSync();
   let projsToTrans = conf['projects'];
+  let projectsMap = conf['projectsMap'];
   for (const p of projsToTrans) {
+    let genConf = projectsMap[p.uuid];
+    delete genConf.LA_uuid;
+    p.genConf = genConf;
+
     p.isHub = false;
     delete p.uuid;
     // https://stackoverflow.com/a/37576787
@@ -37,6 +42,10 @@ exports.up = async function (db) {
     delete p.lastCmdEntry;
 
     var createdP = await Project.create(p).fetch();
+
+    genConf.LA_id = createdP.id;
+
+    await Project.update({ id: createdP.id }).set({ genConf: genConf });
 
     for (const sv of Object.values(services)) {
       delete sv.uuid;

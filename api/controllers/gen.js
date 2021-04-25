@@ -1,8 +1,6 @@
 const tmp = require('tmp');
 const archiver = require('archiver');
-const p = require('path');
 const fs = require('fs');
-const { appConf } = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'Generate and Download',
@@ -10,13 +8,13 @@ module.exports = {
   description: 'Generate the LA inventories and send to the user',
 
   inputs: {
-    uuid: {
-      description: 'the uuid to process',
+    id: {
+      description: 'the id to process',
       type: 'string',
       required: true,
       /* custom: async function (uuid) {
-        return await Conf.findOne({ uuid: uuid });
-      }, */
+         return await Conf.findOne({ uuid: uuid });
+         }, */
     },
     download: {
       description: 'just gen and download',
@@ -47,14 +45,13 @@ module.exports = {
     // temporal directory
     const tmpobj = tmp.dirSync({ unsafeCleanup: true });
 
-    var projects = JSON.parse(fs.readFileSync(appConf(), 'utf8'))[
-      'projectsMap'
-    ];
-    let conf = projects[inputs.uuid];
+    let p = await Project.findOne({ id: inputs.id });
 
-    const yoRc = sails.helpers.transform(conf);
-    const pkgName =
-      yoRc['generator-living-atlas']['promptValues']['LA_pkg_name'];
+    const yoRc = sails.helpers.transform({ conf: p.genConf });
+
+    console.log(yoRc);
+
+    const pkgName = p.dirName;
 
     const path = inputs.download
       ? tmpobj.name
