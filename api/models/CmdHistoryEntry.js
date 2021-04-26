@@ -10,6 +10,7 @@ module.exports = {
   attributes: {
     // Basic
     // Location info
+    desc: { type: 'string', allowNull: false },
     logsPrefix: { type: 'string', allowNull: false },
     logsSuffix: { type: 'string', allowNull: false },
     invDir: { type: 'string', allowNull: false },

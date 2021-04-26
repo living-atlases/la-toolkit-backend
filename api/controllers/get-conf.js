@@ -31,12 +31,13 @@ module.exports = async function getAppConf(req, res) {
           vMap[v.nameInt] = v;
         }
         p.serversMap = sMap;
-        p.services = svMap;
-        p.variables = vMap;
+        p.servicesMap = svMap;
+        p.variablesMap = vMap;
         //  console.log(p.serverServices);
 
         for (const cmdH of p.cmdHistoryEntries) {
           cmdH.cmd = await Cmd.findOne({ cmdHistoryEntryId: cmdH.id });
+          cmdH.date = cmdH.createdAt;
         }
       }
       for (const p of ps) {

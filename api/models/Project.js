@@ -18,7 +18,7 @@ module.exports = {
 
     // Additional
     theme: { type: 'string', allowNull: false },
-    mapZoom: { type: 'number' },
+    mapZoom: { type: 'number', allowNull: true },
     mapBoundsFstPoint: { type: 'json', allowNull: false },
     mapBoundsSndPoint: { type: 'json', allowNull: false },
     additionalVariables: { type: 'string', allowNull: false },
