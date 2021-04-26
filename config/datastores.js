@@ -49,7 +49,7 @@ module.exports.datastores = {
     // url: 'mysql://user:password@host:port/database',
 
     adapter: 'sails-mongo',
-    // url: 'mongodb://la_toolkit_user:la_toolkit_changeme@localhost/la_toolkit',
+    // WARN: should match session.js conf
     url:
       'mongodb://la_toolkit_user:la_toolkit_changeme@localhost:27017/la_toolkit?ssl=true&w=majority',
   },

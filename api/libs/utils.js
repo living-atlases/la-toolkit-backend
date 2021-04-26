@@ -23,13 +23,21 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const sailsLoadSync = () => {
   return new Promise((resolve, reject) => {
-    sails.load({}, (err) => {
-      if (err) {
-        console.log(err);
-        reject(err);
+    sails.load(
+      {
+        hooks: {
+          // without this the db-migrate task doesn't stops
+          session: false,
+        },
+      },
+      (err) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+        }
+        resolve();
       }
-      resolve();
-    });
+    );
   });
 };
 
