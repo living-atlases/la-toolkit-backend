@@ -24,6 +24,8 @@ module.exports = {
     const id = inputs.id;
     const projectDir = sails.config.projectsDir;
     let result;
+    // If we generate a project with the same ID we can get a similar dirname so we check if exits
+    //
     // Exits that dir?
     //   has same id?
     //     return old dirName
@@ -39,17 +41,20 @@ module.exports = {
       );
       let yoRcJ = JSON.parse(yoRc);
       let otherId = yoRcJ['generator-living-atlas']['promptValues']['LA_id'];
-      if (id === otherId) {
-        // ok, it's the same, we can use the same dirName
+      if (id == null || id === otherId) {
+        // Id == null when migrating from uuid
+        // ok, it's the same, we can use the same dirName"
         result = dirName;
       } else {
-        // find a dirname-num combination that does not exist
+        // Let's find a dirname-num combination that does not exist
         let num = 1;
         result = `${dirName}-${num}`;
         while (fs.existsSync(p.join(projectDir, result))) {
           num += 1;
           result = `${dirName}-${num}`;
         }
+        // update Project with new dirname
+        await Project.updateOne({ id: id }).set({ dirName: result });
       }
     } else {
       result = dirName;

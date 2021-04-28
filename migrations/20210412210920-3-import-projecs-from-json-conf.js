@@ -94,8 +94,6 @@ exports.up = async function (db) {
       cmd.updatedAt = d;
       delete cH.date;
       cH.projectId = createdP.id;
-      let cHcreated = await CmdHistoryEntry.create(cH).fetch();
-      cmd.cmdHistoryEntryId = cHcreated.id;
       cmd.type =
         cH.preDeployCmd != null
           ? 'preDeploy'
@@ -105,6 +103,16 @@ exports.up = async function (db) {
       delete cH.postDeployCmd;
       delete cH.preDeployCmd;
       delete cH.deployCmd;
+
+      cH.invDir =
+        cmd.type === 'deploy'
+          ? `${createdP.dirName}/${createdP.dirName}-inventories/`
+          : cmd.type === 'preDeploy'
+          ? `${createdP.dirName}/${createdP.dirName}-pre-deploy/`
+          : `${createdP.dirName}/${createdP.dirName}-post-deploy/`;
+
+      let cHcreated = await CmdHistoryEntry.create(cH).fetch();
+      cmd.cmdHistoryEntryId = cHcreated.id;
 
       if (lastCmdEntry != null && lastCmdEntry.uuid === cHUuid) {
         // Update project with the lastCmdEntry id or just use the date?

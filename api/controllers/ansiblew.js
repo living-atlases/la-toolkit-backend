@@ -4,6 +4,16 @@ module.exports = {
   description: 'Ansiblew something.',
 
   inputs: {
+    id: {
+      type: 'string',
+      description: 'project id',
+      required: true,
+    },
+    desc: {
+      type: 'string',
+      description: 'cmd desc',
+      required: true,
+    },
     cmd: {
       type: 'json',
       description: 'ansiblew options',
@@ -21,7 +31,8 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    let projectPath = inputs.cmd.dirName;
+    let p = await Project.findOne({ id: inputs.id });
+    let projectPath = p.dirName;
     let invBase = '/home/ubuntu/ansible/la-inventories/';
     let invDir = `${projectPath}/${projectPath}-inventories/`;
     let invPath = `${invBase}${invDir}`;
@@ -31,12 +42,16 @@ module.exports = {
 
     let resp = await sails.helpers.ansibleTtyd.with({
       useAnsiblew: true,
+      type: 'deploy',
       baseCmd: baseCmd,
+      projectId: inputs.id,
       projectPath: projectPath,
+      desc: inputs.desc,
       invDir: invDir,
       invPath: invPath,
       cmd: inputs.cmd,
     });
+
     this.res.json(resp);
   },
 };

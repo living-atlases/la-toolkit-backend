@@ -4,7 +4,9 @@ module.exports = async function getAppConf(req, res) {
     .populate('services')
     .populate('variables')
     .populate('serviceDeploys')
-    .populate('cmdHistoryEntries')
+    .populate('cmdHistoryEntries', {
+      sort: 'createdAt DESC',
+    })
     .then(async (ps) => {
       for (const p of ps) {
         p.serverServices = {};

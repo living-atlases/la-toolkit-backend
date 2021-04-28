@@ -56,6 +56,7 @@ module.exports = {
             ? 100
             : parseInt(exitCodeRead);
       }
+
       // As the ansible callbacks are not a correct json object is like {},{},{}, we transform it to [{},{},{}]
       let results =
         '[' +

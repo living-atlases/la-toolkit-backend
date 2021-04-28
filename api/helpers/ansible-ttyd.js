@@ -28,7 +28,19 @@ module.exports = {
       type: 'bool',
       required: true,
     },
+    projectId: {
+      type: 'string',
+      required: true,
+    },
     projectPath: {
+      type: 'string',
+      required: true,
+    },
+    desc: {
+      type: 'string',
+      required: true,
+    },
+    type: {
       type: 'string',
       required: true,
     },
@@ -100,13 +112,29 @@ module.exports = {
     try {
       let port = await ttyFreePort();
       await ttyd(cmd, port, true, inputs.invPath, env, logsPrefix, logsSuffix);
-      // return exits.success();
+
+      // Cmd
+      let cmdCreated = await Cmd.create({
+        type: inputs.type,
+        properties: inputs.cmd,
+      }).fetch();
+
+      // CmdHistoryEntry
+      let cmdEntry = await CmdHistoryEntry.create({
+        desc: inputs.desc,
+        logsPrefix: logsPrefix,
+        logsSuffix: logsSuffix,
+        invDir: inputs.invDir,
+        rawCmd: cmd,
+        result: 'unknown',
+        projectId: inputs.projectId,
+        cmd: cmdCreated.id,
+      }).fetch();
+      cmdEntry.cmd = cmdCreated;
+
       return {
-        cmd: '${cmd}',
+        cmdEntry: cmdEntry,
         port: port,
-        logsPrefix: '${logsPrefix}',
-        logsSuffix: '${logsSuffix}',
-        invDir: '${inputs.invDir}',
       };
     } catch (e) {
       console.log(`ttyd ansiblew call failed (${e})`);
