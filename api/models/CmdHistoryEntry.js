@@ -41,4 +41,19 @@ module.exports = {
     //  ╠═╣╚═╗╚═╗║ ║║  ║╠═╣ ║ ║║ ║║║║╚═╗
     //  ╩ ╩╚═╝╚═╝╚═╝╚═╝╩╩ ╩ ╩ ╩╚═╝╝╚╝╚═╝
   },
+
+  beforeDestroy: function (criteria, cb) {
+    var cmdEntryId = criteria.where.id;
+    Cmd.destroy({ cmdHistoryEntryId: cmdEntryId }).exec(function (err) {
+      cb();
+    });
+
+    /* var ids = _.pluck(destroyedCmdEntry, 'id');
+
+    if (ids && ids.length) {
+      Cmd.destroy({ cmdHistoryEntryId: ids });
+    } else {
+      cb();
+    } */
+  },
 };

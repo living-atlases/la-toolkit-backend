@@ -59,4 +59,7 @@ module.exports.routes = {
   'POST /api/v1/pre-deploy': { action: 'pre-deploy' },
   'POST /api/v1/post-deploy': { action: 'post-deploy' },
   'POST /api/v1/test-host-services': { action: 'test-host-services' },
+  'POST /api/v1/add-project': { action: 'add-project' },
+  'PATCH /api/v1/update-project': { action: 'update-project' },
+  'DELETE /api/v1/delete-project': { action: 'delete-project' },
 };

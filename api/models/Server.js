@@ -19,7 +19,7 @@ module.exports = {
     // Connectivity
     ip: { type: 'string', defaultsTo: '' },
     sshPort: { type: 'number', defaultsTo: 22 },
-    sshUser: { type: 'string' },
+    sshUser: { type: 'json' },
     gateways: { type: 'json' },
 
     // Status
