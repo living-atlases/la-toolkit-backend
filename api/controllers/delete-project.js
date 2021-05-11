@@ -13,7 +13,7 @@ module.exports = {
 
   exits: {},
 
-  fn: async function (inputs, exits) {
+  fn: async function (inputs) {
     await CmdHistoryEntry.destroy({ projectId: inputs.id });
     await ServiceDeploy.destroy({ projectId: inputs.id });
     await Service.destroy({ projectId: inputs.id });
@@ -23,6 +23,7 @@ module.exports = {
       // This seemst that does not work so we delete the associations before
       cascade: true,
     });
-    return exits.success();
+    let projects = await sails.helpers.populateProject;
+    return this.res.json({ projects: projects });
   },
 };

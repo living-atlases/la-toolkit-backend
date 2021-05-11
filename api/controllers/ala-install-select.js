@@ -17,6 +17,7 @@ var alaInstallSelect = (version) => {
       );
       preCmd = preCmd + ' ';
     }
+    console.log('Selecting proper ala-install version');
     if (version !== 'custom') {
       cp.execSync(`${preCmd}git fetch --tags origin master`, {
         cwd: alaInstallLocation,
@@ -34,6 +35,7 @@ var alaInstallSelect = (version) => {
         stderr: err,
       });
     }
+    console.log('End of ala-install git pull');
     return '';
   } catch (err) {
     console.log(err);

@@ -7,7 +7,10 @@ module.exports = {
     query: {
       type: 'json',
       description: 'A project query',
-      required: true,
+      required: false,
+      defaultsTo: {
+        sort: 'updatedAt DESC',
+      },
       custom: function (value) {
         return _.isObject(value);
       },

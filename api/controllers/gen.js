@@ -49,7 +49,7 @@ module.exports = {
 
     const yoRc = sails.helpers.transform({ conf: p.genConf });
 
-    console.log(yoRc);
+    // console.log(yoRc);
 
     const pkgName = p.dirName;
 

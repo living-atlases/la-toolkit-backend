@@ -33,19 +33,17 @@ module.exports = {
     for (const a of assoc) {
       for (const el of a[0]) {
         if (!(await a[1].findOne({ id: el.id }))) {
-          console.log(`creating ${JSON.stringify(el)}`);
+          // console.log(`creating ${JSON.stringify(el)}`);
           await a[1].findOrCreate({ id: el.id }, el);
         } else {
-          console.log(`updating ${JSON.stringify(el)}`);
+          // console.log(`updating ${JSON.stringify(el)}`);
           await a[1].updateOne({ id: el.id }).set(el);
         }
       }
     }
-    // console.log(p);
-    let pUpdated = await Project.updateOne({ id: p.id }).set(p);
-    let pPopulated = await sails.helpers.populateProject.with({
-      query: { id: pUpdated.id },
-    });
-    return this.res.json(pPopulated[0]);
+    delete p.cmdHistoryEntries;
+    await Project.updateOne({ id: p.id }).set(p);
+    let projects = await sails.helpers.populateProject();
+    return this.res.json({ projects: projects });
   },
 };

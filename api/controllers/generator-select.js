@@ -10,6 +10,7 @@ var generatorSelect = (version) => {
       preCmd = preCmd.replace('exec', 'exec -w /home/ubuntu/');
       preCmd = preCmd + ' ';
     }
+    console.log("Downloading proper 'generator-living-atlas' version and deps");
     let currentVersion = cp.execSync(
       `${preCmd}npm list --depth 1 --global  generator-living-atlas| grep -o "@.*"  | sed 's/@//' | tr '\n' ' '  `,
       {
@@ -21,16 +22,16 @@ var generatorSelect = (version) => {
     if (currentVersion.toString().trim() !== version) {
       cp.execSync(`${preCmd}npm install -g generator-living-atlas@${version}`, {
         cwd: sails.config.projectDir,
-        timeout: 120000,
+        timeout: 240000,
         stderr: err,
       });
     }
+    console.log("End of downloading 'generator-living-atlas'");
     return '';
   } catch (err) {
     console.log(err);
     return err;
   }
-  // console.log(out.toString());
 };
 
 module.exports = {

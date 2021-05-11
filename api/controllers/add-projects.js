@@ -1,14 +1,12 @@
-var assert = require('assert');
-
 module.exports = {
   friendlyName: 'Add project',
 
   description: '',
 
   inputs: {
-    project: {
+    projects: {
       type: 'json',
-      description: 'A new project',
+      description: 'A list of new projects',
       required: true,
       custom: function (value) {
         return _.isObject(value);
@@ -19,9 +17,11 @@ module.exports = {
   exits: {},
 
   fn: async function (inputs) {
-    await sails.helpers.addProject.with({
-      project: inputs.project,
-    });
+    for (let p of inputs.projects) {
+      await sails.helpers.addProject.with({
+        project: p,
+      });
+    }
     let projectsAdded = await sails.helpers.populateProject();
     return this.res.json({ projects: projectsAdded });
   },

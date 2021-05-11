@@ -33,15 +33,13 @@ module.exports = {
     //     return dirName-count not existent
     // else
     //   return dirName
+    let yoRcPath = p.join(projectDir, `${dirName}/.yo-rc.json`);
+    if (fs.existsSync(p.join(projectDir, dirName)) && fs.existsSync(yoRcPath)) {
+      let yoRc = fs.readFileSync(yoRcPath, 'utf8');
 
-    if (fs.existsSync(p.join(projectDir, dirName))) {
-      let yoRc = fs.readFileSync(
-        p.join(projectDir, `${dirName}/.yo-rc.json`),
-        'utf8'
-      );
       let yoRcJ = JSON.parse(yoRc);
       let otherId = yoRcJ['generator-living-atlas']['promptValues']['LA_id'];
-      if (id == null || id === otherId) {
+      if (otherId == null || id === otherId) {
         // Id == null when migrating from uuid
         // ok, it's the same, we can use the same dirName"
         result = dirName;
@@ -54,6 +52,9 @@ module.exports = {
           result = `${dirName}-${num}`;
         }
         // update Project with new dirname
+        console.log(
+          `Old dirname '${dirName}' is in use by a project with a different id '${otherId}', so selecting a new dirname '${result}'`
+        );
         await Project.updateOne({ id: id }).set({ dirName: result });
       }
     } else {
