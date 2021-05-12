@@ -3,6 +3,7 @@ const toIds = (rows) =>
     return row.id;
   });
 
+// noinspection JSUnresolvedFunction
 module.exports = {
   friendlyName: 'Update project',
 
@@ -34,14 +35,17 @@ module.exports = {
       for (const el of a[0]) {
         if (!(await a[1].findOne({ id: el.id }))) {
           // console.log(`creating ${JSON.stringify(el)}`);
+          // noinspection JSUnresolvedFunction
           await a[1].findOrCreate({ id: el.id }, el);
         } else {
           // console.log(`updating ${JSON.stringify(el)}`);
+          // noinspection JSUnresolvedFunction
           await a[1].updateOne({ id: el.id }).set(el);
         }
       }
     }
     delete p.cmdHistoryEntries;
+    // noinspection JSUnresolvedFunction
     await Project.updateOne({ id: p.id }).set(p);
     let projects = await sails.helpers.populateProject();
     return this.res.json({ projects: projects });

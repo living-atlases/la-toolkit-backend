@@ -63,6 +63,7 @@ module.exports = {
           //  console.log(p.serverServices);
 
           for (const cmdH of p.cmdHistoryEntries) {
+            // noinspection JSUnresolvedFunction
             cmdH.cmd = await Cmd.findOne({ cmdHistoryEntryId: cmdH.id });
             cmdH.date = cmdH.createdAt;
           }

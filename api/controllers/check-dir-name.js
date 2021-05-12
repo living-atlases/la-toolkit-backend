@@ -55,6 +55,7 @@ module.exports = {
         console.log(
           `Old dirname '${dirName}' is in use by a project with a different id '${otherId}', so selecting a new dirname '${result}'`
         );
+        // noinspection JSUnresolvedFunction
         await Project.updateOne({ id: id }).set({ dirName: result });
       }
     } else {

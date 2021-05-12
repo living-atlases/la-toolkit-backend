@@ -117,28 +117,23 @@ module.exports = {
       resultJson[server.name] = {};
 
       let pingOut = pingTest(server);
-      let ping = pingOut.length === 0;
-      resultJson[server.name]['ping'] = ping;
+      resultJson[server.name]['ping'] = pingOut.length === 0;
       resultJson[server.name]['out'] = pingOut;
 
       let sshOut = sshTest(server);
       resultJson[server.name]['out'] =
         resultJson[server.name]['out'] + '\n' + sshOut;
-      let ssh = sshOut.length === 0;
-      resultJson[server.name]['ssh'] = ssh;
+      resultJson[server.name]['ssh'] = sshOut.length === 0;
 
       let sudoOut = sudoTest(server);
-      let sudo = sudoOut.length === 0;
-      resultJson[server.name]['sudo'] = sudo;
+      resultJson[server.name]['sudo'] = sudoOut.length === 0;
       resultJson[server.name]['out'] =
         resultJson[server.name]['out'] + '\n' + sudoOut;
 
       let osVersionOut = osVersionTest(server);
-      let osVersion =
-        osVersionOut.length !== 0
-          ? JSON.parse(osVersionOut)
-          : { os: { name: '', version: '' } };
-      resultJson[server.name]['os'] = osVersion;
+      resultJson[server.name]['os'] = osVersionOut.length !== 0
+        ? JSON.parse(osVersionOut)
+        : {os: {name: '', version: ''}};
     });
     // console.log(resultJson);
     return this.res.json(resultJson);

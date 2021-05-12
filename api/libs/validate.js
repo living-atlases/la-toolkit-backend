@@ -34,6 +34,7 @@ const enabledServices = [
   "biocache_backend",
 ];
 
+// noinspection JSUnresolvedFunction
 module.exports = function (inputs) {
   // JSON
   if (
@@ -60,6 +61,7 @@ module.exports = function (inputs) {
   }
 
   // First check the service booleans
+  // noinspection JSUnresolvedFunction
   services.forEach((service) => {
     const value = param[`LA_use_${service}`] + "";
 
@@ -74,6 +76,7 @@ module.exports = function (inputs) {
     }
   });
 
+  // noinspection JSUnresolvedFunction
   enabledServices.forEach((service) => {
     const url = param[`LA_${service}_url`];
     const path = param[`LA_${service}_path`];

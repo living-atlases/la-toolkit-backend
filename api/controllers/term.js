@@ -1,4 +1,5 @@
 const { ttyd, ttyFreePort } = require('../libs/ttyd-utils.js');
+// noinspection JSUnresolvedFunction
 module.exports = {
   friendlyName: 'Term',
   description: 'Term spawn',

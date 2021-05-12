@@ -18,6 +18,7 @@ module.exports = {
 
   fn: async function (inputs) {
     for (let p of inputs.projects) {
+      // noinspection JSUnresolvedFunction
       await sails.helpers.addProject.with({
         project: p,
       });

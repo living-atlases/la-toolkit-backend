@@ -2,6 +2,7 @@ const tmp = require('tmp');
 const archiver = require('archiver');
 const fs = require('fs');
 
+// noinspection JSUnresolvedFunction
 module.exports = {
   friendlyName: 'Generate and Download',
 
@@ -61,12 +62,14 @@ module.exports = {
       fs.mkdirSync(path);
     }
 
+    // noinspection JSUnresolvedFunction
     await sails.helpers.yoGen(pkgName, path, yoRc);
 
     if (inputs.download) {
       let res = this.res;
 
       // set the archive name
+      // noinspection JSUnresolvedFunction
       res.attachment(`${pkgName}-inventories-and-theme.zip`);
 
       // https://github.com/archiverjs/node-archiver/blob/master/examples/express.js

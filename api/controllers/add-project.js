@@ -17,6 +17,7 @@ module.exports = {
   exits: {},
 
   fn: async function (inputs) {
+    // noinspection JSUnresolvedFunction
     await sails.helpers.addProject.with({
       project: inputs.project,
     });

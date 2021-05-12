@@ -16,6 +16,7 @@ module.exports = {
 
   fn: async function (inputs) {
     let keys = {};
+    // noinspection JSUnresolvedFunction
     keys.value = await sails.helpers.jwkGen.with({
       size: inputs.size,
     });

@@ -1,4 +1,5 @@
 const cp = require('child_process');
+// noinspection JSUnresolvedFunction
 module.exports = {
   friendlyName: 'Ansible additional inv',
 

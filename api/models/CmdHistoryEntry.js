@@ -44,8 +44,8 @@ module.exports = {
   },
 
   beforeDestroy: function (criteria, cb) {
-    var cmdEntryId = criteria.where.id;
-    Cmd.destroy({ cmdHistoryEntryId: cmdEntryId }).exec(function (err) {
+    let cmdEntryId = criteria.where.id;
+    Cmd.destroy({ cmdHistoryEntryId: cmdEntryId }).exec(function (/* err */) {
       cb();
     });
 

@@ -6,7 +6,7 @@ const brandOrign = sails.config.baseBrandingLocation;
 const { defExecTimeout } = require('../libs/utils.js');
 
 async function yoGen(pkgName, path, yoRc) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve, /* reject */) {
     fs.open(p.join(path, '.yo-rc.json'), 'w')
       .then((desc) => {
         fs.writeFile(desc, JSON.stringify(yoRc, null, 2), { encoding: 'utf8' })
@@ -38,7 +38,7 @@ async function yoGen(pkgName, path, yoRc) {
             console.log('End of yo');
             resolve();
           })
-          .catch((err) => {
+          .catch((/* err */) => {
             resolve('genError');
           });
         // console.log("yo-rc written");

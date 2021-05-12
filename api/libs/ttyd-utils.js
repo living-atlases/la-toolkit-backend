@@ -30,10 +30,11 @@ const pidKill = async (pid) => {
   });
 };
 
+/*
 // eslint-disable-next-line no-unused-vars
 const ttydKill = async () => {
   return pidKill(sails.ttydPid);
-};
+}; */
 
 const ttyd = async (
   cmd,
