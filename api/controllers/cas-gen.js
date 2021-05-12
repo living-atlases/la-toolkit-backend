@@ -1,13 +1,13 @@
 module.exports = {
-  friendlyName: "CAS keys gen",
+  friendlyName: 'CAS keys gen',
 
-  description: "",
+  description: '',
 
   inputs: {},
 
   exits: {},
 
-  fn: async function (inputs) {
+  fn: async function () {
     // All done.
     let keys = {};
     keys.pac4j_cookie_signing_key = await sails.helpers.jwkGen.with({

@@ -86,17 +86,17 @@ module.exports = {
         tmpobj.removeCallback();
       });
 
-      var files = [];
-      for (var i in files) {
+      const files = [];
+      for (let i in files) {
         archive.file(files[i], { name: p.basename(files[i]) });
       }
 
-      var directories = [path];
-      for (var i in directories) {
+      const directories = [path];
+      for (let i in directories) {
         archive.directory(directories[i], directories[i].replace(path, ''));
       }
 
-      archive.finalize();
+      await archive.finalize();
 
       return res;
     } else {

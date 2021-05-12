@@ -12,25 +12,19 @@ async function yoGen(pkgName, path, yoRc) {
         fs.writeFile(desc, JSON.stringify(yoRc, null, 2), { encoding: 'utf8' })
           .then(() => {
             desc.close();
-            let errC;
-            let errY;
-            let errCF;
             console.log(p.join(path, `${pkgName}-branding`));
             if (!fsn.existsSync(p.join(path, `${pkgName}-branding`))) {
               console.log(`Copying branding from ${brandOrign}`);
               cp.execSync(`cp -a ${brandOrign} ${pkgName}-branding`, {
                 cwd: path,
                 timeout: defExecTimeout,
-                stderr: errC,
               });
             }
-            if (errC) console.log(errC);
             console.log('Generating inventories');
             cp.execSync(
               'yo living-atlas --replay-dont-ask --force', //  --debug",
-              { cwd: path, timeout: defExecTimeout, stderr: errY }
+              { cwd: path, timeout: defExecTimeout}
             );
-            if (errY) console.log(errY);
             if (
               !fsn.existsSync(
                 p.join(path, `${pkgName}-branding/app/js/settings.js`)
@@ -38,11 +32,9 @@ async function yoGen(pkgName, path, yoRc) {
             ) {
               cp.execSync(
                 `cp -f ${pkgName}-branding/app/js/settings.js.sample ${pkgName}-branding/app/js/settings.js`,
-                { cwd: path, timeout: defExecTimeout, stderr: errCF }
+                { cwd: path, timeout: defExecTimeout}
               );
             }
-            if (errCF) console.log(errCF);
-
             console.log('End of yo');
             resolve();
           })

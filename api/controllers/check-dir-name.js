@@ -60,7 +60,7 @@ module.exports = {
     } else {
       result = dirName;
     }
-    resultJson = `{ "dirName": "${result}" }`;
+    let resultJson = `{ "dirName": "${result}" }`;
     return this.res.json(JSON.parse(resultJson));
   },
 };

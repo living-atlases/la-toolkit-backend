@@ -89,7 +89,7 @@ module.exports = {
       cmd = cmd + ` ${inputs.cmd.deployServices.join(' ')}`;
     }
 
-    var env = {};
+    let env = {};
 
     let now = new Date();
     let logDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
@@ -103,7 +103,7 @@ module.exports = {
       '',
       projectPath,
       logDate,
-      (colorized = true)
+       true
     );
     env.ANSIBLE_JSON_FILE = resultsFile(projectPath, logDate);
     env.ANSIBLE_FORCE_COLOR = true;

@@ -57,14 +57,12 @@ module.exports = {
     }
 
     let cmd = `${preCmd}ansible-galaxy install -r requirements.yml`; // --force`;
-    let err;
 
     console.log(`cmd: ${cmd}`);
     console.log(`cwd: ${invPath}`);
 
     cp.execSync(cmd, {
       cwd: cwd,
-      stderr: err,
     });
 
     let baseCmd = `ansible-playbook -i ${mainInvDir} -i inventory.yml ${addInv}.yml`;
@@ -72,7 +70,7 @@ module.exports = {
     console.log(`Resulting cwd: ${cwd}`);
     console.log(`Resulting preCmd: ${preCmd}`);
 
-    let resp = await sails.helpers.ansibleTtyd.with({
+    return  await sails.helpers.ansibleTtyd.with({
       useAnsiblew: false,
       type: inputs.type,
       baseCmd: baseCmd,
@@ -83,6 +81,5 @@ module.exports = {
       invPath: invPath,
       cmd: inputs.cmd,
     });
-    return resp;
   },
 };

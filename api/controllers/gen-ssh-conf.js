@@ -95,7 +95,7 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    var serversTransformed = trans(inputs.servers, inputs.user);
+    let serversTransformed = trans(inputs.servers, inputs.user);
     yaml(
       `${destIncDir}assh-${inputs.name}-${inputs.id}.yml`,
       serversTransformed,

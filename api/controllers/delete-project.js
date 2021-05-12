@@ -20,7 +20,7 @@ module.exports = {
     await Server.destroy({ projectId: inputs.id });
     await Variable.destroy({ projectId: inputs.id });
     await Project.destroy({ id: inputs.id }).meta({
-      // This seemst that does not work so we delete the associations before
+      // This seems that does not work so we delete the associations before
       cascade: true,
     });
     let projects = await sails.helpers.populateProject;

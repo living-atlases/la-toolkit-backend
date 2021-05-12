@@ -28,7 +28,7 @@ module.exports = {
     },
   },
 
-  fn: async function (inputs, exits) {
+  fn: async function (inputs) {
     // console.log('Executing bash');
     try {
       let log = logsFile(

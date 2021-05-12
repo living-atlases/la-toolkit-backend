@@ -24,7 +24,7 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    let projects = await Project.find(inputs.query) // Here for some group maybe in the future if users/groups are used
+    return await Project.find(inputs.query) // Here for some group maybe in the future if users/groups are used
       .populate('servers')
       .populate('services')
       .populate('variables')
@@ -75,6 +75,5 @@ module.exports = {
       .catch((err) => {
         throw err;
       });
-    return projects;
   },
 };

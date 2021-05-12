@@ -1,8 +1,7 @@
 const cp = require('child_process');
 const { defExecTimeout } = require('../libs/utils.js');
 
-var generatorSelect = (version) => {
-  let err;
+const generatorSelect = (version) => {
   let preCmd = sails.config.preCmd;
 
   try {
@@ -16,14 +15,12 @@ var generatorSelect = (version) => {
       {
         cwd: sails.config.projectDir,
         timeout: defExecTimeout,
-        stderr: err,
       }
     );
     if (currentVersion.toString().trim() !== version) {
       cp.execSync(`${preCmd}npm install -g generator-living-atlas@${version}`, {
         cwd: sails.config.projectDir,
         timeout: 240000,
-        stderr: err,
       });
     }
     console.log("End of downloading 'generator-living-atlas'");

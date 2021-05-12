@@ -1,9 +1,11 @@
+// noinspection HttpUrlsUsage
+
 const bent = require('bent');
 const getBuffer = bent('buffer');
 const { http, https } = require('follow-redirects');
 
 module.exports = async function proxy(req, res) {
-  var url = req.params[0];
+  let url = req.params[0];
   (url.indexOf('http://') === 0 ? http : https)
     .get(url, async (response) => {
       let buffer = await getBuffer(response.responseUrl);

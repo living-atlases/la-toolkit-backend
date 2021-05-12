@@ -11,28 +11,14 @@ const portPool = new PortPool(
 );
 const ttyFreePort = () => portPool.getNext();
 
-const ttydPkill = async () => {
-  return new Promise((resolve) => {
-    pkill.full('ttyd', (pkerr, validPid) => {
-      if (pkerr) {
-        console.log(err);
-        resolve('termError');
-      }
-      if (validPid) {
-        console.log(`Pkilling ttyd with pid ${validPid}`);
-      }
-      resolve();
-    });
-  });
-};
-
+// eslint-disable-next-line no-unused-vars
 const pidKill = async (pid) => {
   return new Promise((resolve) => {
     if (typeof pid === 'number') {
       console.log(`Killing proc with pid ${pid}`);
       kill(pid, 'SIGKILL', (kerr) => {
         if (kerr) {
-          console.log(err);
+          console.log(kerr);
           resolve('termError');
         }
         resolve();
@@ -44,6 +30,7 @@ const pidKill = async (pid) => {
   });
 };
 
+// eslint-disable-next-line no-unused-vars
 const ttydKill = async () => {
   return pidKill(sails.ttydPid);
 };
@@ -75,7 +62,7 @@ const ttyd = async (
 
       if (Object.entries(env).length !== 0) {
         let envDocker = '';
-        for (var [key, value] of Object.entries(env)) {
+        for (let [key, value] of Object.entries(env)) {
           envDocker = envDocker + ` --env ${key}=${value}`;
         }
         preCmd = preCmd.replace('exec', `exec ${envDocker.trim()}`);
@@ -88,12 +75,12 @@ const ttyd = async (
     console.log(`Resulting cwd: ${cwd}`);
     console.log(`Resulting preCmd: ${preCmd}`);
 
-    var extraArgs = `${once ? '--once ' : ''}`;
+    const extraArgs = `${once ? '--once ' : ''}`;
     // -t disableReconnect=true
     // --max-clients 1
-    var scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true --check-origin -p ${port} ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
+    const scriptArgs = `ttyd -t fontSize=14 -t disableLeaveAlert=true --check-origin -p ${port} ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
 
-    var ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
+    const ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
 
     console.log(`cmd: ${ttydCmd.join(' ')}`);
 

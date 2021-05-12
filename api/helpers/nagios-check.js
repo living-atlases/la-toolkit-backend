@@ -31,11 +31,9 @@ module.exports = {
 
     let cmd = `/usr/lib/nagios/plugins/check_${inputs.check} ${inputs.args}`;
     // console.log(cmd);
-    let result = await sails.helpers.sshCmd.with({
+    return await sails.helpers.sshCmd.with({
       server: inputs.server,
       cmd: cmd,
     });
-
-    return result;
   },
 };

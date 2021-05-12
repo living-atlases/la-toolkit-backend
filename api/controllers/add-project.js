@@ -1,5 +1,3 @@
-var assert = require('assert');
-
 module.exports = {
   friendlyName: 'Add project',
 

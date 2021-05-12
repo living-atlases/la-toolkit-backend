@@ -139,13 +139,10 @@ module.exports = {
           // console.log(cmd);
           // console.log(`checks started in ${server}`);
           try {
-            let out = '';
-            let err = '';
             let fullcmd = `${preCmd}${cmd}`;
-            out = cp.execSync(fullcmd, {
+            cp.execSync(fullcmd, {
               cwd: sails.config.sshDir,
               timeout: defExecTimeout,
-              stderr: err,
             });
             let outS = fs.readFileSync(outFileProdDev).toString();
 
@@ -172,7 +169,6 @@ module.exports = {
                 (e) => {
                   console.log('Error converting check results to json');
                   console.error(e);
-                  reject();
                 }
               );
           } catch (err) {

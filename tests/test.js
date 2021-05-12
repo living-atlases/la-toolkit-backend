@@ -5,10 +5,8 @@ const sails = require('sails');
 const { delay } = require('../api/libs/utils.js');
 
 const {
-  projectNameRegexp,
   domainRegexp,
   hostnameRegexp,
-  shortNameRegexp,
 } = require('../api/libs/regexp.js');
 
 const defObj = {
@@ -140,7 +138,7 @@ let dest = transform(src);
    t.is(dest[P][G].LA_pkg_name, 'gbif-es');
    }); */
 
-test.before((t) => {
+test.before((/* t */) => {
   // This runs before all tests
   sails.lift(
     {
@@ -163,13 +161,13 @@ test.before((t) => {
     },
     function (err) {
       if (err) {
-        return;
+        // return;
       }
 
       // here you can load fixtures, etc.
       // (for example, you might want to create some records in the database)
 
-      return;
+      // return;
     }
   );
 });
@@ -183,7 +181,7 @@ test('long name valid', async (t) => {
     'Лорем ипсум долор сит амет, фастидии ехпетенда при ид.',
     '議さだや設9売サコヱ助送首し康美イヤエテ決竹ハキ約泣ヘハ式追だじけ',
   ];
-  for (name in names) {
+  for (let name in names) {
     testObj.LA_project_name = names[name];
     testObj.LA_project_shortname = names[name]; // .substring(0, 10);
     t.is(validate({ conf: JSON.stringify(testObj) }), '');

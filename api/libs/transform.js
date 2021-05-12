@@ -1,8 +1,8 @@
 // https://github.com/wankdanker/node-object-mapper
-var objectMapper = require('object-mapper');
+const objectMapper = require('object-mapper');
 
 module.exports = function (inputs) {
-  var map = {
+  const map = {
     LA_id: 'LA_id',
     LA_project_name: 'LA_project_name',
     LA_project_shortname: 'LA_project_shortname',
@@ -11,6 +11,7 @@ module.exports = function (inputs) {
     LA_use_ala_bie: 'LA_use_species',
     LA_use_spatial: 'LA_use_spatial',
     LA_use_regions: 'LA_use_regions',
+    LA_use_species: 'LA_use_species',
     LA_use_species_lists: 'LA_use_species_lists',
     LA_use_cas: 'LA_use_CAS',
     LA_use_images: 'LA_use_images',
@@ -143,7 +144,7 @@ module.exports = function (inputs) {
   let debug = false;
 
   if (debug) {
-    for (var [key, value] of Object.entries(objMapped)) {
+    for (let [key, value] of Object.entries(objMapped)) {
       if (
         key !== 'LA_pkg_name' &&
         (typeof value === 'string' || typeof value === 'number')
@@ -153,12 +154,11 @@ module.exports = function (inputs) {
     }
   }
 
-  const dest = {
+  return {
     'generator-living-atlas': {
       promptValues: objMapped,
       firstRun: false,
     },
   };
 
-  return dest;
 };

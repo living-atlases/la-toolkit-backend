@@ -1,7 +1,4 @@
 const { ttyd, ttyFreePort } = require('../libs/ttyd-utils.js');
-const { appConf } = require('../libs/utils.js');
-const fs = require('fs');
-
 module.exports = {
   friendlyName: 'Term',
   description: 'Term spawn',
@@ -29,7 +26,7 @@ module.exports = {
     },
   },
 
-  fn: async function (inputs, exits) {
+  fn: async function (inputs) {
     if (inputs.id) {
       console.log('Executing ssh');
     } else {

@@ -84,7 +84,7 @@ module.exports = {
       );
       let logsEnc = Base64.encode(logs);
       let logsColorizedEnc = Base64.encode(logsColorized);
-      var resultJson = `{ "code": ${exitCode}, "results": ${results}, "logs": "${logsEnc}", "logsColorized": "${logsColorizedEnc}" }`;
+      const resultJson = `{ "code": ${exitCode}, "results": ${results}, "logs": "${logsEnc}", "logsColorized": "${logsColorizedEnc}" }`;
       return this.res.json(JSON.parse(resultJson));
     } catch (e) {
       switch (e.code) {

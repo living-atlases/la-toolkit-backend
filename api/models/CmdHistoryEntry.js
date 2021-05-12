@@ -5,6 +5,7 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
+// noinspection JSUnusedGlobalSymbols
 module.exports = {
   tableName: 'cmd_history_entries',
   attributes: {

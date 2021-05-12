@@ -8,7 +8,7 @@ module.exports = {
   exits: {},
 
   fn: async function () {
-    var pjson = require('../../package.json');
+    let pjson = require('../../package.json');
     return this.res.send(pjson);
   },
 };

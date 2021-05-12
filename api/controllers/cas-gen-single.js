@@ -1,13 +1,13 @@
 module.exports = {
-  friendlyName: "CAS keys gen",
+  friendlyName: 'CAS keys gen',
 
-  description: "",
+  description: '',
 
   inputs: {
     size: {
-      type: "number",
+      type: 'number',
       example: 256,
-      description: "The size.",
+      description: 'The size.',
       required: true,
     },
   },
