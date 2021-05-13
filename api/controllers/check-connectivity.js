@@ -2,7 +2,7 @@ const cp = require('child_process');
 const { defExecTimeout } = require('../libs/utils.js');
 
 const log = (preCmd, cmd) => {
-  console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
+  // console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
 };
 
 const pingTest = (server) => {
