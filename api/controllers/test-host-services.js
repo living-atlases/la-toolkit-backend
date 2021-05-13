@@ -58,39 +58,44 @@ module.exports = {
 
   fn: async function (inputs) {
     let map = inputs.hostsServices.map;
-    let servers = Object.keys(map);
+    let serviceDeployIds = Object.keys(map);
 
     // Prepare results object
     let results = {};
-    servers.forEach((s) => (results[s] = {}));
+    // serviceDeployIds.forEach((s) => (results[s] = {status: 'unknown'}));
 
     const checkSshBase =
       '/usr/local/bin/check_by_ssh -F /home/ubuntu/.ssh/config -j';
     const plugins = 'sudo /usr/lib/nagios/plugins/';
     //  -H ala-install-test-1 -n ala-1 -s uptime:uptime:mysql:https -C uptime -C uptime -C 'sudo /usr/lib/nagios/plugins/check_mysql' -C '/usr/lib/nagios/plugins/check_tcp -H localhost -p 443'
 
+    let pId;
     try {
       await Promise.all(
-        servers.map(async (server) => {
-          const services = map[server];
+        serviceDeployIds.map(async (id) => {
+          let sd = await ServiceDeploy.findOne({id: id});
+          if (pId === null) pId = sd.projectId;
+          let s = await Server.findOne({id: sd.serverId});
+          let server = s.name;
+          const services = map[id];
 
-          const serverCheckBase = `${checkSshBase} -H ${server} -n ${server}`;
+          const serverCheckBase = `${checkSshBase} -H ${server} -n ${id}`;
           let serviceName = [];
           let serviceCommand = [];
 
-          services.tcpPorts.forEach((port) => {
+          for (let port of services.tcpPorts) {
             serviceName.push(`check_tcpþ${port}`);
             serviceCommand.push(
               `${plugins}check_tcp -H localhost -r ok -p ${port}`
             );
-          });
+          }
 
-          services.udpPorts.forEach((port) => {
+          for (let port of services.udpPorts) {
             serviceName.push(`check_udpþ${port}`);
             serviceCommand.push(`${plugins}check_udp -H localhost -p ${port}`);
-          });
+          }
 
-          services.otherChecks.forEach((check) => {
+          for (let check of services.otherChecks) {
             let checkName;
             let args = '';
             switch (check) {
@@ -108,9 +113,9 @@ module.exports = {
                 `${plugins}check_${checkName} -H localhost${args}`
               );
             }
-          });
+          }
 
-          services.urls.forEach((url) => {
+          for (let url of services.urls) {
             let pUrl = parse(url, true);
             let hostname = pUrl.hostname;
             // let protocol = pUrl.protocol;
@@ -119,67 +124,77 @@ module.exports = {
             let args = `-H ${hostname} -I ${server} -t 40 --sni -f follow -p ${port} -u '${pathname}'`;
             serviceName.push(`check_urlþ${Base64.encode(url)}`);
             serviceCommand.push(`${plugins}check_http ${args}`);
-          });
+          }
 
           let outFile = `${server}-checks.txt`;
           let outFileProdDev = p.join(logsProdDevLocation(), outFile);
 
           try {
             // try to remove previous file as the check_by_ssh appends
-            fs.unlinkSync(outFileProdDev);
+            await fs.unlinkSync(outFileProdDev);
           } catch (err) {}
 
-          let cmd = `${serverCheckBase} -s ${serviceName.join(
-            ':'
-          )} \\\n -C "${serviceCommand.join('" \\\n -C "')}" -O ${p.join(
-            logsProdFolder,
-            outFile
-          )}`;
+          if (serviceName.length > 0 && serviceCommand.length > 0) {
+            let cmd = `${serverCheckBase} -s ${serviceName.join(
+              ':'
+            )} \\\n -C "${serviceCommand.join('" \\\n -C "')}" -O ${p.join(
+              logsProdFolder,
+              outFile
+            )}`;
 
-          // console.log(cmd);
-          // console.log(`checks started in ${server}`);
-          try {
-            let fullcmd = `${preCmd}${cmd}`;
-            cp.execSync(fullcmd, {
-              cwd: sails.config.sshDir,
-              timeout: defExecTimeout,
-            });
-            let outS = fs.readFileSync(outFileProdDev).toString();
+            // console.log(cmd);
+            // console.log(`checks started in ${server}`);
+            try {
+              let fullcmd = `${preCmd}${cmd}`;
+              await cp.execSync(fullcmd, {
+                cwd: sails.config.sshDir,
+                timeout: defExecTimeout,
+              });
+              let outS = await fs.readFileSync(outFileProdDev).toString();
+              // console.log(outS.toString());
+              // console.log(`checks completed in ${server}`);
 
-            // console.log(outS.toString());
-            // console.log(`checks completed in ${server}`);
-
-            return csv({
-              noheader: true,
-              delimiter: 'þ',
-              // https://www.npmjs.com/package/csvtojson#column-parser
-              colParser: {
-                msg: function (item) {
-                  return Base64.encode(item);
+              return csv({
+                noheader: true,
+                delimiter: 'þ',
+                // https://www.npmjs.com/package/csvtojson#column-parser
+                colParser: {
+                  msg: function (item) {
+                    return Base64.encode(item);
+                  },
                 },
-              },
-              headers: ['time', 'server', 'service', 'args', 'code', 'msg'],
-            })
-              .fromString(outS)
-              .then(
-                (jsonR) => {
-                  // console.log(`checks converted in ${server}`);
-                  results[server] = jsonR;
-                },
-                (e) => {
-                  console.log('Error converting check results to json');
-                  console.error(e);
-                }
+                headers: ['time', 'serviceDeploy', 'service', 'args', 'code', 'msg'],
+              })
+                .fromString(outS)
+                .then(
+                  async (checksJs) => {
+                    // console.log(`checks converted in ${server}`);
+                    // console.log(checksJs)
+                    results[id] = checksJs;
+                    let status = 0;
+                    for (let check of checksJs) {
+                      status += parseInt(check.code);
+                    }
+                    await ServiceDeploy.updateOne({id: id}).set({
+                      status: status === 0 ? 'success' : 'failed',
+                      checkedAt: Date.now()
+                    });
+                  },
+                  (e) => {
+                    console.log('Error converting check results to json');
+                    console.error(e);
+                  }
+                );
+
+            } catch (err) {
+              // Process typical: 'check_by_ssh: Error parsing output' error when the services are not deployed/ready
+              console.error(
+                err.output != null && err.output[1] != null
+                  ? err.output[1].toString()
+                  : err.toString()
               );
-          } catch (err) {
-            // Process typical: 'check_by_ssh: Error parsing output' error when the services are not deployed/ready
-            console.error(
-              err.output != null && err.output[1] != null
-                ? err.output[1].toString()
-                : err.toString()
-            );
+            }
           }
-
           /*
            * let otherServers = servers.filter((s) => s !== server);
            * // console.log(`--------- server: ${server} others: ${otherServers}`);
@@ -187,7 +202,8 @@ module.exports = {
         })
       );
       // console.log(results);
-      this.res.json(results);
+      let sds = await ServiceDeploy.find({projectId: pId});
+      this.res.json({projectId: pId, serviceDeploys: sds, results: results});
     } catch (e) {
       console.log(e);
       this.res.serverError(e);
