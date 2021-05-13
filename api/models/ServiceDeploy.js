@@ -15,6 +15,7 @@ module.exports = {
       defaultsTo: 'unknown',
       isIn: ['unknown', 'success', 'failed'],
     },
+    checkedAt: { type: 'number', allowNull: true},
 
     serviceId: { model: 'service' },
     serverId: { model: 'server' },
