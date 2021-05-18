@@ -97,7 +97,9 @@ module.exports = {
   fn: async function (inputs, exits) {
     let serversTransformed = trans(inputs.servers, inputs.user);
     yaml(
-      `${destIncDir}assh-${inputs.name}-${inputs.id}.yml`,
+      // to use the id is too much
+      // `${destIncDir}assh-${inputs.name}-${inputs.id}.yml`,
+      `${destIncDir}assh-${inputs.name}.yml`,
       serversTransformed,
       (err) => {
         if (err) {
