@@ -43,7 +43,20 @@ const sshTest = (server) => {
       timeout: defExecTimeout,
     });
     return '';
-  } catch (err) {
+  } catch (e) {
+    console.warn('Failed to ssh connect using configured ssh user, trying root')
+  }
+
+  try {
+    let cmd = `${preCmd}ssh ${server.name} root@hostname`;
+    log(preCmd, cmd);
+    cp.execSync(cmd, {
+      cwd: sails.config.sshDir,
+      timeout: defExecTimeout,
+    });
+    return '';
+  }
+  catch (err) {
     //console.log(err);
     return err;
   }
