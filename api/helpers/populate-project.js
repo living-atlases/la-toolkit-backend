@@ -60,13 +60,21 @@ module.exports = {
           p.serversMap = sMap;
           p.servicesMap = svMap;
           p.variablesMap = vMap;
-          //  console.log(p.serverServices);
+
+          let cmdHistoryPopulated = [];
 
           for (const cmdH of p.cmdHistoryEntries) {
             // noinspection JSUnresolvedFunction
             cmdH.cmd = await Cmd.findOne({ cmdHistoryEntryId: cmdH.id });
-            cmdH.date = cmdH.createdAt;
+            if (cmdH.cmd == null) {
+              console.warn(`Missing cmd for CmdHistoryEntryId ${cmdH.id}`);
+              await CmdHistoryEntry.destroyOne({id: cmdH.id});
+            } else {
+              cmdH.date = cmdH.createdAt;
+              cmdHistoryPopulated.push(cmdH);
+            }
           }
+          p.cmdHistoryEntries = cmdHistoryPopulated;
         }
         for (const p of ps) {
           // console.log(p.serverServices);
