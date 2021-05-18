@@ -22,7 +22,7 @@ module.exports = {
     },
     cmd: {
       type: 'json',
-      description: 'ansiblew options',
+      description: 'ansible options',
       required: true,
     },
     type: {
@@ -47,6 +47,7 @@ module.exports = {
     let invPath = `${invBase}${invDir}`;
     let mainInvDir = `../${projectPath}-inventories/${projectPath}-inventory.ini`;
     let cwd = invPath;
+    let rootBecome = inputs.cmd.rootBecome != null && inputs.cmd.rootBecome;
 
     let preCmd = sails.config.preCmd;
     // During devel set work dir
@@ -66,7 +67,7 @@ module.exports = {
       cwd: cwd,
     });
 
-    let baseCmd = `ansible-playbook -i ${mainInvDir} -i inventory.yml ${addInv}.yml`;
+    let baseCmd = `ansible-playbook -i ${mainInvDir} -i inventory.yml ${addInv}.yml${rootBecome? ' --user root --e ansible_user=root':''}`;
 
     console.log(`Resulting cwd: ${cwd}`);
     console.log(`Resulting preCmd: ${preCmd}`);
