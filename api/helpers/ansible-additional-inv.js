@@ -58,7 +58,7 @@ module.exports = {
       cwd = null;
     }
 
-    let cmd = `${preCmd}ansible-galaxy install -r requirements.yml`; // --force`;
+    let cmd = `${preCmd}ansible-galaxy install -r requirements.yml --roles-path roles --force`;
 
     console.log(`cmd: ${cmd}`);
     console.log(`cwd: ${invPath}`);
