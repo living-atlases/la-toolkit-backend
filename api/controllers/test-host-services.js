@@ -57,8 +57,8 @@ module.exports = {
   exits: {},
 
   fn: async function (inputs) {
-    let map = inputs.hostsServices.map;
-    let serviceDeployIds = Object.keys(map);
+    let serverChecks = inputs.hostsServices.checks;
+    let serversIds = Object.keys(serverChecks);
 
     // Prepare results object
     let results = {};
@@ -72,59 +72,11 @@ module.exports = {
     let pId;
     try {
       await Promise.all(
-        serviceDeployIds.map(async (id) => {
-          let sd = await ServiceDeploy.findOne({id: id});
-          if (pId === null) pId = sd.projectId;
-          let s = await Server.findOne({id: sd.serverId});
+        serversIds.map(async (id) => {
+          let s = await Server.findOne({id: id});
+          if (pId == null) pId = s.projectId;
           let server = s.name;
-          const services = map[id];
-
-          const serverCheckBase = `${checkSshBase} -H ${server} -n ${id}`;
-          let serviceName = [];
-          let serviceCommand = [];
-
-          for (let port of services.tcpPorts) {
-            serviceName.push(`check_tcpþ${port}`);
-            serviceCommand.push(
-              `${plugins}check_tcp -H localhost -r ok -p ${port}`
-            );
-          }
-
-          for (let port of services.udpPorts) {
-            serviceName.push(`check_udpþ${port}`);
-            serviceCommand.push(`${plugins}check_udp -H localhost -p ${port}`);
-          }
-
-          for (let check of services.otherChecks) {
-            let checkName;
-            let args = '';
-            switch (check) {
-              case 'mysql':
-              case 'mongodb':
-                checkName = check;
-                break;
-              // case: 'psql':
-              default:
-                checkName = '';
-            }
-            if (checkName !== '') {
-              serviceName.push(`check_${check}þ`);
-              serviceCommand.push(
-                `${plugins}check_${checkName} -H localhost${args}`
-              );
-            }
-          }
-
-          for (let url of services.urls) {
-            let pUrl = parse(url, true);
-            let hostname = pUrl.hostname;
-            // let protocol = pUrl.protocol;
-            let port = pUrl.protocol === 'http:' ? '80' : '443 -S';
-            let pathname = pUrl.pathname;
-            let args = `-H ${hostname} -I ${server} -t 40 --sni -f follow -p ${port} -u '${pathname}'`;
-            serviceName.push(`check_urlþ${Base64.encode(url)}`);
-            serviceCommand.push(`${plugins}check_http ${args}`);
-          }
+          const checks = serverChecks[id];
 
           let outFile = `${server}-checks.txt`;
           let outFileProdDev = p.join(logsProdDevLocation(), outFile);
@@ -133,6 +85,65 @@ module.exports = {
             // try to remove previous file as the check_by_ssh appends
             await fs.unlinkSync(outFileProdDev);
           } catch (err) {}
+
+          let serviceName = [];
+          let serviceCommand = [];
+          const serverCheckBase = `${checkSshBase} -H ${server} -n ${id}`;
+          const checkIds = Object.keys(checks);
+          for (const checkId of checkIds) {
+            let check = checks[checkId];
+            let type = check.type;
+
+            switch (type) {
+              case "tcp":
+                serviceName.push(`${checkId}þcheck_tcpþ${check.args}`);
+                serviceCommand.push(
+                  `${plugins}check_tcp -H localhost -r ok -p ${check.args}`
+                );
+                break;
+              case "udp":
+                serviceName.push(`${checkId}þcheck_udpþ${check.args}`);
+                serviceCommand.push(`${plugins}check_udp -H localhost -p ${check.args}`);
+                break;
+              case "other":
+                let checkName;
+                let args = '';
+                switch (check.args) {
+                  case 'mysql':
+                  case 'mongodb':
+                    checkName = check.args;
+                    break;
+                  // case: 'psql':
+                  default:
+                    checkName = '';
+                }
+                if (checkName !== '') {
+                  serviceName.push(`${checkId}þcheck_${checkName}þ`);
+                  serviceCommand.push(
+                    `${plugins}check_${checkName} -H localhost${args}`
+                  );
+                }
+                break;
+              case "url":
+
+                let url = check.args;
+                let pUrl = parse(url, true);
+                let hostname = pUrl.hostname;
+                // let protocol = pUrl.protocol;
+                let port = pUrl.protocol === 'http:' ? '80' : '443 -S';
+                let pathname = pUrl.pathname;
+                if (pathname.includes('/admin/') || pathname.includes('/alaAdmin/')) {
+                  // skip
+                  break;
+                }
+                let urlArgs = `-H ${hostname} -I ${server} -t 40 --sni -f follow -p ${port} -u '${pathname}'`;
+                serviceName.push(`${checkId}þcheck_urlþ${Base64.encode(url)}`);
+                serviceCommand.push(`${plugins}check_http ${urlArgs}`);
+                break;
+              default:
+                break;
+            }
+          }
 
           if (serviceName.length > 0 && serviceCommand.length > 0) {
             let cmd = `${serverCheckBase} -s ${serviceName.join(
@@ -163,22 +174,41 @@ module.exports = {
                     return Base64.encode(item);
                   },
                 },
-                headers: ['time', 'serviceDeploy', 'service', 'args', 'code', 'msg'],
+                headers: ['time', 'server', 'checkId', 'service', 'args', 'code', 'msg'],
               })
                 .fromString(outS)
                 .then(
-                  async (checksJs) => {
+                  async (checksRes) => {
                     // console.log(`checks converted in ${server}`);
-                    // console.log(checksJs)
-                    results[id] = checksJs;
-                    let status = 0;
-                    for (let check of checksJs) {
-                      status += parseInt(check.code);
+                    results[id] = checksRes;
+                    let sdStatus = {};
+                    // let sStatus = {};
+                    for (let checkRes of checksRes) {
+                      // console.log(checkRes);
+                      // console.log(checks[checkRes.checkId]);
+                      for (let s of checks[checkRes.checkId].serviceDeploys) {
+                        if (sdStatus[s] != null) sdStatus[s] += parseInt(checkRes.code);
+                        else sdStatus[s] = parseInt(checkRes.code);
+                      }
+                     /* Disabled for now
+                     for (let s of checks[checkRes.checkId].services) {
+                        if (sStatus[s] !=  null) sStatus[s] += parseInt(checkRes.code);
+                        else sStatus[s] = parseInt(checkRes.code);
+                      } */
                     }
-                    await ServiceDeploy.updateOne({id: id}).set({
-                      status: status === 0 ? 'success' : 'failed',
+                    for (let s in sdStatus) {
+                      await ServiceDeploy.updateOne({id: s}).set({
+                      status: sdStatus[s] === 0 ? 'success' : 'failed',
                       checkedAt: Date.now()
                     });
+                    }
+                    /* Disabled for now
+                    for (let s in sStatus) {
+                      await Service.updateOne({id: s}).set({
+                        status: sdStatus[s] === 0 ? 'success' : 'failed',
+                        checkedAt: Date.now()
+                      });
+                    }*/
                   },
                   (e) => {
                     console.log('Error converting check results to json');
@@ -195,15 +225,11 @@ module.exports = {
               );
             }
           }
-          /*
-           * let otherServers = servers.filter((s) => s !== server);
-           * // console.log(`--------- server: ${server} others: ${otherServers}`);
-           */
         })
       );
-      // console.log(results);
       let sds = await ServiceDeploy.find({projectId: pId});
-      this.res.json({projectId: pId, serviceDeploys: sds, results: results});
+      let ss = await Service.find({projectId: pId});
+      this.res.json({projectId: pId, serviceDeploys: sds, services: ss, results: results});
     } catch (e) {
       console.log(e);
       this.res.serverError(e);
