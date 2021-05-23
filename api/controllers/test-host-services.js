@@ -98,7 +98,8 @@ module.exports = {
               case "tcp":
                 serviceName.push(`${checkId}þcheck_tcpþ${check.args}`);
                 serviceCommand.push(
-                  `${plugins}check_tcp -H localhost -r ok -p ${check.args}`
+                  // -r, --refuse=ok|warn|crit
+                  `${plugins}check_tcp -H localhost -r crit -p ${check.args}`
                 );
                 break;
               case "udp":
@@ -125,7 +126,6 @@ module.exports = {
                 }
                 break;
               case "url":
-
                 let url = check.args;
                 let pUrl = parse(url, true);
                 let hostname = pUrl.hostname;
@@ -153,7 +153,7 @@ module.exports = {
               outFile
             )}`;
 
-            // console.log(cmd);
+            console.log(cmd);
             // console.log(`checks started in ${server}`);
             try {
               let fullcmd = `${preCmd}${cmd}`;
