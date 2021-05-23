@@ -39,7 +39,7 @@ module.exports = {
       );
       let port = await ttyFreePort();
       let cmd = `less +G -r ${log}`;
-      await ttyd(cmd, port, true);
+      await ttyd(cmd, port, false);
       this.res.json({ cmd: cmd, port: port });
     } catch (e) {
       console.log(`ttyd log less call failed (${e})`);

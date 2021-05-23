@@ -52,13 +52,13 @@ module.exports = {
 
         if (found) {
           cmd = `ssh ${inputs.server}`;
-          await ttyd(cmd, port);
+          await ttyd(cmd, port, false);
         } else {
           throw 'termError';
         }
       } else {
         cmd = 'bash';
-        await ttyd(cmd, port);
+        await ttyd(cmd, port, false);
       }
       this.res.json({ cmd: cmd, port: port });
     } catch (e) {
