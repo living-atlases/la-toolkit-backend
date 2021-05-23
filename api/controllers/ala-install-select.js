@@ -6,7 +6,6 @@ const alaInstallSelect = (version) => {
     process.env.NODE_ENV === 'production'
       ? '/home/ubuntu/ansible/ala-install'
       : sails.config.projectDir;
-
   console.log(`Resulting cwd: ${alaInstallLocation}`);
   try {
     if (preCmd !== '') {
@@ -18,6 +17,10 @@ const alaInstallSelect = (version) => {
     }
     console.log('Selecting proper ala-install version');
     if (version !== 'custom') {
+      // Stash previous uncommited changes
+      cp.execSync(`${preCmd}git stash`, {
+        cwd: alaInstallLocation,
+      });
       cp.execSync(`${preCmd}git fetch --tags origin master`, {
         cwd: alaInstallLocation,
       });
