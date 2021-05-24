@@ -39,6 +39,7 @@ async function yoGen(pkgName, path, yoRc) {
             resolve();
           })
           .catch((/* err */) => {
+            desc.close();
             resolve('genError');
           });
         // console.log("yo-rc written");
