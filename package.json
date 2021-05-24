@@ -28,7 +28,7 @@
     "url-parse": "^1.5.1",
     "validator": "^13.5.2",
     "wait-on": "^5.3.0",
-    "write-yaml": "^1.0.0"
+    "write-yaml-file": "^4.2.0"
   },
   "devDependencies": {
     "eslint": "5.16.0"
