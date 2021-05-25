@@ -16,8 +16,8 @@ const basicAsshConf = () => {
   }
   t.defaults.ControlMaster = 'auto';
   t.defaults.ControlPath = '/home/ubuntu/.ssh/%h-%p-%r.sock';
-  t.defaults.ControlPersist = 'yes';
-  t.defaults.ControlMasterMkdir = true;
+  t.defaults.ControlPersist = '10m';
+  // t.defaults.ControlMasterMkdir = true;
   return t;
 };
 
