@@ -96,10 +96,11 @@ module.exports = {
 
             switch (type) {
               case "tcp":
+                let host = parseInt(check.args) === 8983 ||  parseInt(check.args) === 9000? server : "localhost";
                 serviceName.push(`${checkId}þcheck_tcpþ${check.args}`);
                 serviceCommand.push(
                   // -r, --refuse=ok|warn|crit
-                  `${plugins}check_tcp -H localhost -r crit -p ${check.args}`
+                  `${plugins}check_tcp -H ${host} -r crit -p ${check.args}`
                 );
                 break;
               case "udp":
@@ -130,7 +131,7 @@ module.exports = {
                 let pUrl = parse(url, true);
                 let hostname = pUrl.hostname;
                 // let protocol = pUrl.protocol;
-                let port = pUrl.protocol === 'http:' ? '80' : '443 -S';
+                let port = pUrl.port != null && pUrl.port.length > 0? pUrl.port: pUrl.protocol === 'http:' ? '80' : '443 -S';
                 let pathname = pUrl.pathname;
                 if (pathname.includes('/admin/') || pathname.includes('/alaAdmin/')) {
                   // skip
