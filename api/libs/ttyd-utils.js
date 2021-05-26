@@ -3,7 +3,8 @@ const fs = require('fs');
 const PortPool = require('./port-pool.js');
 const sails = require('sails');
 const kill = require('tree-kill');
-const { delay, exitCodeFile, logsProdDevLocation } = require('./utils.js');
+const {delay, exitCodeFile, logsProdDevLocation} = require('./utils.js');
+const findPidFromPort = require("find-pid-from-port")
 
 const portPool = new PortPool(
   sails.config.ttydMinPort,
@@ -30,12 +31,19 @@ const pidKill = async (pid) => {
   });
 };
 
-/*
-// eslint-disable-next-line no-unused-vars
-const ttydKill = async () => {
-  return pidKill(sails.ttydPid);
-}; */
-
+const killByPort = async (port) => {
+  try {
+    const pids = await findPidFromPort(port)
+    for (let pid of pids) {
+      await pidKill(pid);
+    }
+    // console.log(pids.all)
+    //=> [1234, 5678]
+  } catch (error) {
+    console.log(error)
+    //=> "Couldn't find a process with port `8017`"
+  }
+}
 const ttyd = async (
   cmd,
   port,
@@ -93,10 +101,9 @@ const ttyd = async (
 
     const ttyd = spawn(ttydCmd.shift(), ttydCmd, {
       cwd: cwd,
-      env: { ...process.env, ...env, NODE_DEBUG: 'child_process' },
+      env: {...process.env, ...env, NODE_DEBUG: 'child_process'},
     });
 
-    sails.ttydPid = ttyd.pid;
     console.log(`ttyd pid: ${ttyd.pid}`);
 
     // Wait til listenning
@@ -142,4 +149,5 @@ module.exports = {
   ttyd,
   ttyFreePort,
   pidKill,
+  killByPort,
 };

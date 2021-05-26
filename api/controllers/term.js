@@ -1,4 +1,4 @@
-const { ttyd, ttyFreePort } = require('../libs/ttyd-utils.js');
+const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
 // noinspection JSUnresolvedFunction
 module.exports = {
   friendlyName: 'Term',
@@ -33,13 +33,14 @@ module.exports = {
     } else {
       console.log('Executing bash');
     }
+    let ttydPid;
     try {
       let port = await ttyFreePort();
       let cmd;
       if (inputs.id) {
         // Double check that this server belongs to this project
         let found = false;
-        let project = await Project.findOne({ id: inputs.id }).populate(
+        let project = await Project.findOne({id: inputs.id}).populate(
           'servers'
         );
         if (project) {
@@ -52,15 +53,15 @@ module.exports = {
 
         if (found) {
           cmd = `ssh ${inputs.server}`;
-          await ttyd(cmd, port, false);
+          ttydPid = await ttyd(cmd, port, false);
         } else {
           throw 'termError';
         }
       } else {
         cmd = 'bash';
-        await ttyd(cmd, port, false);
+        ttydPid = await ttyd(cmd, port, false);
       }
-      this.res.json({ cmd: cmd, port: port });
+      this.res.json({cmd: cmd, port: port, ttydPid: ttydPid});
     } catch (e) {
       console.log(`ttyd bash call failed (${e})`);
       throw 'termError';

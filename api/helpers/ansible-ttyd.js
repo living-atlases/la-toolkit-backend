@@ -1,5 +1,5 @@
-const { ttyd, ttyFreePort } = require('../libs/ttyd-utils.js');
-const { logsProdFolder, resultsFile, logsFile } = require('../libs/utils.js');
+const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
+const {logsProdFolder, resultsFile, logsFile} = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'ansible with ttyd',
@@ -103,7 +103,7 @@ module.exports = {
       '',
       projectPath,
       logDate,
-       true
+      true
     );
     env.ANSIBLE_JSON_FILE = resultsFile(projectPath, logDate);
     env.ANSIBLE_FORCE_COLOR = true;
@@ -111,7 +111,7 @@ module.exports = {
     let logsSuffix = logDate;
     try {
       let port = await ttyFreePort();
-      await ttyd(cmd, port, true, inputs.invPath, env, logsPrefix, logsSuffix);
+      let ttydPid = await ttyd(cmd, port, true, inputs.invPath, env, logsPrefix, logsSuffix);
 
       // Cmd
       let cmdCreated = await Cmd.create({
@@ -135,6 +135,7 @@ module.exports = {
       return {
         cmdEntry: cmdEntry,
         port: port,
+        ttydPid: ttydPid
       };
     } catch (e) {
       console.log(`ttyd ansiblew call failed (${e})`);
