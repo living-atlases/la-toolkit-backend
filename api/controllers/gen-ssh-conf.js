@@ -13,6 +13,8 @@ const basicAsshConf = () => {
   t.defaults = {};
   if (process.env.NODE_ENV !== 'production') {
     t.defaults.StrictHostKeyChecking = 'no';
+  } else {
+    t.defaults.StrictHostKeyChecking = 'accept-new';
   }
   t.defaults.ControlMaster = 'auto';
   t.defaults.ControlPath = '/home/ubuntu/.ssh/%h-%p-%r.sock';
