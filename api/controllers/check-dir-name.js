@@ -12,50 +12,56 @@ module.exports = {
       description: 'Suggested din name',
       required: true,
     },
-    uuid: {
+    id: {
       type: 'string',
-      description: 'project uuid',
+      description: 'project id',
       required: true,
     },
   },
 
   fn: async function (inputs) {
     const dirName = inputs.dirName;
-    const uuid = inputs.uuid;
+    const id = inputs.id;
     const projectDir = sails.config.projectsDir;
     let result;
+    // If we generate a project with the same ID we can get a similar dirname so we check if exits
+    //
     // Exits that dir?
-    //   has same uuid?
+    //   has same id?
     //     return old dirName
     //   else
     //     return dirName-count not existent
     // else
     //   return dirName
+    let yoRcPath = p.join(projectDir, `${dirName}/.yo-rc.json`);
+    if (fs.existsSync(p.join(projectDir, dirName)) && fs.existsSync(yoRcPath)) {
+      let yoRc = fs.readFileSync(yoRcPath, 'utf8');
 
-    if (fs.existsSync(p.join(projectDir, dirName))) {
-      let yoRc = fs.readFileSync(
-        p.join(projectDir, `${dirName}/.yo-rc.json`),
-        'utf8'
-      );
       let yoRcJ = JSON.parse(yoRc);
-      let otherUuid =
-        yoRcJ['generator-living-atlas']['promptValues']['LA_uuid'];
-      if (uuid === otherUuid) {
-        // ok, it's the same, we can use the same dirName
+      let otherId = yoRcJ['generator-living-atlas']['promptValues']['LA_id'];
+      if (otherId == null || id === otherId) {
+        // Id == null when migrating from uuid
+        // ok, it's the same, we can use the same dirName"
         result = dirName;
       } else {
-        // find a dirname-num combination that does not exist
+        // Let's find a dirname-num combination that does not exist
         let num = 1;
         result = `${dirName}-${num}`;
         while (fs.existsSync(p.join(projectDir, result))) {
           num += 1;
           result = `${dirName}-${num}`;
         }
+        // update Project with new dirname
+        console.log(
+          `Old dirname '${dirName}' is in use by a project with a different id '${otherId}', so selecting a new dirname '${result}'`
+        );
+        // noinspection JSUnresolvedFunction
+        await Project.updateOne({ id: id }).set({ dirName: result });
       }
     } else {
       result = dirName;
     }
-    resultJson = `{ "dirName": "${result}" }`;
+    let resultJson = `{ "dirName": "${result}" }`;
     return this.res.json(JSON.parse(resultJson));
   },
 };

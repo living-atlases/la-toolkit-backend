@@ -1,4 +1,4 @@
-var transform = require('../libs/transform');
+const transform = require('../libs/transform');
 
 module.exports = {
   friendlyName: 'transform conf param',
@@ -16,6 +16,6 @@ module.exports = {
   },
 
   fn: function (inputs, exits) {
-    return exits.success(transform(inputs));
+    return exits.success(transform(inputs.conf));
   },
 };

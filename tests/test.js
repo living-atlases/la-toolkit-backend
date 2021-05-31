@@ -2,12 +2,11 @@ const test = require('ava');
 const transform = require('../api/libs/transform.js');
 const validate = require('../api/libs/validate.js');
 const sails = require('sails');
+const { delay } = require('../api/libs/utils.js');
 
 const {
-  projectNameRegexp,
   domainRegexp,
   hostnameRegexp,
-  shortNameRegexp,
 } = require('../api/libs/regexp.js');
 
 const defObj = {
@@ -139,7 +138,7 @@ let dest = transform(src);
    t.is(dest[P][G].LA_pkg_name, 'gbif-es');
    }); */
 
-test.before((t) => {
+test.before((/* t */) => {
   // This runs before all tests
   sails.lift(
     {
@@ -162,13 +161,13 @@ test.before((t) => {
     },
     function (err) {
       if (err) {
-        return;
+        // return;
       }
 
       // here you can load fixtures, etc.
       // (for example, you might want to create some records in the database)
 
-      return;
+      // return;
     }
   );
 });
@@ -182,7 +181,7 @@ test('long name valid', async (t) => {
     'Лорем ипсум долор сит амет, фастидии ехпетенда при ид.',
     '議さだや設9売サコヱ助送首し康美イヤエテ決竹ハキ約泣ヘハ式追だじけ',
   ];
-  for (name in names) {
+  for (let name in names) {
     testObj.LA_project_name = names[name];
     testObj.LA_project_shortname = names[name]; // .substring(0, 10);
     t.is(validate({ conf: JSON.stringify(testObj) }), '');
@@ -288,18 +287,18 @@ test('bie false also species lists', async (t) => {
 });
 
 test('port pool test', async (t) => {
-  const { ttyd, ttyFreePort, pidKill, delay } = require('../api/libs/utils.js');
+  const { ttyd, ttyFreePort, pidKill } = require('../api/libs/ttyd-utils.js');
   let port = await ttyFreePort();
-  let p1 = await ttyd('bash', port, false, '/tmp');
+  let pid1 = await ttyd('bash', port, false, '/tmp');
   await delay(4000);
   let port1 = await ttyFreePort();
   console.log(`port free: ${port1}`);
   t.not(port, port1);
-  let p2 = await ttyd('bash', port1, true, '/tmp');
+  let pid2 = await ttyd('bash', port1, true, '/tmp');
   await delay(4000);
   let port2 = await ttyFreePort();
   console.log(`port free: ${port}`);
   t.not(port1, port2);
-  await pidKill(p1);
-  await pidKill(p2);
+  await pidKill(pid1);
+  await pidKill(pid2);
 });

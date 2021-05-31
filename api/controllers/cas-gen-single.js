@@ -1,13 +1,13 @@
 module.exports = {
-  friendlyName: "CAS keys gen",
+  friendlyName: 'CAS keys gen',
 
-  description: "",
+  description: '',
 
   inputs: {
     size: {
-      type: "number",
+      type: 'number',
       example: 256,
-      description: "The size.",
+      description: 'The size.',
       required: true,
     },
   },
@@ -16,6 +16,7 @@ module.exports = {
 
   fn: async function (inputs) {
     let keys = {};
+    // noinspection JSUnresolvedFunction
     keys.value = await sails.helpers.jwkGen.with({
       size: inputs.size,
     });

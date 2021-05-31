@@ -1,5 +1,5 @@
-const { ttyd, ttyFreePort } = require('../libs/utils.js');
-const { logsProdFolder, logsFile } = require('../libs/utils.js');
+const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
+const {logsProdFolder, logsFile} = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'Term',
@@ -28,7 +28,7 @@ module.exports = {
     },
   },
 
-  fn: async function (inputs, exits) {
+  fn: async function (inputs) {
     // console.log('Executing bash');
     try {
       let log = logsFile(
@@ -39,8 +39,8 @@ module.exports = {
       );
       let port = await ttyFreePort();
       let cmd = `less +G -r ${log}`;
-      await ttyd(cmd, port, true);
-      this.res.json({ cmd: cmd, port: port });
+      let ttydPid = await ttyd(cmd, port, false);
+      this.res.json({cmd: cmd, port: port, ttydPid: ttydPid});
     } catch (e) {
       console.log(`ttyd log less call failed (${e})`);
       throw 'termError';

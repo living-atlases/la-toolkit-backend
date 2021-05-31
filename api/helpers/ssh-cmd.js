@@ -29,25 +29,21 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    let err = '';
     let out = '';
     try {
       let cmd = `${preCmd}ssh ${inputs.server} ${inputs.cmd}`;
       out = cp.execSync(cmd, {
         cwd: sails.config.sshDir,
         timeout: defExecTimeout,
-        stderr: err,
       });
-      let res = { code: 0, error: err, out: out.toString(), cmd: cmd };
-      //console.log(res);
-      return res;
+      return { code: 0, err: '', out: out.toString(), cmd: cmd };
     } catch (err) {
       // console.log(err);
-      res = {
+      let res = {
         code: err.status,
         wrapperError: err.toString(),
         err:
-          err.output[1] != null
+          err.output[1] !== null
             ? err.output[1].toString()
             : err.output.toString(),
       };

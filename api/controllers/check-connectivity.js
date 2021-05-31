@@ -2,12 +2,10 @@ const cp = require('child_process');
 const { defExecTimeout } = require('../libs/utils.js');
 
 const log = (preCmd, cmd) => {
-  console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
+  // console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
 };
 
-var pingTest = (server) => {
-  let err;
-
+const pingTest = (server) => {
   let preCmd = sails.config.preCmd;
   if (preCmd !== '') {
     preCmd = preCmd + ' ';
@@ -22,7 +20,6 @@ var pingTest = (server) => {
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
       timeout: defExecTimeout,
-      stderr: err,
     });
     return '';
   } catch (err) {
@@ -32,8 +29,7 @@ var pingTest = (server) => {
   // console.log(out.toString());
 };
 
-var sshTest = (server) => {
-  let err;
+const sshTest = (server) => {
   let preCmd = sails.config.preCmd;
   if (preCmd !== '') {
     preCmd = preCmd + ' ';
@@ -45,18 +41,29 @@ var sshTest = (server) => {
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
       timeout: defExecTimeout,
-      stderr: err,
     });
     return '';
-  } catch (err) {
+  } catch (e) {
+    console.warn('Failed to ssh connect using configured ssh user, trying root')
+  }
+
+  try {
+    let cmd = `${preCmd}ssh ${server.name} root@hostname`;
+    log(preCmd, cmd);
+    cp.execSync(cmd, {
+      cwd: sails.config.sshDir,
+      timeout: defExecTimeout,
+    });
+    return '';
+  }
+  catch (err) {
     //console.log(err);
     return err;
   }
   // console.log(out.toString());
 };
 
-var sudoTest = (server) => {
-  let err;
+const sudoTest = (server) => {
   let preCmd = sails.config.preCmd;
   if (preCmd !== '') {
     preCmd = preCmd + ' ';
@@ -68,7 +75,6 @@ var sudoTest = (server) => {
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
       timeout: defExecTimeout,
-      stderr: err,
     });
     return '';
   } catch (err) {
@@ -77,8 +83,7 @@ var sudoTest = (server) => {
   // console.log(out.toString());
 };
 
-var osVersionTest = (server) => {
-  let err;
+const osVersionTest = (server) => {
   let preCmd = sails.config.preCmd;
   if (preCmd !== '') {
     preCmd = preCmd + ' ';
@@ -87,12 +92,10 @@ var osVersionTest = (server) => {
   try {
     let cmd = `${preCmd}ssh ${server.name} sudo cat /etc/os-release | egrep "^NAME=|^VERSION_ID=" | sed 's/=/:/' | sed 's/^NAME:/{"name":/' | sed 's/VERSION_ID:/"version":/' |  sed '1 s/$/,/' | sed '$ s/$/}/'`;
     log(preCmd, cmd);
-    let out = cp.execSync(cmd, {
+    return cp.execSync(cmd, {
       cwd: sails.config.sshDir,
       timeout: defExecTimeout,
-      stderr: err,
     });
-    return out;
   } catch (err) {
     return err;
   }
@@ -127,28 +130,23 @@ module.exports = {
       resultJson[server.name] = {};
 
       let pingOut = pingTest(server);
-      let ping = pingOut.length === 0 ? true : false;
-      resultJson[server.name]['ping'] = ping;
+      resultJson[server.name]['ping'] = pingOut.length === 0;
       resultJson[server.name]['out'] = pingOut;
 
       let sshOut = sshTest(server);
       resultJson[server.name]['out'] =
         resultJson[server.name]['out'] + '\n' + sshOut;
-      let ssh = sshOut.length === 0 ? true : false;
-      resultJson[server.name]['ssh'] = ssh;
+      resultJson[server.name]['ssh'] = sshOut.length === 0;
 
       let sudoOut = sudoTest(server);
-      let sudo = sudoOut.length === 0 ? true : false;
-      resultJson[server.name]['sudo'] = sudo;
+      resultJson[server.name]['sudo'] = sudoOut.length === 0;
       resultJson[server.name]['out'] =
         resultJson[server.name]['out'] + '\n' + sudoOut;
 
       let osVersionOut = osVersionTest(server);
-      let osVersion =
-        osVersionOut.length !== 0
-          ? JSON.parse(osVersionOut)
-          : { os: { name: '', version: '' } };
-      resultJson[server.name]['os'] = osVersion;
+      resultJson[server.name]['os'] = osVersionOut.length !== 0
+        ? JSON.parse(osVersionOut)
+        : {os: {name: '', version: ''}};
     });
     // console.log(resultJson);
     return this.res.json(resultJson);

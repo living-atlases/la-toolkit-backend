@@ -1,5 +1,5 @@
 const fs = require('fs');
-var genName = (name) => `${sails.config.sshDir}${name}`;
+const genName = (name) => `${sails.config.sshDir}${name}`;
 
 module.exports = {
   friendlyName: 'ssh pair key import',

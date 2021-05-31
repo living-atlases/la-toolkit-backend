@@ -1,13 +1,11 @@
 const cp = require('child_process');
 
-var alaInstallSelect = (version) => {
-  let err;
+const alaInstallSelect = (version) => {
   let preCmd = sails.config.preCmd;
   let alaInstallLocation =
     process.env.NODE_ENV === 'production'
       ? '/home/ubuntu/ansible/ala-install'
       : sails.config.projectDir;
-
   console.log(`Resulting cwd: ${alaInstallLocation}`);
   try {
     if (preCmd !== '') {
@@ -17,23 +15,26 @@ var alaInstallSelect = (version) => {
       );
       preCmd = preCmd + ' ';
     }
+    console.log('Selecting proper ala-install version');
     if (version !== 'custom') {
+      // Stash previous uncommited changes
+      cp.execSync(`${preCmd}git stash`, {
+        cwd: alaInstallLocation,
+      });
       cp.execSync(`${preCmd}git fetch --tags origin master`, {
         cwd: alaInstallLocation,
-        stderr: err,
       });
     }
     if (version !== 'upstream' && version !== 'custom') {
       cp.execSync(`${preCmd}git checkout tags/${version}`, {
         cwd: alaInstallLocation,
-        stderr: err,
       });
     } else if (version === 'upstream') {
       cp.execSync(`${preCmd}git pull --rebase origin master`, {
         cwd: alaInstallLocation,
-        stderr: err,
       });
     }
+    console.log('End of ala-install git pull');
     return '';
   } catch (err) {
     console.log(err);

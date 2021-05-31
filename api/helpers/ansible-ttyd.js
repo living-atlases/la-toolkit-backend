@@ -1,10 +1,5 @@
-const {
-  ttyd,
-  ttyFreePort,
-  logsProdFolder,
-  resultsFile,
-  logsFile,
-} = require('../libs/utils.js');
+const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
+const {logsProdFolder, resultsFile, logsFile} = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'ansible with ttyd',
@@ -33,7 +28,19 @@ module.exports = {
       type: 'bool',
       required: true,
     },
+    projectId: {
+      type: 'string',
+      required: true,
+    },
     projectPath: {
+      type: 'string',
+      required: true,
+    },
+    desc: {
+      type: 'string',
+      required: true,
+    },
+    type: {
       type: 'string',
       required: true,
     },
@@ -82,7 +89,7 @@ module.exports = {
       cmd = cmd + ` ${inputs.cmd.deployServices.join(' ')}`;
     }
 
-    var env = {};
+    let env = {};
 
     let now = new Date();
     let logDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
@@ -96,7 +103,7 @@ module.exports = {
       '',
       projectPath,
       logDate,
-      (colorized = true)
+      true
     );
     env.ANSIBLE_JSON_FILE = resultsFile(projectPath, logDate);
     env.ANSIBLE_FORCE_COLOR = true;
@@ -104,14 +111,31 @@ module.exports = {
     let logsSuffix = logDate;
     try {
       let port = await ttyFreePort();
-      await ttyd(cmd, port, true, inputs.invPath, env, logsPrefix, logsSuffix);
-      // return exits.success();
+      let ttydPid = await ttyd(cmd, port, true, inputs.invPath, env, logsPrefix, logsSuffix);
+
+      // Cmd
+      let cmdCreated = await Cmd.create({
+        type: inputs.type,
+        properties: inputs.cmd,
+      }).fetch();
+
+      // CmdHistoryEntry
+      let cmdEntry = await CmdHistoryEntry.create({
+        desc: inputs.desc,
+        logsPrefix: logsPrefix,
+        logsSuffix: logsSuffix,
+        invDir: inputs.invDir,
+        rawCmd: cmd,
+        result: 'unknown',
+        projectId: inputs.projectId,
+        cmd: cmdCreated.id,
+      }).fetch();
+      cmdEntry.cmd = cmdCreated;
+
       return {
-        cmd: '${cmd}',
+        cmdEntry: cmdEntry,
         port: port,
-        logsPrefix: '${logsPrefix}',
-        logsSuffix: '${logsSuffix}',
-        invDir: '${inputs.invDir}',
+        ttydPid: ttydPid
       };
     } catch (e) {
       console.log(`ttyd ansiblew call failed (${e})`);

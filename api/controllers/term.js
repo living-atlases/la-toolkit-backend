@@ -1,15 +1,13 @@
-const { ttyd, ttyFreePort } = require('../libs/utils.js');
-const { appConf } = require('../libs/utils.js');
-const fs = require('fs');
-
+const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
+// noinspection JSUnresolvedFunction
 module.exports = {
   friendlyName: 'Term',
   description: 'Term spawn',
 
   inputs: {
-    uuid: {
+    id: {
       type: 'string',
-      desc: 'project uuid',
+      desc: 'project id',
       required: false,
     },
     server: {
@@ -29,41 +27,41 @@ module.exports = {
     },
   },
 
-  fn: async function (inputs, exits) {
-    if (inputs.uuid) {
+  fn: async function (inputs) {
+    if (inputs.id) {
       console.log('Executing ssh');
     } else {
       console.log('Executing bash');
     }
+    let ttydPid;
     try {
       let port = await ttyFreePort();
       let cmd;
-      if (inputs.uuid) {
+      if (inputs.id) {
         // Double check that this server belongs to this project
-        var projects = JSON.parse(fs.readFileSync(appConf(), 'utf8'))[
-          'projects'
-        ];
         let found = false;
-        projects.forEach((project) => {
-          if (project['uuid'] === inputs.uuid && found === false) {
-            project['servers'].forEach((serverObj) => {
-              if (serverObj['name'] === inputs.server && found === false) {
-                found = true;
-              }
-            });
-          }
-        });
+        let project = await Project.findOne({id: inputs.id}).populate(
+          'servers'
+        );
+        if (project) {
+          project.servers.forEach((serverObj) => {
+            if (serverObj['name'] === inputs.server && found === false) {
+              found = true;
+            }
+          });
+        }
+
         if (found) {
           cmd = `ssh ${inputs.server}`;
-          await ttyd(cmd, port);
+          ttydPid = await ttyd(cmd, port, false);
         } else {
           throw 'termError';
         }
       } else {
         cmd = 'bash';
-        await ttyd(cmd, port);
+        ttydPid = await ttyd(cmd, port, false);
       }
-      this.res.json({ cmd: cmd, port: port });
+      this.res.json({cmd: cmd, port: port, ttydPid: ttydPid});
     } catch (e) {
       console.log(`ttyd bash call failed (${e})`);
       throw 'termError';

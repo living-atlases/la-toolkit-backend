@@ -1,4 +1,4 @@
-const yaml = require('write-yaml');
+const yaml = require('write-yaml-file')
 
 const dest = sails.config.sshDir;
 const destIncDir = sails.config.asshDir;
@@ -10,14 +10,16 @@ const basicAsshConf = () => {
   let t = {};
   t.includes = [`/home/ubuntu/.ssh/assh.d/*.yml`];
 
-  // This is done in ansible.cfg better
   t.defaults = {};
   if (process.env.NODE_ENV !== 'production') {
     t.defaults.StrictHostKeyChecking = 'no';
+  } else {
+    t.defaults.StrictHostKeyChecking = 'accept-new';
   }
   t.defaults.ControlMaster = 'auto';
   t.defaults.ControlPath = '/home/ubuntu/.ssh/%h-%p-%r.sock';
-  t.defaults.ControlPersist = 'yes';
+  t.defaults.ControlPersist = '10m';
+  // t.defaults.ControlMasterMkdir = true;
   return t;
 };
 
@@ -76,9 +78,9 @@ module.exports = {
       description: 'ansible ssh user',
       required: true,
     },
-    uuid: {
-      type: 'json',
-      description: 'project uuid',
+    id: {
+      type: 'string',
+      description: 'project id',
       required: true,
     },
     name: {
@@ -95,23 +97,21 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    var serversTransformed = trans(inputs.servers, inputs.user);
-    yaml(
-      `${destIncDir}assh-${inputs.name}-${inputs.uuid}.yml`,
-      serversTransformed,
-      (err) => {
-        if (err) {
-          throw new Error(err);
-        }
-      }
-    );
-    yaml(`${dest}assh.yml`, basicAsshConf(), (err) => {
-      if (err) {
-        throw new Error(err);
-      }
-    });
+    let serversTransformed = trans(inputs.servers, inputs.user);
+    // options from dump: https://www.npmjs.com/package/js-yaml
+    let yamlOpts = { indent: 2 };
+    try {
+    await yaml(
+      // to use the id is too much
+      // `${destIncDir}assh-${inputs.name}-${inputs.id}.yml`,
+      `${destIncDir}assh-${inputs.name}.yml`,
+      serversTransformed, yamlOpts);
+    await yaml(`${dest}assh.yml`, basicAsshConf(), yamlOpts);
     // assh config build > ~/.ssh/config
     return exits.success();
+      } catch (err) {
+        throw new Error(err);
+    }
   },
 };
 

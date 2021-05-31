@@ -4,6 +4,16 @@ module.exports = {
   description: '',
 
   inputs: {
+    id: {
+      type: 'string',
+      description: 'project id',
+      required: true,
+    },
+    desc: {
+      type: 'string',
+      description: 'cmd desc',
+      required: true,
+    },
     cmd: {
       type: 'json',
       description: 'ansiblew options',
@@ -23,6 +33,9 @@ module.exports = {
   fn: async function (inputs) {
     let addInv = 'pre-deploy';
     let resp = await sails.helpers.ansibleAdditionalInv.with({
+      type: 'preDeploy',
+      id: inputs.id,
+      desc: inputs.desc,
       addInv,
       cmd: inputs.cmd,
     });

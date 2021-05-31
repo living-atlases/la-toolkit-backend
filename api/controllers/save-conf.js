@@ -1,5 +1,5 @@
-const fs = require('fs');
-const { appConf } = require('../libs/utils.js');
+/* const fs = require('fs');
+const { appConf } = require('../libs/utils.js'); */
 
 module.exports = {
   friendlyName: 'Save app conf',
@@ -71,9 +71,10 @@ module.exports = {
 
   fn: async function (inputs, exits) {
     try {
-      fs.writeFileSync(appConf(), JSON.stringify(inputs, null, 2), {
-        encoding: 'utf8',
-      });
+      // Disabled while we migrate to mongo
+      // fs.writeFileSync(appConf(), JSON.stringify(inputs, null, 2), {
+      // encoding: 'utf8',
+      // });
       return exits.success();
     } catch (e) {
       console.error(e);
