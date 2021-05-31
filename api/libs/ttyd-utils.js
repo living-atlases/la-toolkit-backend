@@ -1,4 +1,5 @@
 const spawn = require('child_process').spawn;
+const execSync = require('child_process').execSync;
 const fs = require('fs');
 const PortPool = require('./port-pool.js');
 const sails = require('sails');
@@ -33,12 +34,19 @@ const pidKill = async (pid) => {
 
 const killByPort = async (port) => {
   try {
-    const pids = await findPidFromPort(port)
-    for (let pid of pids) {
-      await pidKill(pid);
+    if (process.env.NODE_ENV === 'production') {
+      const pids = await findPidFromPort(port)
+      for (let pid of pids) {
+        await pidKill(pid);
+      }
+      // console.log(pids.all)
+      //=> [1234, 5678]
+    } else {
+      // As "Kill docker exec command will not terminate the spawned process"
+      // https://github.com/moby/moby/issues/9098
+      let cmd = `docker container top la-toolkit | grep "\\-p ${port}" | awk '{print $2}' | xargs kill`;
+      execSync(cmd);
     }
-    // console.log(pids.all)
-    //=> [1234, 5678]
   } catch (error) {
     console.log(error)
     //=> "Couldn't find a process with port `8017`"
