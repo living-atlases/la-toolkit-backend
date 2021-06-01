@@ -6,10 +6,10 @@ Setup your `config/local.js` to something like, to test the `.ssh` keys generati
 
 ```
 module.exports = {
-  sshDir: '/var/tmp/la-toolkit/.ssh/',
-  asshDir: '/var/tmp/la-toolkit/.ssh/assh.d/',
-  projectsDir: '/var/tmp/la-toolkit/config/',
-  logsDir: '/var/tmp/la-toolkit/logs/',
+  sshDir: '/data/la-toolkit/.ssh/',
+  asshDir: '/data/la-toolkit/.ssh/assh.d/',
+  projectsDir: '/data/la-toolkit/config/',
+  logsDir: '/data/la-toolkit/logs/',
   baseBrandingLocation: '/data/la-generator/base-branding',
   preCmd: 'docker exec -u ubuntu la-toolkit',
   ttydMinPort: 20011,
@@ -38,9 +38,17 @@ And match the directories of the [la-toolkit](https://github.com/living-atlases/
 
 ### Run sails
 
+First of all setup a pair of environment variables with your mongo user/password:
+
+```bash
+export sails_mongo_la_user=la_toolkit_user
+export sails_mongo_la_pass=la_toolkit_changeme
+```
+that should match [the same varibles in your la-toolkit docker-compose.yml](https://github.com/living-atlases/la-toolkit/blob/master/docker-compose.yml) if you change them.
+
 During development you can run sails with forever to easy reload with code changes
 
-```
+```bash
 npm install -g forever
 forever -w app.js
 ```
@@ -48,6 +56,6 @@ forever -w app.js
 Or without `forewer` and `watch` just:
 
 
-```
+```bash
 sails lift
 ```
