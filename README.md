@@ -41,8 +41,7 @@ And match the directories of the [la-toolkit](https://github.com/living-atlases/
 First of all setup a pair of environment variables with your mongo user/password:
 
 ```bash
-export sails_mongo_la_user=la_toolkit_user
-export sails_mongo_la_pass=la_toolkit_changeme
+export DATABASE_URL=mongodb://la_toolkit_user:la_toolkit_changeme@localhost:27017/la_toolkit
 ```
 that should match [the same varibles in your la-toolkit docker-compose.yml](https://github.com/living-atlases/la-toolkit/blob/master/docker-compose.yml) if you change them.
 

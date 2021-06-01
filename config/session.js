@@ -36,7 +36,7 @@ module.exports.session = {
 
   // https://sailsjs.com/documentation/reference/configuration/sails-config-session
   adapter: 'connect-mongo',
-  url: `mongodb://${process.env.sails_mongo_la_user}:${process.env.sails_mongo_la_pass}@localhost:27017/la_toolkit`,
+  url: process.env.DATABASE_URL,
   collection: 'sessions',
   // stringify: true,
   // auto_reconnect: false,

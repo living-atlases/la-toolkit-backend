@@ -50,6 +50,6 @@ module.exports.datastores = {
 
     adapter: 'sails-mongo',
     // WARN: should match session.js conf
-    url: `mongodb://${process.env.sails_mongo_la_user}:${process.env.sails_mongo_la_pass}@localhost:27017/la_toolkit?ssl=true&w=majority`,
+    url: process.env.DATABASE_URL,
   },
 };
