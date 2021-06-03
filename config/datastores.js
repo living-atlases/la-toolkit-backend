@@ -51,5 +51,8 @@ module.exports.datastores = {
     adapter: 'sails-mongo',
     // WARN: should match session.js conf
     url: process.env.DATABASE_URL,
+    // https://stackoverflow.com/questions/46504258/sails-mongo-reconnect
+    reconnectTries: Number.MAX_VALUE,
+    reconnectInterval: 1000
   },
 };
