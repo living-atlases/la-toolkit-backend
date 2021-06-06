@@ -1,5 +1,5 @@
 const cp = require('child_process');
-const { defExecTimeout } = require('../libs/utils.js');
+const {defExecTimeout} = require('../libs/utils.js');
 
 const log = (preCmd, cmd) => {
   // console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
@@ -23,10 +23,8 @@ const pingTest = (server) => {
     });
     return '';
   } catch (err) {
-    // console.log(err);
     return err;
   }
-  // console.log(out.toString());
 };
 
 const sshTest = (server) => {
@@ -48,19 +46,16 @@ const sshTest = (server) => {
   }
 
   try {
-    let cmd = `${preCmd}ssh ${server.name} root@hostname`;
+    let cmd = `${preCmd}ssh root@${server.name} hostname`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
       timeout: defExecTimeout,
     });
     return '';
-  }
-  catch (err) {
-    //console.log(err);
+  } catch (err) {
     return err;
   }
-  // console.log(out.toString());
 };
 
 const sudoTest = (server) => {
@@ -80,7 +75,6 @@ const sudoTest = (server) => {
   } catch (err) {
     return err;
   }
-  // console.log(out.toString());
 };
 
 const osVersionTest = (server) => {
@@ -99,7 +93,6 @@ const osVersionTest = (server) => {
   } catch (err) {
     return err;
   }
-  // console.log(out.toString());
 };
 
 module.exports = {
@@ -148,7 +141,6 @@ module.exports = {
         ? JSON.parse(osVersionOut)
         : {os: {name: '', version: ''}};
     });
-    // console.log(resultJson);
     return this.res.json(resultJson);
   },
 };
