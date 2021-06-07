@@ -11,12 +11,12 @@ module.exports = {
   attributes: {
     // Basic
     // Location info
-    desc: { type: 'string', allowNull: false },
-    logsPrefix: { type: 'string', allowNull: false },
-    logsSuffix: { type: 'string', allowNull: false },
-    invDir: { type: 'string', allowNull: false },
+    desc: {type: 'string', allowNull: false},
+    logsPrefix: {type: 'string', allowNull: false},
+    logsSuffix: {type: 'string', allowNull: false},
+    invDir: {type: 'string', allowNull: false},
     // previously cmd
-    rawCmd: { type: 'string', allowNull: false },
+    rawCmd: {type: 'string', allowNull: false},
     // unknown, aborted, success, failed
     result: {
       type: 'string',
@@ -28,7 +28,7 @@ module.exports = {
     projectId: {
       model: 'project',
     },
-    cmd: { collection: 'cmd', via: 'cmdHistoryEntryId' },
+    cmd: {collection: 'cmd', via: 'cmdHistoryEntryId'},
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
     //  ╠═╝╠╦╝║║║║║ ║ ║╚╗╔╝║╣ ╚═╗
@@ -45,9 +45,13 @@ module.exports = {
 
   beforeDestroy: function (criteria, cb) {
     let cmdEntryId = criteria.where.id;
-    Cmd.destroy({ cmdHistoryEntryId: cmdEntryId }).exec(function (/* err */) {
-      cb();
-    });
+    console.log(`Before Deleting CmdHistoryEntry with id: '${cmdEntryId}'`);
+    if (cmdEntryId != null) {
+      console.log(`Deleting CmdHistoryEntry with id: '${cmdEntryId}'`);
+      Cmd.destroy({cmdHistoryEntryId: cmdEntryId}).exec(function (/* err */) {
+        cb();
+      });
+    }
 
     /* var ids = _.pluck(destroyedCmdEntry, 'id');
 
