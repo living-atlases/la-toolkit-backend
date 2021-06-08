@@ -14,7 +14,7 @@ const asshReConfig = () => {
   }
 
   try {
-    let cmd = `${preCmd}assh config build > ~/.ssh/config`;
+    let cmd = `${preCmd}bash -c "/home/ubuntu/go/bin/assh config build > /home/ubuntu/.ssh/config"`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
