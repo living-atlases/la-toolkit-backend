@@ -35,7 +35,7 @@ const pingTest = (server) => {
   }
 
   if (server.gateways.length > 0) {
-    preCmd = `${preCmd}ssh -T${server.gateways[0]} `;
+    preCmd = `${preCmd}ssh -T ${server.gateways[0]} `;
   }
   try {
     let cmd = `${preCmd}ping -w 5 -c 1 ${server.ip}`;
@@ -59,7 +59,7 @@ const sshTest = (server) => {
   }
 
   try {
-    let cmd = `${preCmd}ssh -T${server.name} hostname`;
+    let cmd = `${preCmd}ssh -T ${server.name} hostname`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
@@ -73,7 +73,7 @@ const sshTest = (server) => {
   }
 
   try {
-    let cmd = `${preCmd}ssh -Troot@${server.name} hostname`;
+    let cmd = `${preCmd}ssh -T root@${server.name} hostname`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
@@ -94,7 +94,7 @@ const sudoTest = (server) => {
   }
 
   try {
-    let cmd = `${preCmd}ssh -T${server.name} sudo hostname`;
+    let cmd = `${preCmd}ssh -T ${server.name} sudo hostname`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
@@ -115,7 +115,7 @@ const osVersionTest = (server) => {
   }
 
   try {
-    let cmd = `${preCmd}ssh -T${server.name} sudo cat /etc/os-release | egrep "^NAME=|^VERSION_ID=" | sed 's/=/:/' | sed 's/^NAME:/{"name":/' | sed 's/VERSION_ID:/"version":/' |  sed '1 s/$/,/' | sed '$ s/$/}/'`;
+    let cmd = `${preCmd}ssh -T ${server.name} sudo cat /etc/os-release | egrep "^NAME=|^VERSION_ID=" | sed 's/=/:/' | sed 's/^NAME:/{"name":/' | sed 's/VERSION_ID:/"version":/' |  sed '1 s/$/,/' | sed '$ s/$/}/'`;
     log(preCmd, cmd);
     return cp.execSync(cmd, {
       cwd: sails.config.sshDir,
