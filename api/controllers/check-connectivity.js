@@ -1,5 +1,5 @@
 const cp = require('child_process');
-const {defExecTimeout} = require('../libs/utils.js');
+const {defExecTimeout, logErr} = require('../libs/utils.js');
 
 const log = (preCmd, cmd) => {
   console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
@@ -23,6 +23,7 @@ const pingTest = (server) => {
     });
     return '';
   } catch (err) {
+    logErr(err);
     return err;
   }
 };
@@ -44,11 +45,7 @@ const sshTest = (server) => {
     return '';
   } catch (err) {
     console.warn('Failed to ssh connect using configured ssh default user, trying root');
-    console.error(
-      err.output != null && err.output[1] != null
-        ? err.output[1].toString()
-        : err.toString()
-    );
+    logErr(err);
   }
 
   try {
@@ -61,11 +58,7 @@ const sshTest = (server) => {
     });
     return '';
   } catch (err) {
-    console.error(
-      err.output != null && err.output[1] != null
-        ? err.output[1].toString()
-        : err.toString()
-    );
+    logErr(err);
     return err;
   }
 };
@@ -86,6 +79,7 @@ const sudoTest = (server) => {
     });
     return '';
   } catch (err) {
+    logErr(err);
     return err;
   }
 };
@@ -105,6 +99,7 @@ const osVersionTest = (server) => {
       timeout: defExecTimeout,
     });
   } catch (err) {
+    logErr(err);
     return err;
   }
 };

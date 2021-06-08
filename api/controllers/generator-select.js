@@ -1,5 +1,5 @@
 const cp = require('child_process');
-const { defExecTimeout } = require('../libs/utils.js');
+const {defExecTimeout, logErr} = require('../libs/utils.js');
 
 const generatorSelect = (version) => {
   let preCmd = sails.config.preCmd;
@@ -26,7 +26,7 @@ const generatorSelect = (version) => {
     console.log("End of downloading 'generator-living-atlas'");
     return '';
   } catch (err) {
-    console.log(err);
+    logErr(err);
     return err;
   }
 };

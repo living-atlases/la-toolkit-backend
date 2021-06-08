@@ -47,6 +47,14 @@ const appConfSync = async () => {
   return JSON.parse(conf);
 };
 
+const logErr = (err) => {
+  console.error(
+    err.output != null && err.output[1] != null
+      ? err.output[1].toString()
+      : err.toString()
+  );
+}
+
 module.exports = {
   logsProdFolder,
   logsFile,
@@ -58,4 +66,5 @@ module.exports = {
   delay,
   sailsLoadSync,
   appConfSync,
+  logErr,
 };
