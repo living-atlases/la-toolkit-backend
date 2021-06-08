@@ -1,6 +1,6 @@
 'use strict';
 const sails = require('sails');
-const { sailsLoadSync, appConfSync } = require('../api/libs/utils.js');
+const {sailsLoadSync, appConfSync} = require('../api/libs/utils.js');
 var dbm;
 var type;
 var seed;
@@ -45,7 +45,7 @@ exports.up = async function (db) {
 
     genConf.LA_id = createdP.id;
 
-    await Project.update({ id: createdP.id }).set({ genConf: genConf });
+    await Project.update({id: createdP.id}).set({genConf: genConf});
 
     for (const sv of Object.values(services)) {
       delete sv.uuid;
@@ -85,7 +85,7 @@ exports.up = async function (db) {
       delete cH.uuid;
       cH.rawCmd = cH.cmd;
       delete cH.cmd;
-      let cmd = { properties: cH.deployCmd };
+      let cmd = {properties: cH.deployCmd};
       // p.createdAt = cH.date;
       let d = new Date(cH.date);
       cH.createdAt = d;
@@ -133,16 +133,16 @@ exports.up = async function (db) {
 };
 
 exports.down = async function (db) {
-  // TODO comment to the end to prevent wipe the db
-  await sailsLoadSync();
-  await Variable.destroy({});
-  await Cmd.destroy({});
-  await CmdHistoryEntry.destroy({});
-  await ServiceDeploy.destroy({});
-  await Service.destroy({});
-  await Server.destroy({});
-  await Project.destroy({});
-  sails.lower();
+  // Comment after the development to prevent wipe the db
+  // await sailsLoadSync();
+  // await Variable.destroy({});
+  // await Cmd.destroy({});
+  // await CmdHistoryEntry.destroy({});
+  // await ServiceDeploy.destroy({});
+  // await Service.destroy({});
+  // await Server.destroy({});
+  // await Project.destroy({});
+  // sails.lower();
   return;
 };
 

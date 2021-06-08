@@ -42,9 +42,16 @@ const sailsLoadSync = () => {
 };
 
 const appConfSync = async () => {
-  await sailsLoadSync();
-  let conf = await fs.readFileSync(appConf(), 'utf8');
-  return JSON.parse(conf);
+  await sailsLoadSync()
+  if (fs.existsSync(appConf())) {
+    let conf = await fs.readFileSync(appConf(), 'utf8');
+    return JSON.parse(conf);
+  } else {
+    return {
+      'projects': [],
+      'projectsMap': {}
+    };
+  }
 };
 
 const logErr = (err) => {
