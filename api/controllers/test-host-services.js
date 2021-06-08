@@ -4,6 +4,7 @@ const {
   defExecTimeout,
   logsProdFolder,
   logsProdDevLocation,
+  logErr,
 } = require('../libs/utils.js');
 const csv = require('csvtojson/v2');
 const fs = require('fs');
@@ -219,11 +220,7 @@ module.exports = {
                 console.log(`<<< End of checks of ${server}`);
               } catch (err) {
                 // Process typical: 'check_by_ssh: Error parsing output' error when the services are not deployed/ready
-                console.error(
-                  err.output != null && err.output[1] != null
-                    ? err.output[1].toString()
-                    : err.toString()
-                );
+                logErr(err);
                 console.log(`Checking ${server} cmd by cmd as some failed`);
                 // lets try cmd by cmd
                 for (let i = 0; i < serviceName.length; i++) {
@@ -234,11 +231,7 @@ module.exports = {
                   try {
                     await checkAndUpdateDb(cmd, outFileProdDev, results, id, checks, server);
                   } catch (err) {
-                    console.error(
-                      err.output != null && err.output[1] != null
-                        ? err.output[1].toString()
-                        : err.toString()
-                    );
+                    logErr(err);
                   }
                 }
               }

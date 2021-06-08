@@ -60,6 +60,7 @@ const logErr = (err) => {
       ? err.output[1].toString()
       : err.toString()
   );
+  if (err.status != null) console.error(`exit code: ${err.status}`);
 }
 
 module.exports = {
