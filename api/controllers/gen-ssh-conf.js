@@ -18,7 +18,7 @@ const basicAsshConf = () => {
   }
   t.defaults.ControlMaster = 'auto';
   t.defaults.ControlPath = '/home/ubuntu/.ssh/%h-%p-%r.sock';
-  t.defaults.ControlPersist = '10m';
+  t.defaults.ControlPersist = '90m';
   // t.defaults.ControlMasterMkdir = true;
   return t;
 };
@@ -50,7 +50,7 @@ const trans = (serverObjs, user) => {
     if (serverObj.sshKey !== null) {
       t.hosts[
         `${serverObj.name}`
-      ].IdentityFile = `/home/ubuntu/.ssh/${serverObj.sshKey.name}`;
+        ].IdentityFile = `/home/ubuntu/.ssh/${serverObj.sshKey.name}`;
     }
   });
   return t;
@@ -99,18 +99,18 @@ module.exports = {
   fn: async function (inputs, exits) {
     let serversTransformed = trans(inputs.servers, inputs.user);
     // options from dump: https://www.npmjs.com/package/js-yaml
-    let yamlOpts = { indent: 2 };
+    let yamlOpts = {indent: 2};
     try {
-    await yaml(
-      // to use the id is too much
-      // `${destIncDir}assh-${inputs.name}-${inputs.id}.yml`,
-      `${destIncDir}assh-${inputs.name}.yml`,
-      serversTransformed, yamlOpts);
-    await yaml(`${dest}assh.yml`, basicAsshConf(), yamlOpts);
-    // assh config build > ~/.ssh/config
-    return exits.success();
-      } catch (err) {
-        throw new Error(err);
+      await yaml(
+        // to use the id is too much
+        // `${destIncDir}assh-${inputs.name}-${inputs.id}.yml`,
+        `${destIncDir}assh-${inputs.name}.yml`,
+        serversTransformed, yamlOpts);
+      await yaml(`${dest}assh.yml`, basicAsshConf(), yamlOpts);
+      // assh config build > ~/.ssh/config
+      return exits.success();
+    } catch (err) {
+      throw new Error(err);
     }
   },
 };
