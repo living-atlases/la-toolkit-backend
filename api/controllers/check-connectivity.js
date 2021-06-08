@@ -133,7 +133,8 @@ module.exports = {
 
   fn: async function (inputs) {
     let resultJson = {};
-    inputs.servers.forEach((server) => {
+    let updatedServers = [];
+    for (const server of inputs.servers) {
       resultJson[server.name] = {};
 
       let pingOut = pingTest(server);
@@ -154,7 +155,18 @@ module.exports = {
       resultJson[server.name]['os'] = osVersionOut.length !== 0
         ? JSON.parse(osVersionOut)
         : {os: {name: '', version: ''}};
-    });
+
+      let updatedServer = await Server.updateOne({id: server.id}).set(
+        {
+          reachable: resultJson[server.name]['ping'] ? 'success' : 'failed',
+          sshReachable: resultJson[server.name]['ssh'] ? 'success' : 'failed',
+          sudoEnabled: resultJson[server.name]['sudo'] ? 'success' : 'failed',
+          osName: resultJson[server.name]['os'].name,
+          osVersion: resultJson[server.name]['os'].name,
+        });
+      updatedServers.push(updatedServer);
+    }
+    resultJson.servers = updatedServers;
     return this.res.json(resultJson);
-  },
+  }
 };
