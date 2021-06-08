@@ -1,8 +1,31 @@
 const cp = require('child_process');
-const {defExecTimeout, logErr} = require('../libs/utils.js');
+const {logErr} = require('../libs/utils.js');
+
+let defExecTimeout = 5000;
 
 const log = (preCmd, cmd) => {
   console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
+};
+
+const asshReConfig = () => {
+  let preCmd = sails.config.preCmd;
+  if (preCmd !== '') {
+    preCmd = preCmd + ' ';
+  }
+
+  try {
+    let cmd = `${preCmd}assh config build > ~/.ssh/config`;
+    log(preCmd, cmd);
+    cp.execSync(cmd, {
+      cwd: sails.config.sshDir,
+      shell: "/bin/bash",
+      timeout: defExecTimeout,
+    });
+    return '';
+  } catch (err) {
+    logErr(err);
+    return err;
+  }
 };
 
 const pingTest = (server) => {
@@ -12,13 +35,14 @@ const pingTest = (server) => {
   }
 
   if (server.gateways.length > 0) {
-    preCmd = `${preCmd}ssh ${server.gateways[0]} `;
+    preCmd = `${preCmd}ssh -T${server.gateways[0]} `;
   }
   try {
     let cmd = `${preCmd}ping -w 5 -c 1 ${server.ip}`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
+      shell: "/bin/bash",
       timeout: defExecTimeout,
     });
     return '';
@@ -35,7 +59,7 @@ const sshTest = (server) => {
   }
 
   try {
-    let cmd = `${preCmd}ssh ${server.name} hostname`;
+    let cmd = `${preCmd}ssh -T${server.name} hostname`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
@@ -49,7 +73,7 @@ const sshTest = (server) => {
   }
 
   try {
-    let cmd = `${preCmd}ssh root@${server.name} hostname`;
+    let cmd = `${preCmd}ssh -Troot@${server.name} hostname`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
@@ -70,7 +94,7 @@ const sudoTest = (server) => {
   }
 
   try {
-    let cmd = `${preCmd}ssh ${server.name} sudo hostname`;
+    let cmd = `${preCmd}ssh -T${server.name} sudo hostname`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
@@ -91,7 +115,7 @@ const osVersionTest = (server) => {
   }
 
   try {
-    let cmd = `${preCmd}ssh ${server.name} sudo cat /etc/os-release | egrep "^NAME=|^VERSION_ID=" | sed 's/=/:/' | sed 's/^NAME:/{"name":/' | sed 's/VERSION_ID:/"version":/' |  sed '1 s/$/,/' | sed '$ s/$/}/'`;
+    let cmd = `${preCmd}ssh -T${server.name} sudo cat /etc/os-release | egrep "^NAME=|^VERSION_ID=" | sed 's/=/:/' | sed 's/^NAME:/{"name":/' | sed 's/VERSION_ID:/"version":/' |  sed '1 s/$/,/' | sed '$ s/$/}/'`;
     log(preCmd, cmd);
     return cp.execSync(cmd, {
       cwd: sails.config.sshDir,
@@ -129,6 +153,9 @@ module.exports = {
   fn: async function (inputs) {
     let resultJson = {};
     let updatedServers = [];
+
+    asshReConfig();
+
     for (const server of inputs.servers) {
       resultJson[server.name] = {};
 
