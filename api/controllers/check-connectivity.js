@@ -2,7 +2,7 @@ const cp = require('child_process');
 const {defExecTimeout} = require('../libs/utils.js');
 
 const log = (preCmd, cmd) => {
-  // console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
+  console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
 };
 
 const pingTest = (server) => {
@@ -38,11 +38,17 @@ const sshTest = (server) => {
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
+      shell: "/bin/bash",
       timeout: defExecTimeout,
     });
     return '';
-  } catch (e) {
-    console.warn('Failed to ssh connect using configured ssh user, trying root')
+  } catch (err) {
+    console.warn('Failed to ssh connect using configured ssh default user, trying root');
+    console.error(
+      err.output != null && err.output[1] != null
+        ? err.output[1].toString()
+        : err.toString()
+    );
   }
 
   try {
@@ -50,10 +56,16 @@ const sshTest = (server) => {
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
+      shell: "/bin/bash",
       timeout: defExecTimeout,
     });
     return '';
   } catch (err) {
+    console.error(
+      err.output != null && err.output[1] != null
+        ? err.output[1].toString()
+        : err.toString()
+    );
     return err;
   }
 };
@@ -69,6 +81,7 @@ const sudoTest = (server) => {
     log(preCmd, cmd);
     cp.execSync(cmd, {
       cwd: sails.config.sshDir,
+      shell: "/bin/bash",
       timeout: defExecTimeout,
     });
     return '';
@@ -88,6 +101,7 @@ const osVersionTest = (server) => {
     log(preCmd, cmd);
     return cp.execSync(cmd, {
       cwd: sails.config.sshDir,
+      shell: "/bin/bash",
       timeout: defExecTimeout,
     });
   } catch (err) {
