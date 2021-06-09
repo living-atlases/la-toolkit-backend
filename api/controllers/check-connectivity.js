@@ -58,7 +58,7 @@ const sshTest = (server) => {
     preCmd = preCmd + ' ';
   }
 
-  try {
+  function sshTestAsUser() {
     let cmd = `${preCmd}ssh -T ${server.name} hostname`;
     log(preCmd, cmd);
     cp.execSync(cmd, {
@@ -67,6 +67,17 @@ const sshTest = (server) => {
       timeout: defExecTimeout,
     });
     return '';
+  }
+
+  try {
+    return sshTestAsUser();
+  } catch (err) {
+    console.warn('Failed to ssh connect using configured ssh default user, retrying...');
+    logErr(err);
+  }
+
+  try {
+    return sshTestAsUser();
   } catch (err) {
     console.warn('Failed to ssh connect using configured ssh default user, trying root');
     logErr(err);
