@@ -6,6 +6,7 @@ const sails = require('sails');
 const kill = require('tree-kill');
 const {delay, exitCodeFile, logsProdDevLocation} = require('./utils.js');
 const findPidFromPort = require("find-pid-from-port")
+const perf = require('execution-time')();
 
 const portPool = new PortPool(
   sails.config.ttydMinPort,
@@ -59,7 +60,8 @@ const ttyd = async (
   cwd = '/home/ubuntu',
   env = {},
   logsPrefix,
-  logsSuffix
+  logsSuffix,
+  cmdEntryId
   // process.env
 ) => {
   try {
@@ -106,7 +108,7 @@ const ttyd = async (
         'WARNING: The cmd has some double space. This will make the spawn fail'
       );
     }
-
+    perf.start();
     const ttyd = spawn(ttydCmd.shift(), ttydCmd, {
       cwd: cwd,
       env: {...process.env, ...env, NODE_DEBUG: 'child_process'},
@@ -130,8 +132,13 @@ const ttyd = async (
       console.error(`stderr: ${data}`);
     });
 
-    ttyd.on('close', (code) => {
+    ttyd.on('close', async (code) => {
       console.log(`child process exited with code ${code} with ${ttyd.pid}`);
+      const results = perf.stop();
+      console.log(results.time);
+      if (cmdEntryId != null) {
+        await CmdHistoryEntry.updateOne({id: cmdEntryId}).set({duration: results.time});
+      }
       if (
         typeof logsSuffix !== 'undefined' &&
         typeof logsPrefix !== 'undefined'

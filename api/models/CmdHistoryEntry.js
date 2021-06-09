@@ -23,6 +23,7 @@ module.exports = {
       defaultsTo: 'unknown',
       isIn: ['unknown', 'aborted', 'success', 'failed'],
     },
+    duration: {type: 'number', allowNull: true},
 
     // Relations
     projectId: {

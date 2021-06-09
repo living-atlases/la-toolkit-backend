@@ -110,9 +110,6 @@ module.exports = {
     let logsPrefix = projectPath;
     let logsSuffix = logDate;
     try {
-      let port = await ttyFreePort();
-      let ttydPid = await ttyd(cmd, port, true, inputs.invPath, env, logsPrefix, logsSuffix);
-
       // Cmd
       let cmdCreated = await Cmd.create({
         type: inputs.type,
@@ -131,6 +128,9 @@ module.exports = {
         cmd: cmdCreated.id,
       }).fetch();
       cmdEntry.cmd = cmdCreated;
+
+      let port = await ttyFreePort();
+      let ttydPid = await ttyd(cmd, port, true, inputs.invPath, env, logsPrefix, logsSuffix, cmdEntry.id);
 
       return {
         cmdEntry: cmdEntry,
