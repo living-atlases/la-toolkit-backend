@@ -195,7 +195,7 @@ module.exports = {
           sshReachable: resultJson[server.name]['ssh'] ? 'success' : 'failed',
           sudoEnabled: resultJson[server.name]['sudo'] ? 'success' : 'failed',
           osName: resultJson[server.name]['os'].name,
-          osVersion: resultJson[server.name]['os'].name,
+          osVersion: resultJson[server.name]['os'].version,
         });
       updatedServers.push(updatedServer);
     }
