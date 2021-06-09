@@ -4,7 +4,7 @@ const fs = require('fs');
 const PortPool = require('./port-pool.js');
 const sails = require('sails');
 const kill = require('tree-kill');
-const {delay, exitCodeFile, logsProdDevLocation} = require('./utils.js');
+const {delay, exitCodeFile, logsProdDevLocation, logErr} = require('./utils.js');
 const findPidFromPort = require("find-pid-from-port")
 const perf = require('execution-time')();
 
@@ -21,7 +21,7 @@ const pidKill = async (pid) => {
       console.log(`Killing proc with pid ${pid}`);
       kill(pid, 'SIGKILL', (kerr) => {
         if (kerr) {
-          console.log(kerr);
+          logErr(kerr);
           resolve('termError');
         }
         resolve();
@@ -45,11 +45,11 @@ const killByPort = async (port) => {
     } else {
       // As "Kill docker exec command will not terminate the spawned process"
       // https://github.com/moby/moby/issues/9098
-      let cmd = `docker container top la-toolkit | grep "\\-p ${port}" | awk '{print $2}' | xargs kill`;
+      let cmd = `for i in $(docker container top la-toolkit | grep "\\-p ${port}" | awk '{print $2}'); do kill $i; done`;
       execSync(cmd);
     }
   } catch (error) {
-    console.log(error)
+    logErr(error);
     //=> "Couldn't find a process with port `8017`"
   }
 }
@@ -135,7 +135,7 @@ const ttyd = async (
     ttyd.on('close', async (code) => {
       console.log(`child process exited with code ${code} with ${ttyd.pid}`);
       const results = perf.stop();
-      console.log(results.time);
+      // console.log(results.time);
       if (cmdEntryId != null) {
         await CmdHistoryEntry.updateOne({id: cmdEntryId}).set({duration: results.time});
       }
