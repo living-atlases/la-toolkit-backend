@@ -64,5 +64,5 @@ module.exports.routes = {
   'POST /api/v1/add-project': {action: 'add-project'},
   'PATCH /api/v1/update-project': {action: 'update-project'},
   'DELETE /api/v1/delete-project': {action: 'delete-project'},
-  'GET /env.production.txt': {action: 'get-env'},
+  'GET /api/v1/get-env': {action: 'get-env'},
 };
