@@ -230,9 +230,18 @@ module.exports = {
     onlyAllowOrigins: [
       'http://localhost',
       'http://127.0.0.1',
-      `${process.env.TOOLKIT_HTTPS != null ? process.env.TOOLKIT_HTTPS === 'true' : false? "https://":"http://"}${process.env.TOOLKIT_PUBLIC_URL != null ? process.env.TOOLKIT_PUBLIC_URL : "localhost"}`,
-    //   'https://example.com',
-    //   'https://staging.example.com',
+      `${
+        process.env.TOOLKIT_HTTPS != null &&
+        process.env.TOOLKIT_HTTPS === 'true'
+          ? 'https://'
+          : 'http://'
+      }${
+        process.env.TOOLKIT_PUBLIC_URL != null
+          ? process.env.TOOLKIT_PUBLIC_URL
+          : 'localhost'
+      }`,
+      //   'https://example.com',
+      //   'https://staging.example.com',
     ],
     /***************************************************************************
      *                                                                          *
