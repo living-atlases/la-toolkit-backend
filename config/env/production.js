@@ -227,13 +227,13 @@ module.exports = {
      * > Be sure to use the right protocol!  ("http://" vs. "https://")         *
      *                                                                          *
      ***************************************************************************/
-    //onlyAllowOrigins: [
-    //'http://localhost',
-    //'http://127.0.0.1',
-    //`${process.env.TOOLKIT_HTTPS != null ? process.env.TOOLKIT_HTTPS === 'true' : false? "https://":"http://"}${process.env.TOOLKIT_PUBLIC_URL != null ? process.env.TOOLKIT_PUBLIC_URL : "localhost"}`,
+    onlyAllowOrigins: [
+      'http://localhost',
+      'http://127.0.0.1',
+      `${process.env.TOOLKIT_HTTPS != null ? process.env.TOOLKIT_HTTPS === 'true' : false? "https://":"http://"}${process.env.TOOLKIT_PUBLIC_URL != null ? process.env.TOOLKIT_PUBLIC_URL : "localhost"}`,
     //   'https://example.com',
     //   'https://staging.example.com',
-    //],
+    ],
     /***************************************************************************
      *                                                                          *
      * If you are deploying a cluster of multiple servers and/or processes,     *
