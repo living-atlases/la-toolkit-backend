@@ -136,7 +136,16 @@ module.exports = {
       // allRoutes: true,
       // allowOrigins: [
       //   'https://example.com',
-      // `${process.env.TOOLKIT_HTTPS != null ? process.env.TOOLKIT_HTTPS === 'true' : false? "https://":"http://"}${process.env.TOOLKIT_PUBLIC_URL != null ? process.env.TOOLKIT_PUBLIC_URL : "localhost"}`,
+      /* `${
+       *   process.env.TOOLKIT_HTTPS != null &&
+       *   process.env.TOOLKIT_HTTPS === 'true'
+       *     ? 'https://'
+       *     : 'http://'
+       * }${
+       *   process.env.TOOLKIT_PUBLIC_URL != null
+       *     ? process.env.TOOLKIT_PUBLIC_URL
+       *     : 'localhost'
+       * }`, */
       // ]
     },
   },
