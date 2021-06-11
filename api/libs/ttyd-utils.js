@@ -135,7 +135,7 @@ const ttyd = async (
     ttyd.on('close', async (code) => {
       console.log(`child process exited with code ${code} with ${ttyd.pid}`);
       const results = perf.stop();
-      // console.log(results.time);
+      console.log(`Cmd duration: ${results.time}`);
       if (cmdEntryId != null) {
         await CmdHistoryEntry.updateOne({id: cmdEntryId}).set({duration: results.time});
       }
