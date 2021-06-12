@@ -15,6 +15,11 @@ module.exports = {
     'Get the results of a ansiblew execution in json and text format',
 
   inputs: {
+    cmdHistoryEntryId: {
+      type: 'string',
+      description: 'cmdHistoryEntry id',
+      required: true,
+    },
     logsPrefix: {
       type: 'string',
       description: 'logs prefix',
@@ -84,7 +89,10 @@ module.exports = {
       );
       let logsEnc = Base64.encode(logs);
       let logsColorizedEnc = Base64.encode(logsColorized);
-      const resultJson = `{ "code": ${exitCode}, "results": ${results}, "logs": "${logsEnc}", "logsColorized": "${logsColorizedEnc}" }`;
+
+      let cmdEntry = await CmdHistoryEntry.findOne({id: inputs.cmdHistoryEntryId});
+      let duration = cmdEntry.duration != null ? `"duration": ${cmdEntry.duration}` : "";
+      const resultJson = `{ "code": ${exitCode}, "results": ${results}, "logs": "${logsEnc}", "logsColorized": "${logsColorizedEnc} ${duration}"}`;
       return this.res.json(JSON.parse(resultJson));
     } catch (e) {
       switch (e.code) {
