@@ -52,8 +52,10 @@ module.exports = {
       Cmd.destroy({cmdHistoryEntryId: cmdEntryId}).exec(function (/* err */) {
         cb();
       });
+    } else {
+      // If not hangs
+      cb();
     }
-
     /* var ids = _.pluck(destroyedCmdEntry, 'id');
 
     if (ids && ids.length) {
