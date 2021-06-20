@@ -91,8 +91,8 @@ module.exports = {
       let logsColorizedEnc = Base64.encode(logsColorized);
 
       let cmdEntry = await CmdHistoryEntry.findOne({id: inputs.cmdHistoryEntryId});
-      let duration = cmdEntry.duration != null ? `"duration": ${cmdEntry.duration}` : "";
-      const resultJson = `{ "code": ${exitCode}, "results": ${results}, "logs": "${logsEnc}", "logsColorized": "${logsColorizedEnc} ${duration}"}`;
+      let duration = cmdEntry.duration != null ? `, "duration": ${cmdEntry.duration}` : "";
+      const resultJson = `{ "code": ${exitCode}, "results": ${results}, "logs": "${logsEnc}", "logsColorized": "${logsColorizedEnc}" ${duration}}`;
       return this.res.json(JSON.parse(resultJson));
     } catch (e) {
       switch (e.code) {
