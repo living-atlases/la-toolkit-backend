@@ -29,5 +29,5 @@ exports.down = async function (db) {
 };
 
 exports._meta = {
-  version: 2,
+  version: 1,
 };
