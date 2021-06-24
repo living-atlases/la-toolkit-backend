@@ -1,5 +1,6 @@
 const yaml = require('write-yaml-file')
-
+const cp = require('child_process');
+const {logErr} = require('../libs/utils.js');
 const dest = sails.config.sshDir;
 const destIncDir = sails.config.asshDir;
 
@@ -23,18 +24,25 @@ const basicAsshConf = () => {
   return t;
 };
 
-const trans = (serverObjs, user) => {
+const trans = async (serverObjs, user, projectId) => {
   // We convert to object with the assh configuration format
   // https://github.com/moul/assh#
   // in order to use later 'write-yaml'.
   // this are created per project and later included in the main assh.yaml conf
   let t = {};
   t.hosts = {};
-  serverObjs.forEach((serverObj) => {
+  for (const serverObj of serverObjs) {
     t.hosts[`${serverObj.name}`] = {};
     t.hosts[`${serverObj.name}`].Hostname = serverObj.ip;
     if (serverObj.gateways.length > 0) {
-      t.hosts[`${serverObj.name}`].Gateways = serverObj.gateways;
+      let gwNames = [];
+      for await (let gwId of serverObj.gateways) {
+        let gw = await Server.findOne({id: gwId, projectId: projectId});
+        if (gw) {
+          gwNames.push(gw.name);
+        }
+      }
+      t.hosts[`${serverObj.name}`].Gateways = gwNames;
     }
     if (serverObj.aliases.length > 0) {
       t.hosts[`${serverObj.name}`].Aliases = serverObj.aliases;
@@ -52,7 +60,7 @@ const trans = (serverObjs, user) => {
         `${serverObj.name}`
         ].IdentityFile = `/home/ubuntu/.ssh/${serverObj.sshKey.name}`;
     }
-  });
+  }
   return t;
 };
 
@@ -97,14 +105,32 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
-    let serversTransformed = trans(inputs.servers, inputs.user);
+    let serversTransformed = await trans(inputs.servers, inputs.user, inputs.id);
     // options from dump: https://www.npmjs.com/package/js-yaml
+    let dirNames = await Project.find({select: ['dirName']});
+    let p = await Project.findOne({id: inputs.id});
+    if (dirNames.length > 0) {
+      // Remove old project assh configurations
+      let notThis = dirNames.map(function (d) {
+        return '! -name "assh-' + d.dirName + '.yml" ';
+      })
+      let cmd = `find ${destIncDir} ${notThis.join('')} -name 'assh*yml' -delete`
+      let preCmd = sails.config.preCmd;
+      if (preCmd !== '') {
+        preCmd = preCmd + ' ';
+      }
+      try {
+        cp.execSync(cmd, {});
+      } catch (err) {
+        logErr(err);
+      }
+    }
     let yamlOpts = {indent: 2};
     try {
       await yaml(
         // to use the id is too much
         // `${destIncDir}assh-${inputs.name}-${inputs.id}.yml`,
-        `${destIncDir}assh-${inputs.name}.yml`,
+        `${destIncDir}assh-${p.dirName}.yml`,
         serversTransformed, yamlOpts);
       await yaml(`${dest}assh.yml`, basicAsshConf(), yamlOpts);
       // assh config build > ~/.ssh/config
