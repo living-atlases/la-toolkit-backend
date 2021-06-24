@@ -28,14 +28,18 @@ const asshReConfig = () => {
   }
 };
 
-const pingTest = (server) => {
+const pingTest = async (server) => {
   let preCmd = sails.config.preCmd;
   if (preCmd !== '') {
     preCmd = preCmd + ' ';
   }
 
   if (server.gateways.length > 0) {
-    preCmd = `${preCmd}ssh -T ${server.gateways[0]} `;
+    let gw = await Server.findOne({id: server.gateways[0], projectId: server.projectId})
+    if (!gw) {
+      throw Error(`Wrong gw: ${server.gateways[0]}`);
+    }
+    preCmd = `${preCmd}ssh -T ${gw.name} `;
   }
   try {
     let cmd = `${preCmd}ping -w 5 -c 1 ${server.ip}`;
@@ -170,7 +174,7 @@ module.exports = {
     for (const server of inputs.servers) {
       resultJson[server.name] = {};
 
-      let pingOut = pingTest(server);
+      let pingOut = await pingTest(server);
       resultJson[server.name]['ping'] = pingOut.length === 0;
       resultJson[server.name]['out'] = pingOut;
 
