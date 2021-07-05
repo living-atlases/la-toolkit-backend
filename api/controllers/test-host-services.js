@@ -154,7 +154,7 @@ module.exports = {
               let checkServiceName = check.name;
               switch (type) {
                 case "tcp":
-                  let host = parseInt(check.args) === 8983 || parseInt(check.args) === 9000 ? server : "localhost";
+                  let host = check.host; // parseInt(check.args) === 8983 || parseInt(check.args) === 9000 ? server : "localhost";
                   let tcpServiceCmd =
                     // -r, --refuse=ok|warn|crit
                     `${plugins}check_tcp -H ${host} -r crit -p ${check.args}`;
@@ -171,6 +171,7 @@ module.exports = {
                   let args = '';
                   switch (check.args) {
                     case 'mysql':
+                      args = '-u root -p $(sudo grep password /root/.my.cnf | cut -d "=" -f 2 | tail -1 | xargs || echo "password")';
                     case 'mongodb':
                       checkName = check.args;
                       break;
@@ -179,7 +180,7 @@ module.exports = {
                       checkName = '';
                   }
                   if (checkName !== '') {
-                    let otherServiceCmd = `${plugins}check_${checkName} -H localhost${args}`;
+                    let otherServiceCmd = `${plugins}check_${checkName} -H localhost ${args}`;
                     serviceName.push(`${checkId}þ${checkServiceName}þcheck_${checkName}þþ${Base64.encode(otherServiceCmd)}`);
                     serviceCommand.push(otherServiceCmd);
                   }
