@@ -1,15 +1,17 @@
 const cp = require('child_process');
 const parse = require('url-parse');
+const csv = require('csvtojson/v2');
+const fs = require('fs');
+const p = require('path');
+const Base64 = require('js-base64');
+const loadIniFile = require('read-ini-file');
 const {
   defExecTimeout,
   logsProdFolder,
   logsProdDevLocation,
   logErr,
 } = require('../libs/utils.js');
-const csv = require('csvtojson/v2');
-const fs = require('fs');
-const p = require('path');
-const Base64 = require('js-base64');
+const {localPasswordsPath} = require('../libs/project-utils.js');
 
 let preCmd = sails.config.preCmd;
 if (preCmd !== '') {
@@ -102,6 +104,11 @@ module.exports = {
   description: '',
 
   inputs: {
+    projectId: {
+      type: 'string',
+      description: 'project id',
+      required: true,
+    },
     hostsServices: {
       type: 'json',
       required: true,
@@ -124,12 +131,25 @@ module.exports = {
     const plugins = 'sudo /usr/lib/nagios/plugins/';
     //  -H ala-install-test-1 -n ala-1 -s uptime:uptime:mysql:https -C uptime -C uptime -C 'sudo /usr/lib/nagios/plugins/check_mysql' -C '/usr/lib/nagios/plugins/check_tcp -H localhost -p 443'
 
-    let pId;
+    let pId = inputs.projectId;
+    let proj = await Project.findOne({id: pId});
+    let projectPath = proj.dirName;
+    let passPath = localPasswordsPath(projectPath);
+    if (!fs.existsSync(passPath)) {
+      console.error(`Cannot access to pass file in ${passPath}`);
+    }
+    let passwordsRead = await loadIniFile.sync(passPath);
+    let passwords = {};
+    for (let partialPass of Object.values(passwordsRead)) {
+      // We join all:vars with cas:vars, etc, to get mongo password for instance
+      Object.assign(passwords, partialPass);
+    }
+
     try {
       await Promise.all(
         serversIds.map(async (id) => {
             let s = await Server.findOne({id: id});
-            if (pId == null) pId = s.projectId;
+
             let server = s.name;
             const checks = serverChecks[id];
 
@@ -167,20 +187,29 @@ module.exports = {
                   serviceCommand.push(udpServiceCmd);
                   break;
                 case "other":
-                  let checkName;
+                  let checkName = check.args;
+                  let checkExecutable;
                   let args = '';
-                  switch (check.args) {
+                  switch (checkName) {
                     case 'mysql':
-                      args = '-u root -p $(sudo grep password /root/.my.cnf | cut -d "=" -f 2 | tail -1 | xargs || echo "password")';
-                    case 'mongodb':
-                      checkName = check.args;
+                      checkExecutable = 'mysql';
+                      args = `-H localhost -u root -p ${passwords['mysql_root_password']}`;
                       break;
-                    // case: 'psql':
+                    case 'mongo':
+                      checkExecutable = 'mongodb';
+                      args = `-H 127.0.0.1 -u admin -p ${passwords['mongodb_root_password']}`;
+                      break;
+                    case 'postgresql':
+                      checkName = ''; // we disable this check now as the admin user are not currently created
+                      checkExecutable = 'pgsql';
+                      args = `-H 127.0.0.1 -l postgres -p ${passwords['postgresql_password']}| paste -s - - | grep -v '^$'`;
+                      break;
                     default:
+                      console.log(`No tests properly configured for ${check.args}`)
                       checkName = '';
                   }
                   if (checkName !== '') {
-                    let otherServiceCmd = `${plugins}check_${checkName} -H localhost ${args}`;
+                    let otherServiceCmd = `(set -o pipefail && ${plugins}check_${checkExecutable} ${args})`;
                     serviceName.push(`${checkId}þ${checkServiceName}þcheck_${checkName}þþ${Base64.encode(otherServiceCmd)}`);
                     serviceCommand.push(otherServiceCmd);
                   }
@@ -222,7 +251,7 @@ module.exports = {
               } catch (err) {
                 // Process typical: 'check_by_ssh: Error parsing output' error when the services are not deployed/ready
                 logErr(err);
-                console.log(`Checking ${server} cmd by cmd as some failed`);
+                console.log(`Checking ${server} cmd by cmd as some failed --------------- `);
                 // lets try cmd by cmd
                 for (let i = 0; i < serviceName.length; i++) {
                   let cmd = `${serverCheckBase} -s ${serviceName[i]} -C "${serviceCommand[i]}" -O ${p.join(

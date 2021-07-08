@@ -1,4 +1,8 @@
 const cp = require('child_process');
+const {
+  addInvRelativePath,
+  addInvAbsPath,
+} = require('../libs/project-utils.js');
 // noinspection JSUnresolvedFunction
 module.exports = {
   friendlyName: 'Ansible additional inv',
@@ -38,13 +42,12 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    // TODO
     let addInv = inputs.addInv;
-    let p = await Project.findOne({ id: inputs.id });
+    let p = await Project.findOne({id: inputs.id});
     let projectPath = p.dirName;
-    let invBase = '/home/ubuntu/ansible/la-inventories/';
-    let invDir = `${projectPath}/${projectPath}-${addInv}/`;
-    let invPath = `${invBase}${invDir}`;
+
+    let invDir = addInvRelativePath(projectPath, addInv);
+    let invPath = addInvAbsPath(invDir, projectPath, addInv);
     let mainInvDir = `../${projectPath}-inventories/${projectPath}-inventory.ini`;
     let cwd = invPath;
     let rootBecome = inputs.cmd.rootBecome != null && inputs.cmd.rootBecome;
@@ -67,12 +70,12 @@ module.exports = {
       cwd: cwd,
     });
 
-    let baseCmd = `ansible-playbook -i ${mainInvDir} -i inventory.yml ${addInv}.yml${rootBecome? ' --user root --e ansible_user=root':''}`;
+    let baseCmd = `ansible-playbook -i ${mainInvDir} -i inventory.yml ${addInv}.yml${rootBecome ? ' --user root --e ansible_user=root' : ''}`;
 
     console.log(`Resulting cwd: ${cwd}`);
     console.log(`Resulting preCmd: ${preCmd}`);
 
-    return  await sails.helpers.ansibleTtyd.with({
+    return await sails.helpers.ansibleTtyd.with({
       useAnsiblew: false,
       type: inputs.type,
       baseCmd: baseCmd,
