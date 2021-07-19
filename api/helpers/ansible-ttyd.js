@@ -1,5 +1,5 @@
 const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
-const {logsProdFolder, resultsFile, logsFile} = require('../libs/utils.js');
+const {logsProdFolder, resultsFile, logsFile, dateSuffix} = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'ansible with ttyd',
@@ -91,19 +91,17 @@ module.exports = {
 
     let env = {};
 
-    let now = new Date();
-    let logDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 19)
-      .replace('T', '_');
+    let logDate = dateSuffix();
+    let logsType = "ansible";
 
     env.ANSIBLE_LOG_FOLDER = logsProdFolder;
-    env.ANSIBLE_LOG_PATH = logsFile(logsProdFolder, projectPath, logDate);
+    env.ANSIBLE_LOG_PATH = logsFile(logsProdFolder, projectPath, logDate, false, logsType);
     env.ANSIBLE_LOG_FILE = logsFile(
       '',
       projectPath,
       logDate,
-      true
+      true,
+      logsType
     );
     env.ANSIBLE_JSON_FILE = resultsFile(projectPath, logDate);
     env.ANSIBLE_FORCE_COLOR = true;

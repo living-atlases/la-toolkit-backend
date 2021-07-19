@@ -1,11 +1,16 @@
 const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
-const {logsProdFolder, logsFile} = require('../libs/utils.js');
+const {logsProdFolder, logsFile, logsTypeF} = require('../libs/utils.js');
 
 module.exports = {
   friendlyName: 'Term',
   description: 'Term with logs',
 
   inputs: {
+    cmdHistoryEntryId: {
+      type: 'string',
+      description: 'cmdHistoryEntry id',
+      required: true,
+    },
     logsPrefix: {
       type: 'string',
       description: 'logs prefix',
@@ -31,14 +36,17 @@ module.exports = {
   fn: async function (inputs) {
     // console.log('Executing bash');
     try {
+      let cmdEntry = await CmdHistoryEntry.findOne({id: inputs.cmdHistoryEntryId}).populate('cmd');
+      let logsType = logsTypeF(cmdEntry.cmd[0].type);
       let log = logsFile(
         logsProdFolder,
         inputs.logsPrefix,
         inputs.logsSuffix,
-        true
+        true,
+        logsType
       );
       let port = await ttyFreePort();
-      let cmd = `less +G -r ${log}`;
+      let cmd = `less +G -f -r ${log}`;
       let ttydPid = await ttyd(cmd, port, false);
       this.res.json({cmd: cmd, port: port, ttydPid: ttydPid});
     } catch (e) {

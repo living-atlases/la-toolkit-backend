@@ -3,10 +3,10 @@ const fs = require('fs');
 const sails = require('sails');
 
 const logsProdFolder = '/home/ubuntu/ansible/logs/';
-const logsFile = (folder, prefix, suffix, colorized = false) =>
+const logsFile = (folder, prefix, suffix, colorized = false, type = "ansible") =>
   p.join(
     folder,
-    `${prefix}-ansible-${colorized ? 'colorized-' : ''}${suffix}.log`
+    `${prefix}-${type}-${colorized ? 'colorized-' : ''}${suffix}.log`
   );
 const resultsFile = (prefix, suffix) => `${prefix}-results-${suffix}.json`;
 const exitCodeFile = (folder, prefix, suffix) =>
@@ -63,6 +63,27 @@ const logErr = (err) => {
   if (err.status != null) console.error(`exit code: ${err.status}`);
 }
 
+const logsTypeF = (cmdType) => {
+  let isBrandingDeploy = cmdType === 'brandingDeploy';
+  let isLAPipelines = cmdType === 'laPipelines'
+  let isBashCmd = cmdType === 'bash' || isLAPipelines || isBrandingDeploy;
+  return isBrandingDeploy ? "branding-deploy" : isLAPipelines ? "la-pipelines" : isBashCmd ? "bash" : "ansible";
+}
+
+const isBashCmdF = (cmdType) => {
+  let isBrandingDeploy = cmdType === 'brandingDeploy';
+  let isLAPipelines = cmdType === 'laPipelines'
+  return cmdType === 'bash' || isLAPipelines || isBrandingDeploy;
+}
+
+const dateSuffix = () => {
+  let now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 19)
+    .replace('T', '_');
+}
+
 module.exports = {
   logsProdFolder,
   logsFile,
@@ -75,4 +96,7 @@ module.exports = {
   sailsLoadSync,
   appConfSync,
   logErr,
+  dateSuffix,
+  logsTypeF,
+  isBashCmdF
 };

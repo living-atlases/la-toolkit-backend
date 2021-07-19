@@ -5,14 +5,17 @@ const {
   exitCodeFile,
   resultsFile,
   logsFile,
+  logErr,
+  logsTypeF,
+  isBashCmdF
 } = require('../libs/utils.js');
 const Base64 = require('js-base64');
 
 module.exports = {
-  friendlyName: 'Get ansiblew results',
+  friendlyName: 'Get cmd results',
 
   description:
-    'Get the results of a ansiblew execution in json and text format',
+    'Get the results of a cmd execution in json and text format',
 
   inputs: {
     cmdHistoryEntryId: {
@@ -27,7 +30,7 @@ module.exports = {
     },
     logsSuffix: {
       type: 'string',
-      description: 'ansiblew logs suffix',
+      description: 'logs suffix',
       required: true,
     },
   },
@@ -44,6 +47,9 @@ module.exports = {
 
   fn: async function (inputs) {
     try {
+      let cmdEntry = await CmdHistoryEntry.findOne({id: inputs.cmdHistoryEntryId}).populate('cmd');
+      let duration = cmdEntry.duration != null ? `, "duration": ${cmdEntry.duration}` : "";
+
       // If the user close the terminal the exit before a normal exit the exit file is not created
       let exitCode = 100;
       let exFile = exitCodeFile(
@@ -63,7 +69,8 @@ module.exports = {
       }
 
       // As the ansible callbacks are not a correct json object is like {},{},{}, we transform it to [{},{},{}]
-      let results =
+      let isBashCmd = isBashCmdF(cmdEntry.cmd[0].type);
+      let results = isBashCmd ? '[]' :
         '[' +
         fs
           .readFileSync(
@@ -74,8 +81,9 @@ module.exports = {
             'utf8'
           )
           .replace(/,\n$/, ']');
+      let logsType = logsTypeF(cmdEntry.cmd[0].type);
       let logs = fs.readFileSync(
-        logsFile(logsProdDevLocation(), inputs.logsPrefix, inputs.logsSuffix),
+        logsFile(logsProdDevLocation(), inputs.logsPrefix, inputs.logsSuffix, false, logsType),
         'utf8'
       );
       let logsColorized = fs.readFileSync(
@@ -83,18 +91,18 @@ module.exports = {
           logsProdDevLocation(),
           inputs.logsPrefix,
           inputs.logsSuffix,
-          true
+          true,
+          logsType
         ),
         'utf8'
       );
       let logsEnc = Base64.encode(logs);
       let logsColorizedEnc = Base64.encode(logsColorized);
 
-      let cmdEntry = await CmdHistoryEntry.findOne({id: inputs.cmdHistoryEntryId});
-      let duration = cmdEntry.duration != null ? `, "duration": ${cmdEntry.duration}` : "";
       const resultJson = `{ "code": ${exitCode}, "results": ${results}, "logs": "${logsEnc}", "logsColorized": "${logsColorizedEnc}" ${duration}}`;
       return this.res.json(JSON.parse(resultJson));
     } catch (e) {
+      logErr(e);
       switch (e.code) {
         case 'ENOENT':
           return this.res.notFound();

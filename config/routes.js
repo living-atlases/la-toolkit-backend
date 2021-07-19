@@ -48,7 +48,7 @@ module.exports.routes = {
     skipAssets: false,
   },
   'POST /api/v1/ansiblew': {action: 'ansiblew'},
-  'POST /api/v1/ansiblew-results': {action: 'ansiblew-results'},
+  'POST /api/v1/cmd-results': {action: 'cmd-results'},
   'GET /api/v1/get-generator-versions': {action: 'get-generator-versions'},
   'GET /api/v1/generator-select/:version': {
     action: 'generator-select',
@@ -65,4 +65,5 @@ module.exports.routes = {
   'PATCH /api/v1/update-project': {action: 'update-project'},
   'DELETE /api/v1/delete-project': {action: 'delete-project'},
   'GET /api/v1/get-env': {action: 'get-env'},
+  'POST /api/v1/branding-deploy': {action: 'branding-deploy'},
 };

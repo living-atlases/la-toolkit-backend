@@ -47,7 +47,7 @@ module.exports = {
     let projectPath = p.dirName;
 
     let invDir = addInvRelativePath(projectPath, addInv);
-    let invPath = addInvAbsPath(invDir, projectPath, addInv);
+    let invPath = addInvAbsPath(projectPath, addInv);
     let mainInvDir = `../${projectPath}-inventories/${projectPath}-inventory.ini`;
     let cwd = invPath;
     let rootBecome = inputs.cmd.rootBecome != null && inputs.cmd.rootBecome;

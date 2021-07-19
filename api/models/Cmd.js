@@ -14,7 +14,7 @@ module.exports = {
       type: 'string',
       allowNull: false,
       isIn: [
-        'ansible',
+        'brandingDeploy',
         'deploy',
         'preDeploy',
         'postDeploy',
@@ -22,10 +22,10 @@ module.exports = {
         'bash',
       ],
     },
-    properties: { type: 'json', allowNull: false },
+    properties: {type: 'json', allowNull: false},
 
     // Relations
-    cmdHistoryEntryId: { model: 'cmdHistoryEntry' },
+    cmdHistoryEntryId: {model: 'cmdHistoryEntry'},
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
     //  ╠═╝╠╦╝║║║║║ ║ ║╚╗╔╝║╣ ╚═╗
