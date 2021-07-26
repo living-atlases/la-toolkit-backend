@@ -1,3 +1,4 @@
+const assert = require("assert");
 const toIds = (rows) =>
   rows.map((row) => {
     return row.id;
@@ -15,7 +16,7 @@ module.exports = {
       custom: function (value) {
         return _.isObject(value);
       },
-    },
+    }
   },
 
   exits: {},
@@ -33,21 +34,24 @@ module.exports = {
     p.variables = toIds(p.variables);
     for (const a of assoc) {
       for (const el of a[0]) {
-        if (!(await a[1].findOne({ id: el.id }))) {
+        if (!(await a[1].findOne({id: el.id}))) {
           // console.log(`creating ${JSON.stringify(el)}`);
           // noinspection JSUnresolvedFunction
-          await a[1].findOrCreate({ id: el.id }, el);
+          await a[1].findOrCreate({id: el.id}, el);
         } else {
           // console.log(`updating ${JSON.stringify(el)}`);
           // noinspection JSUnresolvedFunction
-          await a[1].updateOne({ id: el.id }).set(el);
+          await a[1].updateOne({id: el.id}).set(el);
         }
       }
     }
+    // Not update populated objects here
+    delete p.parent;
+    delete p.hubs;
     delete p.cmdHistoryEntries;
     // noinspection JSUnresolvedFunction
-    await Project.updateOne({ id: p.id }).set(p);
+    await Project.updateOne({id: p.id}).set(p);
     let projects = await sails.helpers.populateProject();
-    return this.res.json({ projects: projects });
+    return this.res.json({projects: projects});
   },
 };

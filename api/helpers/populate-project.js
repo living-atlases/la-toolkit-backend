@@ -9,6 +9,7 @@ module.exports = {
       description: 'A project query',
       required: false,
       defaultsTo: {
+        where: {isHub: false},
         sort: 'updatedAt DESC',
       },
       custom: function (value) {
@@ -31,7 +32,7 @@ module.exports = {
       .populate('serviceDeploys')
       .populate('cmdHistoryEntries', {
         sort: 'createdAt DESC',
-      })
+      }).populate('hubs').populate('parent')
       .then(async (ps) => {
         for (const p of ps) {
           p.serverServices = {};
@@ -65,7 +66,7 @@ module.exports = {
 
           for (const cmdH of p.cmdHistoryEntries) {
             // noinspection JSUnresolvedFunction
-            cmdH.cmd = await Cmd.findOne({ cmdHistoryEntryId: cmdH.id });
+            cmdH.cmd = await Cmd.findOne({cmdHistoryEntryId: cmdH.id});
             if (cmdH.cmd == null) {
               console.warn(`Missing cmd for CmdHistoryEntryId ${cmdH.id}`);
               await CmdHistoryEntry.destroyOne({id: cmdH.id});
