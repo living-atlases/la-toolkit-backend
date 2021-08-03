@@ -32,7 +32,7 @@ module.exports = {
       .populate('serviceDeploys')
       .populate('cmdHistoryEntries', {
         sort: 'createdAt DESC',
-      }).populate('hubs').populate('parent')
+      }).populate('hubs')
       .then(async (ps) => {
         for (const p of ps) {
           p.serverServices = {};
