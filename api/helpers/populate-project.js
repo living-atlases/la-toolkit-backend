@@ -1,39 +1,13 @@
-module.exports = {
-  friendlyName: 'Populate project',
-
-  description: '',
-
-  inputs: {
-    query: {
-      type: 'json',
-      description: 'A project query',
-      required: false,
-      defaultsTo: {
-        where: {isHub: false},
-        sort: 'updatedAt DESC',
-      },
-      custom: function (value) {
-        return _.isObject(value);
-      },
-    },
-  },
-
-  exits: {
-    success: {
-      description: 'All done.',
-    },
-  },
-
-  fn: async function (inputs) {
-    return await Project.find(inputs.query) // Here for some group maybe in the future if users/groups are used
-      .populate('servers')
-      .populate('services')
-      .populate('variables')
-      .populate('serviceDeploys')
-      .populate('cmdHistoryEntries', {
-        sort: 'createdAt DESC',
-      }).populate('hubs')
-      .then(async (ps) => {
+async function populateP(query) {
+  return await Project.find(query) // Here for some group maybe in the future if users/groups are used
+    .populate('servers')
+    .populate('services')
+    .populate('variables')
+    .populate('serviceDeploys')
+    .populate('cmdHistoryEntries', {
+      sort: 'createdAt DESC',
+    }).populate('hubs')
+    .then(async (ps) => {
         for (const p of ps) {
           p.serverServices = {};
           //console.log(p.servers);
@@ -76,14 +50,55 @@ module.exports = {
             }
           }
           p.cmdHistoryEntries = cmdHistoryPopulated;
+
+          // Hubs
+          if (p.hubs != null && p.hubs.length > 0) {
+            let hubs = [];
+            for (let hub of p.hubs) {
+              let populatedHub = await populateP({id: hub.id});
+              hubs.push(populatedHub[0]);
+            }
+            p.hubs = hubs;
+          }
         }
         for (const p of ps) {
           // console.log(p.serverServices);
         }
         return ps;
-      })
-      .catch((err) => {
-        throw err;
-      });
+      }
+    )
+    .catch((err) => {
+      throw err;
+    });
+}
+
+module.exports = {
+  friendlyName: 'Populate project',
+
+  description: '',
+
+  inputs: {
+    query: {
+      type: 'json',
+      description: 'A project query',
+      required: false,
+      defaultsTo: {
+        where: {isHub: false},
+        sort: 'updatedAt DESC',
+      },
+      custom: function (value) {
+        return _.isObject(value);
+      },
+    },
+  },
+
+  exits: {
+    success: {
+      description: 'All done.',
+    },
+  },
+
+  fn: async function (inputs) {
+    return await populateP(inputs.query);
   },
 };
