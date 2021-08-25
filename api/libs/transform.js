@@ -146,6 +146,13 @@ module.exports = function (inputs) {
 
   let objMapped = objectMapper(inputs.conf, map);
 
+  if (inputs.conf.LA_hubs != null) {
+    objMapped.LA_hubs = [];
+    for (let hub of inputs.conf.LA_hubs) {
+      objMapped.LA_hubs.push(objectMapper(hub, map));
+    }
+  }
+
   if (!objMapped.LA_use_spatial) objMapped.LA_use_regions = false;
 
   if (!objMapped.LA_use_species) objMapped.LA_use_species_lists = false;
