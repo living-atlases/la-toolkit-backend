@@ -142,6 +142,8 @@ module.exports = function (inputs) {
       'LA_variable_pac4j_cookie_signing_key',
     LA_variable_privacy_policy_url: 'LA_variable_privacy_policy_url',
     LA_variable_support_email: 'LA_variable_support_email',
+    LA_variable_biocache_query_context: 'LA_variable_biocache_query_context',
+    LA_is_hub: 'LA_is_hub'
   };
 
   let objMapped = objectMapper(inputs.conf, map);
