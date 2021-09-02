@@ -2,6 +2,8 @@ const cp = require('child_process');
 const {
   addInvRelativePath,
   addInvAbsPath,
+  mainProjectPath,
+  projectPath,
 } = require('../libs/project-utils.js');
 // noinspection JSUnresolvedFunction
 module.exports = {
@@ -43,12 +45,13 @@ module.exports = {
 
   fn: async function (inputs) {
     let addInv = inputs.addInv;
-    let p = await Project.findOne({id: inputs.id});
-    let projectPath = p.dirName;
+    let p = await Project.findOne({id: inputs.id}).populate('parent');
+    let mainPath = mainProjectPath(p);
+    let path = projectPath(p);
 
-    let invDir = addInvRelativePath(projectPath, addInv);
-    let invPath = addInvAbsPath(projectPath, addInv);
-    let mainInvDir = `../${projectPath}-inventories/${projectPath}-inventory.ini`;
+    let invDir = addInvRelativePath(mainPath, path, addInv);
+    let invPath = addInvAbsPath(mainPath, path, addInv);
+    let mainInvDir = `../${path}-inventories/${path}-inventory.ini`;
     let cwd = invPath;
     let rootBecome = inputs.cmd.rootBecome != null && inputs.cmd.rootBecome;
 
@@ -80,7 +83,7 @@ module.exports = {
       type: inputs.type,
       baseCmd: baseCmd,
       projectId: inputs.id,
-      projectPath: projectPath,
+      projectPath: path,
       desc: inputs.desc,
       invDir: invDir,
       invPath: invPath,

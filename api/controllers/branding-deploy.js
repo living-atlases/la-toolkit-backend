@@ -1,6 +1,8 @@
 const cp = require('child_process');
 const {
   deployBrandingPath,
+  mainProjectPath,
+  projectPath,
 } = require('../libs/project-utils.js');
 const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
 const {dateSuffix, logsProdFolder, logsFile} = require('../libs/utils.js');
@@ -31,19 +33,20 @@ module.exports = {
 
   fn: async function (inputs) {
     // noinspection JSUnresolvedFunction
-    let p = await Project.findOne({id: inputs.id});
-    let projectPath = p.dirName;
+    let p = await Project.findOne({id: inputs.id}).propagate('parent');
+    let mainPath = mainProjectPath(p);
+    let path = projectPath(p);
 
-    let cmd = `${deployBrandingPath(projectPath)}deploy.sh`;
+    let cmd = `${deployBrandingPath(mainPath, path)}deploy.sh`;
     let env = {BASH_ENV: "$HOME/.profile"};
-    let logsPrefix = projectPath;
+    let logsPrefix = path;
     let logsSuffix = dateSuffix();
     let logsType = "branding-deploy";
 
-    env.BASH_LOG_FILE = logsFile(logsProdFolder, projectPath, logsSuffix, false, logsType);
+    env.BASH_LOG_FILE = logsFile(logsProdFolder, path, logsSuffix, false, logsType);
     env.BASH_LOG_FILE_COLORIZED = logsFile(
       logsProdFolder,
-      projectPath,
+      path,
       logsSuffix,
       true,
       logsType
@@ -70,7 +73,7 @@ module.exports = {
       cmdEntry.cmd = cmdCreated;
 
       let port = await ttyFreePort();
-      let ttydPid = await ttyd(cmd, port, true, deployBrandingPath(projectPath), env, logsPrefix, logsSuffix, cmdEntry.id);
+      let ttydPid = await ttyd(cmd, port, true, deployBrandingPath(mainPath, path), env, logsPrefix, logsSuffix, cmdEntry.id);
 
       return {
         cmdEntry: cmdEntry,
