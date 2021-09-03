@@ -1,4 +1,3 @@
-const assert = require("assert");
 const toIds = (rows) =>
   rows.map((row) => {
     return row.id;
@@ -24,6 +23,7 @@ module.exports = {
   fn: async function (inputs) {
     let p = inputs.project;
     let assoc = [];
+    console.log(`Updating ${p}`)
     assoc.push([p.servers, Server]);
     assoc.push([p.services, Service]);
     assoc.push([p.serviceDeploys, ServiceDeploy]);

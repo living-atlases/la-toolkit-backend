@@ -6,6 +6,9 @@ const p = require('path');
 const Base64 = require('js-base64');
 const loadIniFile = require('read-ini-file');
 const {
+  mainProjectPath,
+} = require('../libs/project-utils.js');
+const {
   defExecTimeout,
   logsProdFolder,
   logsProdDevLocation,
@@ -132,8 +135,8 @@ module.exports = {
     //  -H ala-install-test-1 -n ala-1 -s uptime:uptime:mysql:https -C uptime -C uptime -C 'sudo /usr/lib/nagios/plugins/check_mysql' -C '/usr/lib/nagios/plugins/check_tcp -H localhost -p 443'
 
     let pId = inputs.projectId;
-    let proj = await Project.findOne({id: pId});
-    let projectPath = proj.dirName;
+    let proj = await Project.findOne({id: pId}).populate('parent');
+    let projectPath = mainProjectPath(proj);
     let passPath = localPasswordsPath(projectPath);
     if (!fs.existsSync(passPath)) {
       console.error(`Cannot access to pass file in ${passPath}`);

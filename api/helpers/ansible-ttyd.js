@@ -32,6 +32,10 @@ module.exports = {
       type: 'string',
       required: true,
     },
+    mainProjectPath: {
+      type: 'string',
+      required: true,
+    },
     projectPath: {
       type: 'string',
       required: true,
@@ -54,6 +58,7 @@ module.exports = {
 
   fn: async function (inputs) {
     let cmd = inputs.baseCmd;
+    let maainProjectPath = inputs.mainProjectPath;
     let projectPath = inputs.projectPath;
     let aw = inputs.useAnsiblew;
     let sep = aw ? '=' : ' ';

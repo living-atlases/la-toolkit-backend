@@ -1,3 +1,8 @@
+const {
+  mainProjectPath,
+  projectPath,
+} = require('../libs/project-utils.js');
+
 module.exports = {
   friendlyName: 'Ansiblew',
 
@@ -31,10 +36,12 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    let p = await Project.findOne({ id: inputs.id });
-    let projectPath = p.dirName;
+    let p = await Project.findOne({id: inputs.id}).populate('parent');
+    let mainPath = mainProjectPath(p);
+    let path = projectPath(p);
+
     let invBase = '/home/ubuntu/ansible/la-inventories/';
-    let invDir = `${projectPath}/${projectPath}-inventories/`;
+    let invDir = `${mainPath}/${path}-inventories/`;
     let invPath = `${invBase}${invDir}`;
 
     let baseCmd = `./ansiblew`;
@@ -45,7 +52,8 @@ module.exports = {
       type: 'deploy',
       baseCmd: baseCmd,
       projectId: inputs.id,
-      projectPath: projectPath,
+      mainProjectPath: mainPath,
+      projectPath: path,
       desc: inputs.desc,
       invDir: invDir,
       invPath: invPath,

@@ -33,7 +33,7 @@ module.exports = {
 
   fn: async function (inputs) {
     // noinspection JSUnresolvedFunction
-    let p = await Project.findOne({id: inputs.id}).propagate('parent');
+    let p = await Project.findOne({id: inputs.id}).populate('parent');
     let mainPath = mainProjectPath(p);
     let path = projectPath(p);
 

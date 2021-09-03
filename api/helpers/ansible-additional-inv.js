@@ -83,6 +83,7 @@ module.exports = {
       type: inputs.type,
       baseCmd: baseCmd,
       projectId: inputs.id,
+      mainProjectPath: mainPath,
       projectPath: path,
       desc: inputs.desc,
       invDir: invDir,
