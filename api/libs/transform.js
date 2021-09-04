@@ -143,6 +143,7 @@ module.exports = function (inputs) {
     LA_variable_privacy_policy_url: 'LA_variable_privacy_policy_url',
     LA_variable_support_email: 'LA_variable_support_email',
     LA_variable_biocache_query_context: 'LA_variable_biocache_query_context',
+    LA_variable_sds_faq_url: 'LA_variable_sds_faq_url',
     LA_is_hub: 'LA_is_hub'
   };
 
