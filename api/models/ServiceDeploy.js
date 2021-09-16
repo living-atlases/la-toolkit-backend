@@ -8,18 +8,19 @@
 module.exports = {
   tableName: 'service_deploys',
   attributes: {
-    additionalVariables: { type: 'string', allowNull: false },
+    additionalVariables: {type: 'string', allowNull: false},
     // Status
     status: {
       type: 'string',
       defaultsTo: 'unknown',
       isIn: ['unknown', 'success', 'failed'],
     },
-    checkedAt: { type: 'number', allowNull: true},
+    softwareVersions: {type: 'json'},
+    checkedAt: {type: 'number', allowNull: true},
 
-    serviceId: { model: 'service' },
-    serverId: { model: 'server' },
-    projectId: { model: 'project' },
+    serviceId: {model: 'service'},
+    serverId: {model: 'server'},
+    projectId: {model: 'project'},
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
     //  ╠═╝╠╦╝║║║║║ ║ ║╚╗╔╝║╣ ╚═╗
