@@ -72,7 +72,6 @@ module.exports = function (inputs) {
     LA_solr_url: 'LA_solr_url',
     LA_solr_path: 'LA_solr_path',
     LA_biocache_backend_hostname: 'LA_biocache_backend_hostname',
-    LA_branding_hostname: 'LA_branding_hostname',
     LA_webapi_uses_subdomain: 'LA_webapi_uses_subdomain',
     LA_webapi_hostname: 'LA_webapi_hostname',
     LA_webapi_url: 'LA_webapi_url',
@@ -144,7 +143,8 @@ module.exports = function (inputs) {
     LA_variable_support_email: 'LA_variable_support_email',
     LA_variable_biocache_query_context: 'LA_variable_biocache_query_context',
     LA_variable_sds_faq_url: 'LA_variable_sds_faq_url',
-    LA_is_hub: 'LA_is_hub'
+    LA_is_hub: 'LA_is_hub',
+    LA_software_versions: 'LA_software_versions'
   };
 
   let objMapped = objectMapper(inputs.conf, map);
