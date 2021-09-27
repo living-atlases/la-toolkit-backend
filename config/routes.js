@@ -50,7 +50,7 @@ module.exports.routes = {
   'POST /api/v1/ansiblew': {action: 'ansiblew'},
   'POST /api/v1/cmd-results': {action: 'cmd-results'},
   'GET /api/v1/get-generator-versions': {action: 'get-generator-versions'},
-  'POST /api/v1/get-ala-nexus-versions': {action: 'get-ala-nexus-versions'},
+  'POST /api/v1/get-deps-versions': {action: 'get-deps-versions'},
   'GET /api/v1/generator-select/:version': {
     action: 'generator-select',
     skipAssets: false,
