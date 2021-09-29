@@ -67,4 +67,5 @@ module.exports.routes = {
   'DELETE /api/v1/delete-project': {action: 'delete-project'},
   'GET /api/v1/get-env': {action: 'get-env'},
   'POST /api/v1/branding-deploy': {action: 'branding-deploy'},
+  'POST /api/v1/get-service-versions': {action: 'get-service-versions'},
 };

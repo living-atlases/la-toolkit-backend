@@ -19,6 +19,7 @@
     "follow-redirects": "^1.13.3",
     "grunt": "1.0.4",
     "js-base64": "^3.6.0",
+    "meta-extractor": "^2.1.0",
     "object-mapper": "^6.2.0",
     "pkill": "^2.0.0",
     "read-ini-file": "^3.0.1",
