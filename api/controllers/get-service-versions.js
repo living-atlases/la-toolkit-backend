@@ -94,7 +94,7 @@ module.exports = {
     } catch (e) {
       // console.log();
     }
-    // console.log(versions);
+    console.log(versions);
     // Other option:
     // https://nexus.ala.org.au/service/local/lucene/search?sha1=7882074010dc22e27d25e3ad172beae97d83584d
     return this.res.json(versions);
