@@ -70,6 +70,9 @@ module.exports = {
     advancedEdit: {type: 'boolean', allowNull: false, defaultsTo: false},
     advancedTune: {type: 'boolean', allowNull: false, defaultsTo: false},
 
+    // Used to keep track of migrations of data from the client side
+    clientMigration: {type: 'number', allowNull: true},
+
     /*
        List<CmdHistoryEntry> cmdHistory;
 
