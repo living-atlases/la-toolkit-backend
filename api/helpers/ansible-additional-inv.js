@@ -86,6 +86,7 @@ module.exports = {
       mainProjectPath: mainPath,
       projectPath: path,
       desc: inputs.desc,
+      ansibleUser: p.genConf['LA_variable_ansible_user'],
       invDir: invDir,
       invPath: invPath,
       cmd: inputs.cmd,

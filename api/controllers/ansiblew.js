@@ -52,6 +52,7 @@ module.exports = {
       type: 'deploy',
       baseCmd: baseCmd,
       projectId: inputs.id,
+      ansibleUser: p.genConf['LA_variable_ansible_user'],
       mainProjectPath: mainPath,
       projectPath: path,
       desc: inputs.desc,

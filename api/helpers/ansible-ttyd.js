@@ -48,6 +48,10 @@ module.exports = {
       type: 'string',
       required: true,
     },
+    ansibleUser: {
+      type: 'string',
+      required: true,
+    },
   },
 
   exits: {
@@ -58,7 +62,7 @@ module.exports = {
 
   fn: async function (inputs) {
     let cmd = inputs.baseCmd;
-    let maainProjectPath = inputs.mainProjectPath;
+    // let mainProjectPath = inputs.mainProjectPath;
     let projectPath = inputs.projectPath;
     let aw = inputs.useAnsiblew;
     let sep = aw ? '=' : ' ';
@@ -89,6 +93,8 @@ module.exports = {
     if (inputs.cmd.limitToServers.length > 0) {
       cmd = cmd + ` --limit${sep}${inputs.cmd.limitToServers.join(',')}`;
     }
+
+    cmd = cmd + ` --user ${inputs.ansibleUser}`;
 
     if (aw) {
       cmd = cmd + ` ${inputs.cmd.deployServices.join(' ')}`;
