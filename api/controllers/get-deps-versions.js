@@ -65,6 +65,13 @@ module.exports = {
     },
   },
 
+  exits: {
+    getError: {
+      description: 'Http error checking the nexus ALA module versions.',
+      responseType: 'serverError',
+    },
+  },
+
   fn: async function (inputs) {
 
     if (inputs.artifact === 'pipelines') {
@@ -76,17 +83,23 @@ module.exports = {
       // console.log(versions);
       return this.res.json(versions);
     } else {
-
-      const xmlData = await request(`https://nexus.ala.org.au/service/local/repositories/${inputs.repo}/content/au/org/ala/${inputs.artifact}/maven-metadata.xml`);
-      // https://nexus.ala.org.au/service/local/repositories/releases/content/au/org/ala/ala-hub/4.0.8/ala-hub-4.0.8.war
-      // https://nexus.ala.org.au/service/local/repositories/snapshots/content/au/org/ala/ala-hub/maven-metadata.xml
-      if (parser.validate(xmlData) === true) { //optional (it'll return an object in case it's not valid)
-        const jsonObj = parser.parse(xmlData, {
-          numParseOptions: {
-            skipLike: /[0-9.]*/
-          }
-        });
-        return this.res.json(jsonObj);
+      let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${inputs.repo}/content/au/org/ala/${inputs.artifact}/maven-metadata.xml`;
+      try {
+        const xmlData = await request(nexusUrl);
+        // https://nexus.ala.org.au/service/local/repositories/releases/content/au/org/ala/ala-hub/4.0.8/ala-hub-4.0.8.war
+        // https://nexus.ala.org.au/service/local/repositories/snapshots/content/au/org/ala/ala-hub/maven-metadata.xml
+        if (parser.validate(xmlData) === true) { //optional (it'll return an object in case it's not valid)
+          const jsonObj = parser.parse(xmlData, {
+            numParseOptions: {
+              skipLike: /[0-9.]*/
+            }
+          });
+          return this.res.json(jsonObj);
+        }
+      } catch (e) {
+        console.log(`url: ${nexusUrl}`);
+        console.log(`message: ${e.message}`);
+        throw "getError";
       }
     }
     throw 'getError';
