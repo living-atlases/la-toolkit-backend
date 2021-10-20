@@ -19,6 +19,8 @@ module.exports = function (inputs) {
     LA_use_doi: 'LA_use_doi',
     LA_use_webapi: 'LA_use_webapi',
     LA_use_dashboard: 'LA_use_dashboard',
+    LA_use_biocache_backend: 'LA_use_biocache_store',
+    LA_use_pipelines: 'LA_use_pipelines',
     LA_use_sds: 'LA_use_sds',
     LA_enable_ssl: 'LA_enable_ssl',
     LA_use_git: {key: 'LA_use_git', default: true},
@@ -144,7 +146,8 @@ module.exports = function (inputs) {
     LA_variable_biocache_query_context: 'LA_variable_biocache_query_context',
     LA_variable_sds_faq_url: 'LA_variable_sds_faq_url',
     LA_is_hub: 'LA_is_hub',
-    LA_software_versions: 'LA_software_versions'
+    LA_software_versions: 'LA_software_versions',
+    LA_pipelines_hostname: 'LA_pipelines_hostname'
   };
 
   let objMapped = objectMapper(inputs.conf, map);
