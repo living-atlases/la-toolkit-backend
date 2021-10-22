@@ -80,7 +80,7 @@ module.exports = {
       // Other option but does not match la-pipelines releases:
       // let pipelinesUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
       let versions = await pipelinesVersions();
-      // console.log(versions);
+      // console.log(`${inputs.artifact} ${versions}`);
       return this.res.json(versions);
     } else {
       let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${inputs.repo}/content/au/org/ala/${inputs.artifact}/maven-metadata.xml`;
@@ -94,6 +94,7 @@ module.exports = {
               skipLike: /[0-9.]*/
             }
           });
+          // console.log(`${inputs.artifact} ${JSON.stringify(jsonObj)}`);
           return this.res.json(jsonObj);
         }
       } catch (e) {
