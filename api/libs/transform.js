@@ -147,7 +147,9 @@ module.exports = function (inputs) {
     LA_variable_sds_faq_url: 'LA_variable_sds_faq_url',
     LA_is_hub: 'LA_is_hub',
     LA_software_versions: 'LA_software_versions',
-    LA_pipelines_hostname: 'LA_pipelines_hostname'
+    LA_pipelines_hostname: 'LA_pipelines_hostname',
+    LA_variable_pipelines_master: 'LA_variable_pipelines_master',
+    LA_variable_pipelines_ssh_key: 'LA_variable_pipelines_ssh_key'
   };
 
   let objMapped = objectMapper(inputs.conf, map);
