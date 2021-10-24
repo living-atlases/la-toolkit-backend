@@ -68,4 +68,5 @@ module.exports.routes = {
   'GET /api/v1/get-env': {action: 'get-env'},
   'POST /api/v1/branding-deploy': {action: 'branding-deploy'},
   'POST /api/v1/get-service-versions': {action: 'get-service-versions'},
+  'POST /api/v1/pipelines-run': {action: 'pipelines-run'},
 };
