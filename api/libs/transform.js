@@ -145,11 +145,14 @@ module.exports = function (inputs) {
     LA_variable_support_email: 'LA_variable_support_email',
     LA_variable_biocache_query_context: 'LA_variable_biocache_query_context',
     LA_variable_sds_faq_url: 'LA_variable_sds_faq_url',
+    LA_variable_sds_spatial_layers: 'LA_variable_sds_spatial_layers',
+    LA_variable_sds_flag_rules: 'LA_variable_sds_flag_rules',
     LA_is_hub: 'LA_is_hub',
     LA_software_versions: 'LA_software_versions',
     LA_pipelines_hostname: 'LA_pipelines_hostname',
     LA_variable_pipelines_master: 'LA_variable_pipelines_master',
-    LA_variable_pipelines_ssh_key: 'LA_variable_pipelines_ssh_key'
+    LA_variable_pipelines_ssh_key: 'LA_variable_pipelines_ssh_key',
+    LA_variable_pipelines_jenkins_use: 'LA_use_pipelines_jenkins'
   };
 
   let objMapped = objectMapper(inputs.conf, map);
