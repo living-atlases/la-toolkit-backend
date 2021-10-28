@@ -1,7 +1,7 @@
 {
   "metadata": {
     "groupId": "org.apache",
-    "artifactId": "sorl",
+    "artifactId": "solr",
     "latest": "8.8.2",
     "versioning": {
       "versions": {
