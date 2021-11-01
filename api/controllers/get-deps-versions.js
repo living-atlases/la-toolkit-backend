@@ -73,8 +73,11 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-
-    if (inputs.artifact === 'pipelines') {
+    if (inputs.artifact === 'solr' || inputs.artifact == 'solrcloud') {
+      // As solr does not provide a list of versions, we maintain this json in github :-/
+      const solrData = await request('https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/solr-versions.json');
+      return this.res.json(JSON.parse(solrData));
+    } else if (inputs.artifact === 'pipelines') {
       // apt install la-pipelines=2.9.9-SNAPSHOT\*
       // apt-cache madison la-pipelines  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort -r | uniq
       // Other option but does not match la-pipelines releases:

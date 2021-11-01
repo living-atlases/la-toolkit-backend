@@ -21,6 +21,7 @@ module.exports = function (inputs) {
     LA_use_dashboard: 'LA_use_dashboard',
     LA_use_biocache_backend: 'LA_use_biocache_store',
     LA_use_pipelines: 'LA_use_pipelines',
+    LA_use_solrcloud: 'LA_use_solrcloud',
     LA_use_sds: 'LA_use_sds',
     LA_enable_ssl: 'LA_enable_ssl',
     LA_use_git: {key: 'LA_use_git', default: true},
@@ -150,6 +151,8 @@ module.exports = function (inputs) {
     LA_is_hub: 'LA_is_hub',
     LA_software_versions: 'LA_software_versions',
     LA_pipelines_hostname: 'LA_pipelines_hostname',
+    LA_solrcloud_hostname: 'LA_solrcloud_hostname',
+    LA_zookeeper_hostname: 'LA_zookeeper_hostname',
     LA_variable_pipelines_master: 'LA_variable_pipelines_master',
     LA_variable_pipelines_ssh_key: 'LA_variable_pipelines_ssh_key',
     LA_variable_pipelines_jenkins_use: 'LA_use_pipelines_jenkins'
