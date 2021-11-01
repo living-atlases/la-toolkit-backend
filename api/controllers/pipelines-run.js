@@ -40,27 +40,44 @@ module.exports = {
     let p = await Project.findOne({id: inputs.id}).populate('parent');
     let path = projectPath(p);
 
-    let cmd = `ssh ${inputs.cmd.master} sudo su - spark -c 'la-pipelines `;
+    console.log(inputs.cmd);
 
-    if (inputs.cmd.steps != null && inputs.cmd.steps.length > 0) {
-      cmd = cmd + inputs.cmd.steps[0];
+    let mode = inputs.cmd.mode === 0 ? ' --local' : inputs.cmd.mode === 1 ? ' --embedded' : ' --cluster';
+
+    let steps = inputs.cmd.steps;
+
+    let cmds = [];
+
+    for (let step of steps) {
+      let cmd = `la-pipelines ${step}`;
+      let drs = inputs.cmd.drs;
+      let hasDrs = drs != null && drs.length > 0;
+      if (hasDrs) {
+        cmd = cmd + ' ' + drs.join(' ');
+      }
+      if (inputs.cmd.allSteps) {
+        cmd = cmd + ' do-all';
+      }
+      let noDrSteps = ["archive-list", "dataset-list", "prune-datasets", "validation-report"].indexOf(step) === -1;
+      let useMode = ["dwca-avro", "archive-list", "dataset-list", "prune-datasets", "validation-report"].indexOf(step) === -1;
+      if (inputs.cmd.allDrs && noDrSteps) {
+        cmd = cmd + ' all';
+      }
+      if (inputs.cmd.dryRun) {
+        cmd = cmd + ' --dry-run';
+      }
+      if (useMode) {
+        cmd = cmd + mode;
+      }
+      if (inputs.cmd.debug) {
+        cmd = cmd + ' --debug';
+      }
+      cmds.push(cmd);
     }
-    if (inputs.cmd.drs != null && inputs.cmd.drs.length > 0) {
-      cmd = cmd + ' ' + inputs.cmd.drs; // .join(' ');
-    }
-    if (inputs.cmd.allSteps) {
-      cmd = cmd + ' do-all';
-    }
-    if (inputs.cmd.allDrs) {
-      cmd = cmd + ' all';
-    }
-    if (inputs.cmd.dryRun) {
-      cmd = cmd + ' --dry-run';
-    }
-    if (inputs.cmd.debug) {
-      cmd = cmd + ' --debug';
-    }
-    cmd = cmd + "'";
+
+    let concatCmds = cmds.join(" && ");
+    let finalCmd = `ssh ${inputs.cmd.master} sudo su - spark -c "${concatCmds}"`;
+
 
     let env = {BASH_ENV: "$HOME/.profile"};
     let logsPrefix = path;
@@ -89,7 +106,7 @@ module.exports = {
         logsPrefix: logsPrefix,
         logsSuffix: logsSuffix,
         // invDir: inputs.invDir,
-        rawCmd: cmd,
+        rawCmd: finalCmd,
         result: 'unknown',
         projectId: inputs.id,
         cmd: cmdCreated.id,
@@ -97,7 +114,7 @@ module.exports = {
       cmdEntry.cmd = cmdCreated;
 
       let port = await ttyFreePort();
-      let ttydPid = await ttyd(cmd, port, true, '/home/ubuntu', env, logsPrefix, logsSuffix, cmdEntry.id);
+      let ttydPid = await ttyd(finalCmd, port, true, '/home/ubuntu', env, logsPrefix, logsSuffix, cmdEntry.id);
 
       return {
         cmdEntry: cmdEntry,
@@ -105,11 +122,16 @@ module.exports = {
         ttydPid: ttydPid
       };
     } catch (e) {
-      console.log(`ttyd cmd bash call failed (${e})`);
+      console.log(`
+  ttyd cmd bash call failed ($
+    {
+      e
+    }
+  )
+    `);
       throw 'termError';
     }
     // All done.
-    return;
   }
 
 
