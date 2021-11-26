@@ -55,9 +55,6 @@ module.exports = {
       if (hasDrs) {
         cmd = cmd + ' ' + drs.join(' ');
       }
-      if (inputs.cmd.allSteps) {
-        cmd = cmd + ' do-all';
-      }
       let noDrSteps = ["archive-list", "dataset-list", "prune-datasets", "validation-report"].indexOf(step) === -1;
       let useMode = ["dwca-avro", "archive-list", "dataset-list", "prune-datasets", "validation-report"].indexOf(step) === -1;
       if (inputs.cmd.allDrs && noDrSteps) {
