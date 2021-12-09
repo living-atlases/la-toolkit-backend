@@ -86,7 +86,8 @@ module.exports = {
       // console.log(`${inputs.artifact} ${versions}`);
       return this.res.json(versions);
     } else {
-      let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${inputs.repo}/content/au/org/ala/${inputs.artifact}/maven-metadata.xml`;
+      let artifact = inputs.artifact === 'ala-namematching-server' ? 'names/ala-namematching-server': inputs.artifact;
+      let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${inputs.repo}/content/au/org/ala/${artifact}/maven-metadata.xml`;
       try {
         const xmlData = await request(nexusUrl);
         // https://nexus.ala.org.au/service/local/repositories/releases/content/au/org/ala/ala-hub/4.0.8/ala-hub-4.0.8.war
