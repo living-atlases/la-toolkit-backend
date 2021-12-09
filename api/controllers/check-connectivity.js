@@ -189,9 +189,13 @@ module.exports = {
         resultJson[server.name]['out'] + '\n' + sudoOut;
 
       let osVersionOut = osVersionTest(server);
-      resultJson[server.name]['os'] = osVersionOut.length !== 0
-        ? JSON.parse(osVersionOut)
-        : {os: {name: '', version: ''}};
+      try {
+        resultJson[server.name]['os'] = osVersionOut.length !== 0
+          ? JSON.parse(osVersionOut)
+          : {os: {name: '', version: ''}};
+      } catch (e) {
+        resultJson[server.name]['os'] = {os: {name: '', version: ''}};
+      }
 
       let updatedServer = await Server.updateOne({id: server.id}).set(
         {
