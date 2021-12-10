@@ -163,7 +163,8 @@ module.exports = function (inputs) {
     LA_zookeeper_hostname: 'LA_zookeeper_hostname',
     LA_variable_pipelines_master: 'LA_variable_pipelines_master',
     LA_variable_pipelines_ssh_key: 'LA_variable_pipelines_ssh_key',
-    LA_variable_pipelines_jenkins_use: 'LA_use_pipelines_jenkins'
+    LA_variable_pipelines_jenkins_use: 'LA_use_pipelines_jenkins',
+    LA_variable_enable_data_quality: 'LA_enable_data_quality'
   };
 
   let objMapped = objectMapper(inputs.conf, map);
