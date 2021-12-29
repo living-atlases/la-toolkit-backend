@@ -23,6 +23,7 @@ module.exports = {
     });
     let projects = await sails.helpers.populateProject();
     // Notify subs socket clients
+    // https://sailsjs.com/documentation/reference/web-sockets/resourceful-pub-sub/publish
     Project.publish(projects.map(p => p.id), projects, this.req);
     return this.res.json({ projects: projects });
   },

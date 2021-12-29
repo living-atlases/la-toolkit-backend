@@ -23,6 +23,7 @@ module.exports = {
     }
     let ps = await Project.find({});
     // Now we'll subscribe our client socket to each of these records.
+    // https://sailsjs.com/documentation/reference/web-sockets/resourceful-pub-sub/subscribe
     Project.subscribe(this.req, _.pluck(ps, 'id'));
     console.log('Subscribed to projects')
     // All done.
