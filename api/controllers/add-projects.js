@@ -23,7 +23,9 @@ module.exports = {
         project: p,
       });
     }
-    let projectsAdded = await sails.helpers.populateProject();
-    return this.res.json({ projects: projectsAdded });
+    let projects = await sails.helpers.populateProject();
+    // Notify subs socket clients
+    Project.publish(projects.map(p => p.id), projects, this.req);
+    return this.res.json({ projects: projects });
   },
 };

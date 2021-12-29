@@ -69,4 +69,5 @@ module.exports.routes = {
   'POST /api/v1/branding-deploy': {action: 'branding-deploy'},
   'POST /api/v1/get-service-versions': {action: 'get-service-versions'},
   'POST /api/v1/pipelines-run': {action: 'pipelines-run'},
+  'GET /api/v1/projects-subs': { action: 'projects-subs' },
 };

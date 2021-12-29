@@ -51,6 +51,8 @@ module.exports = {
     // noinspection JSUnresolvedFunction
     await Project.updateOne({id: p.id}).set(p);
     let projects = await sails.helpers.populateProject();
+    // Notify subs socket clients
+    Project.publish(projects.map(p => p.id), projects, this.req);
     return this.res.json({projects: projects});
   },
 };
