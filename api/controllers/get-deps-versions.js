@@ -19,7 +19,7 @@ const pipelinesVersions = async () => {
         timeout: defExecTimeout,
       }
     );
-    console.log("Checking 'la-pipelines' available versions");
+    // console.log("Checking 'la-pipelines' available versions");
     let currentVersions = cp.execSync(
       `${preCmd} apt-cache madison la-pipelines  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort | uniq  | cut -d "|" -f 2 | sed 's/^ /"/g'| sed 's/$/",/g' | paste -s - - | egrep -v "^$" | sed 's/,$/]/' | sed 's/^/[/' `,
       {
@@ -53,14 +53,9 @@ module.exports = {
   description: '',
 
   inputs: {
-    repo: {
-      type: 'string',
-      description: 'the repo to get the version',
-      required: true,
-    },
-    artifact: {
-      type: 'string',
-      description: 'the artifact to get the version',
+    deps: {
+      type: 'json',
+      description: 'list of deps to get versions',
       required: true,
     },
   },
@@ -73,41 +68,48 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    if (inputs.artifact === 'solr' || inputs.artifact == 'solrcloud') {
-      // As solr does not provide a list of versions, we maintain this json in github :-/
-      const solrData = await request('https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/solr-versions.json');
-      return this.res.json(JSON.parse(solrData));
-    } else if (inputs.artifact === 'pipelines') {
-      // apt install la-pipelines=2.9.9-SNAPSHOT\*
-      // apt-cache madison la-pipelines  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort -r | uniq
-      // Other option but does not match la-pipelines releases:
-      // let pipelinesUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
-      let versions = await pipelinesVersions();
-      // console.log(`${inputs.artifact} ${versions}`);
-      return this.res.json(versions);
-    } else {
-      let artifact = inputs.artifact === 'ala-namematching-server' ? 'names/ala-namematching-server': inputs.artifact;
-      let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${inputs.repo}/content/au/org/ala/${artifact}/maven-metadata.xml`;
-      try {
-        const xmlData = await request(nexusUrl);
-        // https://nexus.ala.org.au/service/local/repositories/releases/content/au/org/ala/ala-hub/4.0.8/ala-hub-4.0.8.war
-        // https://nexus.ala.org.au/service/local/repositories/snapshots/content/au/org/ala/ala-hub/maven-metadata.xml
-        if (parser.validate(xmlData) === true) { //optional (it'll return an object in case it's not valid)
-          const jsonObj = parser.parse(xmlData, {
-            numParseOptions: {
-              skipLike: /[0-9.]*/
+    let result = {};
+    let depList = Object.keys(inputs.deps);
+    await Promise.all(
+      depList.map(async (service) => {
+        result[service] = {};
+        for (let repo of ["releases", "snapshots"]) {
+          let artifact = inputs.deps[service];
+          if (artifact === 'solr' || artifact === 'solrcloud') {
+            // As solr does not provide a list of versions, we maintain this json in github :-/
+            const solrData = await request('https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/solr-versions.json');
+            result[service][repo] = JSON.parse(solrData);
+          } else if (artifact === 'pipelines') {
+            // apt install la-pipelines=2.9.9-SNAPSHOT\*
+            // apt-cache madison la-pipelines  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort -r | uniq
+            // Other option but does not match la-pipelines releases:
+            // let pipelinesUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
+            // console.log(`${artifact} ${versions}`);
+            result[service][repo] = await pipelinesVersions();
+          } else {
+            let artifactConv = artifact === 'ala-namematching-server' ? 'names/ala-namematching-server' : artifact;
+            let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${repo}/content/au/org/ala/${artifactConv}/maven-metadata.xml`;
+            try {
+              const xmlData = await request(nexusUrl);
+              // https://nexus.ala.org.au/service/local/repositories/releases/content/au/org/ala/ala-hub/4.0.8/ala-hub-4.0.8.war
+              // https://nexus.ala.org.au/service/local/repositories/snapshots/content/au/org/ala/ala-hub/maven-metadata.xml
+              if (parser.validate(xmlData) === true) { //optional (it'll return an object in case it's not valid)
+                // console.log(`${artifact} ${JSON.stringify(jsonObj)}`);
+                result[service][repo] =
+                  parser.parse(xmlData, {
+                    numParseOptions: {
+                      skipLike: /[0-9.]*/
+                    }
+                  });
+              }
+            } catch (e) {
+              console.log(`url: ${nexusUrl}`);
+              console.log(`message: ${e.message}`);
+              throw "getError";
             }
-          });
-          // console.log(`${inputs.artifact} ${JSON.stringify(jsonObj)}`);
-          return this.res.json(jsonObj);
+          }
         }
-      } catch (e) {
-        console.log(`url: ${nexusUrl}`);
-        console.log(`message: ${e.message}`);
-        throw "getError";
-      }
-    }
-    throw 'getError';
+      }))
+    return this.res.json(result);
   }
-  ,
-};
+}
