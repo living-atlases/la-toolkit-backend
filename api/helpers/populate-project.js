@@ -6,6 +6,7 @@ async function populateP(query) {
     .populate('serviceDeploys')
     .populate('cmdHistoryEntries', {
       sort: 'createdAt DESC',
+      limit: 5
     }).populate('hubs')
     .then(async (ps) => {
         for (const p of ps) {
