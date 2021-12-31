@@ -59,11 +59,13 @@ module.exports = {
       }).fetch();
 
       // CmdHistoryEntry
+      let cwd = deployBrandingPath(mainPath, path);
       let cmdEntry = await CmdHistoryEntry.create({
         desc: "Branding deploy",
         logsPrefix: logsPrefix,
         logsSuffix: logsSuffix,
         // invDir: inputs.invDir,
+        cwd: cwd,
         rawCmd: cmd,
         result: 'unknown',
         projectId: inputs.id,
@@ -72,7 +74,7 @@ module.exports = {
       cmdEntry.cmd = cmdCreated;
 
       let port = await ttyFreePort();
-      let ttydPid = await ttyd(cmd, port, true, deployBrandingPath(mainPath, path), env, logsPrefix, logsSuffix, cmdEntry.id);
+      let ttydPid = await ttyd(cmd, port, true, cwd, env, logsPrefix, logsSuffix, cmdEntry.id);
 
       return {
         cmdEntry: cmdEntry,

@@ -15,6 +15,7 @@ module.exports = {
     logsPrefix: {type: 'string', allowNull: false},
     logsSuffix: {type: 'string', allowNull: false},
     invDir: {type: 'string', allowNull: false},
+    cwd: {type: 'string'},
     // previously cmd
     rawCmd: {type: 'string', allowNull: false},
     // unknown, aborted, success, failed
