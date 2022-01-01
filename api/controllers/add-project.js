@@ -18,8 +18,9 @@ module.exports = {
 
   fn: async function (inputs) {
     // noinspection JSUnresolvedFunction
+    inputs.project.hubs = inputs.project.hubs != null ? inputs.project.hubs.map(h => h.id): [];
     await sails.helpers.addProject.with({
-      project: inputs.project,
+      project: inputs.project
     });
     let projects = await sails.helpers.populateProject();
     // Notify subs socket clients
