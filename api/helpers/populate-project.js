@@ -9,6 +9,7 @@ async function populateP(query) {
       limit: 5
     }).populate('hubs')
     .then(async (ps) => {
+        // console.log(`Populate projects size: ${ps.length}, query: ${JSON.stringify(query)}`);
         for (const p of ps) {
           p.serverServices = {};
           //console.log(p.servers);
