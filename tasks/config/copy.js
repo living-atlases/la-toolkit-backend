@@ -11,12 +11,16 @@
  */
 module.exports = function(grunt) {
 
+  // Fix for files without extension
+  // https://github.com/balderdashy/sails/issues/2917
   grunt.config.set('copy', {
     dev: {
       files: [{
         expand: true,
         cwd: './assets',
-        src: ['**/*.!(coffee|less)'],
+        src: ['**/*',
+              '!**/*.less',
+              '!**/*.coffee'],
         dest: '.tmp/public'
       }]
     },
