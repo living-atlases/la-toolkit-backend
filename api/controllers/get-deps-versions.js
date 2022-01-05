@@ -75,21 +75,22 @@ module.exports = {
         result[service] = {};
         for (let repo of ["releases", "snapshots"]) {
           let artifact = inputs.deps[service];
-          if (artifact === 'solr' || artifact === 'solrcloud') {
-            // As solr does not provide a list of versions, we maintain this json in github :-/
-            const solrData = await request('https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/solr-versions.json');
-            result[service][repo] = JSON.parse(solrData);
-          } else if (artifact === 'pipelines') {
-            // apt install la-pipelines=2.9.9-SNAPSHOT\*
-            // apt-cache madison la-pipelines  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort -r | uniq
-            // Other option but does not match la-pipelines releases:
-            // let pipelinesUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
-            // console.log(`${artifact} ${versions}`);
-            result[service][repo] = await pipelinesVersions();
-          } else {
-            let artifactConv = artifact === 'ala-namematching-server' ? 'names/ala-namematching-server' : artifact;
-            let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${repo}/content/au/org/ala/${artifactConv}/maven-metadata.xml`;
-            try {
+          try {
+            if (artifact === 'solr' || artifact === 'solrcloud') {
+              // As solr does not provide a list of versions, we maintain this json in github :-/
+              const solrData = await request('https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/solr-versions.json');
+              result[service][repo] = JSON.parse(solrData);
+            } else if (artifact === 'pipelines') {
+              // apt install la-pipelines=2.9.9-SNAPSHOT\*
+              // apt-cache madison la-pipelines  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort -r | uniq
+              // Other option but does not match la-pipelines releases:
+              // let pipelinesUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
+              // console.log(`${artifact} ${versions}`);
+              result[service][repo] = await pipelinesVersions();
+            } else {
+              let artifactConv = artifact === 'ala-namematching-server' ? 'names/ala-namematching-server' : artifact;
+              let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${repo}/content/au/org/ala/${artifactConv}/maven-metadata.xml`;
+
               const xmlData = await request(nexusUrl);
               // https://nexus.ala.org.au/service/local/repositories/releases/content/au/org/ala/ala-hub/4.0.8/ala-hub-4.0.8.war
               // https://nexus.ala.org.au/service/local/repositories/snapshots/content/au/org/ala/ala-hub/maven-metadata.xml
@@ -102,11 +103,11 @@ module.exports = {
                     }
                   });
               }
-            } catch (e) {
-              console.log(`url: ${nexusUrl}`);
-              console.log(`message: ${e.message}`);
-              throw "getError";
             }
+          } catch (e) {
+            console.log(`url: ${nexusUrl}`);
+            console.log(`message: ${e.message}`);
+            throw "getError";
           }
         }
       }))
