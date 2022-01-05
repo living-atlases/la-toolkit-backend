@@ -227,6 +227,19 @@ module.exports = {
    *                                                                          *
    ***************************************************************************/
   sockets: {
+    //
+    // If TOOLKIT_PUBLIC_URL is defined, restrict to that IP
+    // using `onlyAllowOrigins`, if not, allow all for now
+    //
+    // https://sailsjs.com/documentation/reference/configuration/sails-config-sockets#?beforeconnect
+    beforeConnect: process.env.TOOLKIT_PUBLIC_URL != null ? null : function(handshake, proceed) {
+      // Send back `true` to allow the socket to connect.
+      // (Or send back `false` to reject the attempt.)
+      //
+      // TODO: In a near future, add here user authorization
+      //
+      return proceed(undefined, true);
+    },
     /***************************************************************************
      *                                                                          *
      * Uncomment the `onlyAllowOrigins` whitelist below to configure which      *
