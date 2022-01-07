@@ -105,7 +105,7 @@ module.exports = {
               }
             }
           } catch (e) {
-            console.log(`url: ${nexusUrl}`);
+            // console.log(`url: ${nexusUrl}`);
             console.log(`message: ${e.message}`);
             throw "getError";
           }
