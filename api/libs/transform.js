@@ -164,7 +164,8 @@ module.exports = function (inputs) {
     LA_variable_pipelines_master: 'LA_variable_pipelines_master',
     LA_variable_pipelines_ssh_key: 'LA_variable_pipelines_ssh_key',
     LA_variable_pipelines_jenkins_use: 'LA_use_pipelines_jenkins',
-    LA_variable_enable_data_quality: 'LA_enable_data_quality'
+    LA_variable_enable_data_quality: 'LA_enable_data_quality',
+    LA_collectory_version_ge_3: 'LA_collectory_version_ge_3'
   };
 
   let objMapped = objectMapper(inputs.conf, map);
