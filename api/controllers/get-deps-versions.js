@@ -92,7 +92,7 @@ module.exports = {
               } else {
                 let artifactConv = artifact === 'ala-namematching-server' ? 'names/ala-namematching-server' : artifact;
                 let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${repo}/content/au/org/ala/${artifactConv}/maven-metadata.xml`;
-
+                //if (process.env.NODE_ENV !== 'production') console.log(`url: ${nexusUrl}`);
                 const xmlData = await request(nexusUrl);
                 // https://nexus.ala.org.au/service/local/repositories/releases/content/au/org/ala/ala-hub/4.0.8/ala-hub-4.0.8.war
                 // https://nexus.ala.org.au/service/local/repositories/snapshots/content/au/org/ala/ala-hub/maven-metadata.xml
@@ -102,8 +102,10 @@ module.exports = {
                       skipLike: /[0-9.]*/
                     }
                   });
+                  // if only one element it does not return an array of versions only the version, so:
+                  // https://stackoverflow.com/questions/1961528/how-to-create-an-array-if-an-array-does-not-exist-yet
                   if (result[service][repo] != null) {
-                    result[service][repo]['metadata']['versioning']['versions']['version'] = [...result[service][repo]['metadata']['versioning']['versions']['version'], ...jsonObj['metadata']['versioning']['versions']['version']]
+                    result[service][repo]['metadata']['versioning']['versions']['version'] = [...result[service][repo]['metadata']['versioning']['versions']['version'], ...[].concat(jsonObj['metadata']['versioning']['versions']['version'])];
                   } else {
                     result[service][repo] = jsonObj;
                   }
@@ -111,9 +113,8 @@ module.exports = {
                 }
               }
             } catch (e) {
-              // console.log(`url: ${nexusUrl}`);
-              console.log(`message: ${e.message}`);
-              throw "getError";
+              console.log(`Exception getting '${artifact}' in '${repo}', message: ${e.message}`);
+              // throw "getError";
             }
           }
         }
