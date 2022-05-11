@@ -70,6 +70,7 @@ module.exports = {
   fn: async function (inputs) {
     let result = {};
     let depList = Object.keys(inputs.deps);
+    let pVersions = await pipelinesVersions();
     await Promise.all(
       depList.map(async (service) => {
         result[service] = {};
@@ -88,7 +89,7 @@ module.exports = {
                 // Other option but does not match la-pipelines releases:
                 // let pipelinesUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
                 // console.log(`${artifact} ${versions}`);
-                result[service][repo] = await pipelinesVersions();
+                result[service][repo] = pVersions;
               } else {
                 let artifactConv = artifact === 'ala-namematching-server' ? 'names/ala-namematching-server' : artifact;
                 let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${repo}/content/au/org/ala/${artifactConv}/maven-metadata.xml`;
@@ -113,15 +114,21 @@ module.exports = {
                 }
               }
             } catch (e) {
-              console.log(`Exception getting '${artifact}' in '${repo}', message: ${e.message}`);
+              console.log(`ERROR: Exception getting '${artifact}' in '${repo}', message: ${e.message}`);
               // throw "getError";
             }
           }
         }
       }));
     // Here we exclude versions that for some reason (bugs, old, security issues) we don't want to show to the user in the UI software selector
-    const excludeList = await request('https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/soft-versions-exclude-list.json');
-    result['excludeList'] = JSON.parse(excludeList);
-    return this.res.json(result);
+    try {
+      const excludeList = await request('https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/soft-versions-exclude-list.json');
+      result['excludeList'] = JSON.parse(excludeList);
+      return this.res.json(result);
+    } catch (e) {
+      console.log(result);
+      console.log("Failed to parse the previous json");
+      throw "getError";
+    }
   }
 }
