@@ -33,6 +33,7 @@ module.exports = function (inputs) {
     LA_cas_url: 'LA_cas_url',
     LA_spatial_hostname: 'LA_spatial_hostname',
     LA_spatial_url: 'LA_spatial_url',
+    LA_spatial_path: 'LA_spatial_path',
     LA_branding_uses_subdomain: 'LA_branding_uses_subdomain',
     LA_branding_hostname: 'LA_branding_hostname',
     LA_branding_url: 'LA_branding_url',
