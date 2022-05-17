@@ -53,7 +53,7 @@ module.exports = {
       let drs = inputs.cmd.drs;
       let hasDrs = drs != null && drs.length > 0;
       if (hasDrs) {
-        cmd = cmd + ' ' + drs.join(' ');
+        cmd = cmd + ' ' + drs;
       }
       let noDrSteps = ["archive-list", "dataset-list", "prune-datasets", "validation-report"].indexOf(step) === -1;
       let useMode = ["dwca-avro", "archive-list", "dataset-list", "prune-datasets", "validation-report"].indexOf(step) === -1;
@@ -74,7 +74,6 @@ module.exports = {
 
     let concatCmds = cmds.join(" && ");
     let finalCmd = `ssh ${inputs.cmd.master} sudo su - spark -c "${concatCmds}"`;
-
 
     let env = {BASH_ENV: "$HOME/.profile"};
     let logsPrefix = path;
