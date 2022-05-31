@@ -1,4 +1,5 @@
 const cp = require('child_process');
+const {logErr} = require('../libs/utils.js');
 
 const alaInstallSelect = (version) => {
   let preCmd = sails.config.preCmd;
@@ -37,7 +38,7 @@ const alaInstallSelect = (version) => {
     console.log('End of ala-install git pull');
     return '';
   } catch (err) {
-    console.log(err);
+    logErr(err);
     return err;
   }
   // console.log(out.toString());
