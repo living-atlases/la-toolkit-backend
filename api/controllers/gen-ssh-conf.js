@@ -3,6 +3,7 @@ const cp = require('child_process');
 const {logErr} = require('../libs/utils.js');
 const dest = sails.config.sshDir;
 const destIncDir = sails.config.asshDir;
+const fs = require('fs');
 
 const basicAsshConf = () => {
   // We create a object with the assh configuration format
@@ -105,6 +106,10 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
+    // Create .ssh/assh.d if not present
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest);
+    }
     let serversTransformed = await trans(inputs.servers, inputs.user, inputs.id);
     // options from dump: https://www.npmjs.com/package/js-yaml
     let dirNames = await Project.find({select: ['dirName']});
