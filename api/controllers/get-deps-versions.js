@@ -4,7 +4,7 @@ const parser = require('fast-xml-parser');
 const cp = require('child_process');
 const {defExecTimeout, logErr} = require('../libs/utils.js');
 
-const pipelinesVersions = async () => {
+const pkgVersions = async (pkg) => {
   let preCmd = sails.config.preCmd;
 
   try {
@@ -21,18 +21,18 @@ const pipelinesVersions = async () => {
     );
     // console.log("Checking 'la-pipelines' available versions");
     let currentVersions = cp.execSync(
-      `${preCmd} apt-cache madison la-pipelines  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort | uniq  | cut -d "|" -f 2 | sed 's/^ /"/g'| sed 's/$/",/g' | paste -s - - | egrep -v "^$" | sed 's/,$/]/' | sed 's/^/[/' `,
+      `${preCmd} apt-cache madison ${pkg}  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort | uniq  | cut -d "|" -f 2 | sed 's/^ /"/g'| sed 's/$/",/g' | paste -s - - | egrep -v "^$" | sed 's/,$/]/' | sed 's/^/[/' `,
       {
         cwd: sails.config.projectDir,
         timeout: defExecTimeout,
       }
     ).toString();
     // console.log(`versions:\n${currentVersions}`);
-    let pipelinesJsonS =
+    let pkgJsonS =
       `{
          "metadata": {
            "groupId": "au.org.ala",
-           "artifactId": "pipelines",
+           "artifactId": "${pkg}",
            "versioning": {
              "versions": {
                 "version": ${currentVersions}
@@ -40,7 +40,7 @@ const pipelinesVersions = async () => {
            }
          }
        }`;
-    return JSON.parse(pipelinesJsonS);
+    return JSON.parse(pkgJsonS);
   } catch (err) {
     logErr(err);
     return err;
@@ -70,7 +70,9 @@ module.exports = {
   fn: async function (inputs) {
     let result = {};
     let depList = Object.keys(inputs.deps);
-    let pVersions = await pipelinesVersions();
+    let pVersions = await pkgVersions('la-pipelines');
+    let nmVersions = await pkgVersions('ala-namematching-service');
+    let sdsVersions = await pkgVersions('ala-sensitive-data-service');
     await Promise.all(
       depList.map(async (service) => {
         result[service] = {};
@@ -90,6 +92,10 @@ module.exports = {
                 // let pipelinesUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
                 // console.log(`${artifact} ${versions}`);
                 result[service][repo] = pVersions;
+              } else if (artifact === 'namematching_service') {
+                result[service][repo] = nmVersions;
+              } else if (artifact === 'sensitive_data_service') {
+                result[service][repo] = sdsVersions;
               } else {
                 let artifactConv = artifact === 'ala-namematching-server' ? 'names/ala-namematching-server' : artifact;
                 let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${repo}/content/au/org/ala/${artifactConv}/maven-metadata.xml`;
