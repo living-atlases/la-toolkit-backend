@@ -20,7 +20,7 @@
     "alerts": [],
     "doi": [],
     "biocache_cli": [],
-    "nameindexer": [],
+    "nameindexer": ["4.0.0", "4.1.0", "4.2.0", "4.3.0", "4.3.0-SNAPSHOT"],
     "namemaching_service": [],
     "data_quality": [],
     "solr": [],
