@@ -148,6 +148,10 @@ module.exports = function (inputs) {
     LA_variable_cas_webflow_encryption_key:
       'LA_variable_cas_webflow_encryption_key',
     LA_variable_cas_webflow_signing_key: 'LA_variable_cas_webflow_signing_key',
+    LA_variable_cas_oauth_encryption_key : "LA_variable_cas_oauth_encryption_key",
+    LA_variable_cas_oauth_signing_key : "LA_variable_cas_oauth_signing_key",
+    LA_variable_cas_oauth_access_token_encryption_key: "LA_variable_cas_oauth_access_token_encryption_key",
+    LA_variable_cas_oauth_access_token_signing_key: "LA_variable_cas_oauth_access_token_signing_key",
     LA_variable_downloads_terms_of_use: 'LA_variable_downloads_terms_of_use',
     LA_variable_email_sender: 'LA_variable_email_sender',
     LA_variable_email_sender_password: 'LA_variable_email_sender_password',
