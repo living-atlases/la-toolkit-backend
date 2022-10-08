@@ -1,0 +1,211 @@
+#
+# LA dependencies
+
+# See: https://github.com/AtlasOfLivingAustralia/documentation/wiki/Dependencies#dependencies-list
+
+# In order to be correctly parsed module names should be:
+#
+# collectory, ala-hub, biocache-service, ala-bie, bie-index, images, species-lists,
+# regions, logger, solr, solrcloud, zookeeper, cas, userdetails, cas-management,
+# apikey, spatial, spatial-service, geoserver, webapi, dashboard, sds, alerts, doi,
+# biocache-backend, branding, biocache-cli, nameindexer, namematching-service,
+# sensitive-data-service, data-quality, pipelines, spark, hadoop, pipelinesJenkins,
+# biocollect, pdfgen, ecodata, ecodata-reporting
+# and java, tomcat, ansible, ala-install, la-generator, la-toolkit
+#
+
+ala-install:
+  >= 2.0.3:
+    - ansible: 2.10.3
+
+alerts:
+  >= 1.5.1:
+    - regions: >= 3.3.5
+    - ala-hub: >= 3.2.9
+    - bie: >= 1.5.0
+  >= 2.0.0:
+    - java: >= 11
+
+apikey:
+  >= 1.7.0:
+    - cas: >= 6.5.6-3
+    - cas-management: >= 6.5.5-2
+    - userdetails: >= 3.0.1
+    - java: >= 11
+
+# ala-bie-hub uses bie too
+
+ala-bie:
+  > 2.0.1:
+    - java: >= 11
+
+biocache-service:
+  >= 2.5.0:
+    - tomcat: >= 9.0.0
+  # biocache-service 2.x uses biocache-store
+  >=2.7.0:
+    - biocache-cli: >= 2.6.1
+  # biocache-service 3.x uses pipelines
+  >= 3.0.0:
+    - pipelines: any
+
+biocollect:
+  any:
+    - ala-install: >= 2.1.7
+    - la-generator: >= 1.2.32
+
+biocache-cli:
+  any:
+    - solr: < 8.0.0
+  >= 2.4.5:
+    - images: >= 1.0.7
+  < 3.0.0:
+    - biocache-service: < 3.0.0
+
+cas:
+  >= 6.5.6-3:
+    - cas-management: >= 6.5.5-2
+    - userdetails: >= 3.0.1
+    - apikey: >= 1.7.0
+    - java: >= 11
+
+cas-management:
+  >= 6.5.5-2:
+    - cas: >= 6.5.6-3
+    - userdetails: >= 3.0.1
+    - apikey: >= 1.7.0
+    - java: >= 11
+
+dashboard:
+  >= 2.2:
+    - ala-install: >= 2.0.5
+
+doi:
+  >= 1.1:
+    - biocache-service: >= 2.5.0
+    - regions: >= 3.3.4
+
+images:
+  >= 1.1:
+    - ala-install: >= 2.0.8
+
+logger:
+  > 4.0.1:
+    - java: >= 11
+
+pipelines:
+  any:
+    - biocache-service: >= 3.0.0
+    - ala-install: >= 2.1.0
+    - solrcloud: >= 8.9.0
+    - namematching-service: >= 1.0.0
+    - images: >= 1.1.1-7
+
+spatial:
+  >= 0.3.12:
+    - spatial-service: > 0.3.12
+
+species-lists:
+  < 4.0.0:
+    - nameindexer: any
+  >= 4.0.0:
+    - namematching-service: any
+
+userdetails:
+  >= 3.0.1:
+    - cas: >= 6.5.6-3
+    - cas-management: >= 6.5.5-2
+    - apikey: >= 1.7.0
+    - java: >= 11
+
+# From here la-toolkit and related:
+
+la-toolkit:
+
+  >= 1.0.22 < 1.0.23:
+    - ala-install: >= 2.0.6
+    - la-generator: >= 1.1.36
+
+  >= 1.0.23 < 1.1.0:
+    - ala-install: >= 2.0.6
+    - la-generator: >= 1.1.37
+
+  >= 1.1.0 < 1.1.9:
+    - ala-install: >= 2.0.7
+    - la-generator: >= 1.1.43
+
+  >= 1.1.9 < 1.1.26:
+    - ala-install: >= 2.0.8
+    - la-generator: >= 1.1.49
+
+  >= 1.1.26 < 1.2.0:
+    - ala-install: >= 2.0.10
+    - la-generator: >= 1.1.51
+
+  >= 1.2.0 < 1.2.1:
+    - ala-install: >= 2.0.11
+    - la-generator: >= 1.2.0
+
+  >= 1.2.1 < 1.2.2:
+    - ala-install: >= 2.0.11
+    - la-generator: >= 1.2.1
+
+  >= 1.2.2 < 1.2.6:
+    - ala-install: >= 2.0.11
+    - la-generator: >= 1.2.1
+
+  >= 1.2.6 < 1.2.8:
+    - ala-install: >= 2.0.11
+    - la-generator: >= 1.2.2
+
+  >= 1.2.8 < 1.3.0:
+    - ala-install: >= 2.1.1
+    - la-generator: >= 1.2.7
+
+  >= 1.3.0 < 1.3.1:
+    - ala-install: >= 2.1.2
+    - la-generator: >= 1.2.9
+
+  >= 1.3.1 < 1.3.2:
+    - ala-install: >= 2.1.3
+    - la-generator: >= 1.2.16
+
+  >= 1.3.2 < 1.3.3:
+    - ala-install: >= 2.1.4
+    - la-generator: >= 1.2.20
+
+  >= 1.3.3 < 1.3.4:
+    - ala-install: >= 2.1.5
+    - la-generator: >= 1.2.22
+
+  >= 1.3.4 < 1.3.5:
+    - ala-install: >= 2.1.5
+    - la-generator: >= 1.2.22
+
+  >= 1.3.5 < 1.3.6:
+    - ala-install: >= 2.1.5
+    - la-generator: >= 1.2.22
+
+  >= 1.3.6 < 1.3.7:
+    - ala-install: >= 2.1.6
+    - la-generator: >= 1.2.29
+
+  >= 1.3.7 < 1.3.8:
+    - ala-install: >= 2.1.6
+    - la-generator: >= 1.2.30
+
+  >= 1.3.8 < 1.3.9:
+    - ala-install: >= 2.1.7
+    - la-generator: >= 1.2.33
+
+  >= 1.3.9 < 1.3.10:
+    - ala-install: >= 2.1.7
+    - la-generator: >= 1.2.38
+
+  >= 1.3.10 < 1.3.11:
+    - ala-install: >= 2.1.9
+    - la-generator: >= 1.2.46
+
+  >= 1.3.11:
+    - ala-install: >= 2.1.9
+    - la-generator: >= 1.2.48
