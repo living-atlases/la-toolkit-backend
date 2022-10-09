@@ -24,20 +24,26 @@ alerts:
     - ala-hub: >= 3.2.9
     - bie: >= 1.5.0
   >= 2.0.0:
-    - java: >= 11
+    - java: 11
+  < 2.0.0:
+    - java: 8
 
 apikey:
   >= 1.7.0:
     - cas: >= 6.5.6-3
     - cas-management: >= 6.5.5-2
     - userdetails: >= 3.0.1
-    - java: >= 11
+    - java: 11
+  < 1.7.0:
+    - java: 8
 
-# ala-bie-hub uses bie too
+# ala-bie-hub uses ala-bie category too:
 
 ala-bie:
-  > 2.0.1:
-    - java: >= 11
+  >= 2.0.2:
+    - java: 11
+  < 2.0.2:
+    - java: 8
 
 biocache-service:
   >= 2.5.0:
@@ -67,31 +73,49 @@ cas:
     - cas-management: >= 6.5.5-2
     - userdetails: >= 3.0.1
     - apikey: >= 1.7.0
-    - java: >= 11
+    - java: 11
+  < 6.5.6-3:
+    - java: 8
 
 cas-management:
   >= 6.5.5-2:
     - cas: >= 6.5.6-3
     - userdetails: >= 3.0.1
     - apikey: >= 1.7.0
-    - java: >= 11
+    - java: 11
+  < 6.5.5-2:
+    - java: 8
 
 dashboard:
   >= 2.2:
     - ala-install: >= 2.0.5
+  >= 2.3:
+    - java: 11
+  < 2.3:
+    - java: 8
 
 doi:
   >= 1.1:
     - biocache-service: >= 2.5.0
     - regions: >= 3.3.4
+  >= 2.0:
+    - java 11
+  < 2.0:
+    - java 8
 
 images:
   >= 1.1:
     - ala-install: >= 2.0.8
+  >= 2.0.0:
+    - java: 11
+  < 2.0.0:
+    - java: 8
 
 logger:
-  > 4.0.1:
-    - java: >= 11
+  >= 4.1.0:
+    - java: 11
+  < 4.1.0:
+    - java: 8
 
 pipelines:
   any:
@@ -100,23 +124,34 @@ pipelines:
     - solrcloud: >= 8.9.0
     - namematching-service: >= 1.0.0
     - images: >= 1.1.1-7
+    - java: 8
 
 spatial:
   >= 0.3.12:
     - spatial-service: > 0.3.12
+  any:
+    - java: 8
+
+spatial-service:
+  any:
+    - java: 8
 
 species-lists:
   < 4.0.0:
     - nameindexer: any
+    - java: 8
   >= 4.0.0:
     - namematching-service: any
+    - java: 11
 
 userdetails:
   >= 3.0.1:
     - cas: >= 6.5.6-3
     - cas-management: >= 6.5.5-2
     - apikey: >= 1.7.0
-    - java: >= 11
+    - java: 11
+  < 3.0.1:
+    - java: 8
 
 # From here la-toolkit and related:
 
