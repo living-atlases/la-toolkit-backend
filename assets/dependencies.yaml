@@ -44,6 +44,16 @@ ala-bie:
     - java: '11'
   '< 2.0.2':
     - java: '8'
+  '>= 1.5.2':
+    - namematching-service: any
+  '< 1.5.2':
+    - nameindexer: any
+
+bie-index:
+  '>= 1.5':
+    - namematching-service: any
+  '< 1.5':
+    - nameindexer: any
 
 biocache-service:
   '>= 2.5.0':
