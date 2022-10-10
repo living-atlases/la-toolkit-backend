@@ -16,26 +16,26 @@
 
 ala-install:
   '>= 2.0.3':
-    - ansible: '2.10.3'
+    - ansible: 2.10.3
 
 alerts:
   '>= 1.5.1':
-    - regions: '>= 3.3.5'
-    - ala-hub: '>= 3.2.9'
-    - ala-bie: '>= 1.5.0'
+    - regions: >= 3.3.5
+    - ala-hub: >= 3.2.9
+    - ala-bie: >= 1.5.0
   '>= 2.0.0':
-    - java: '11'
+    - java: 11
   '< 2.0.0':
-    - java: '8'
+    - java: 8
 
 apikey:
   '>= 1.7.0':
-    - cas: '>= 6.5.6-3'
-    - cas-management: '>= 6.5.5-2'
-    - userdetails: '>= 3.0.1'
-    - java: '11'
+    - cas: >= 6.5.6-3
+    - cas-management: >= 6.5.5-2
+    - userdetails: >= 3.0.1
+    - java: 11
   '< 1.7.0':
-    - java: '8'
+    - java: 8
 
 # ala-bie-hub uses ala-bie category too:
 
