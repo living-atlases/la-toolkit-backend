@@ -62,7 +62,7 @@ biocollect:
 
 biocache-cli:
   any:
-    - solr: '< '8'.0.0'
+    - solr: '< '8.0.0'
   '>= 2.4.5':
     - images: '>= 1.0.7'
   '< 3.0.0':
