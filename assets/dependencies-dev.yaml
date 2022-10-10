@@ -62,7 +62,7 @@ biocollect:
 
 biocache-cli:
   any:
-    - solr: '< '8.0.0'
+    - solr: '< 8.0.0'
   '>= 2.4.5':
     - images: '>= 1.0.7'
   '< 3.0.0':
@@ -121,7 +121,7 @@ pipelines:
   any:
     - biocache-service: '>= 3.0.0'
     - ala-install: '>= 2.1.0'
-    - solrcloud: '>= '8'.9.0'
+    - solrcloud: '>= 8.9.0'
     - namematching-service: '>= 1.0.0'
     - images: '>= 1.1.1-7'
     - java: '8'
