@@ -54,6 +54,10 @@ biocache-service:
   # biocache-service 3.x uses pipelines
   '>= 3.0.0':
     - pipelines: any
+    - namematching-service: any
+    - java: '8'
+  '< 3.0.0':
+    - nameindexer: any
 
 biocollect:
   any:
