@@ -99,9 +99,9 @@ doi:
     - biocache-service: '>= 2.5.0'
     - regions: '>= 3.3.4'
   '>= 2.0':
-    - java '11'
+    - java: '11'
   '< 2.0':
-    - java '8'
+    - java: '8'
 
 images:
   '>= 1.1':
