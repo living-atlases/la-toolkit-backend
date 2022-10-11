@@ -54,6 +54,10 @@ bie-index:
     - namematching-service: any
   '< 1.5':
     - nameindexer: any
+  '>= 1.8':
+    - java: '11'
+  '< 1.8':
+    - java: '8'
 
 biocache-service:
   '>= 2.5.0':
@@ -68,15 +72,25 @@ biocache-service:
     - java: '8'
   '< 3.0.0':
     - nameindexer: any
+    - java: '8'
 
 biocollect:
   any:
     - ala-install: '>= 2.1.7'
     - la-generator: '>= 1.2.32'
+  '>= 6.3':
+    - java: '11'
+  '< 6.3':
+    - java: '8'
+
+biocache-backend:
+  any:
+    - java: '8'
 
 biocache-cli:
   any:
     - solr: '< 8.0.0'
+    - java: '8'
   '>= 2.4.5':
     - images: '>= 1.0.7'
   '< 3.0.0':
@@ -108,6 +122,12 @@ dashboard:
   '< 2.3':
     - java: '8'
 
+data-quality:
+  '>= 1.3.0':
+    - java: '11'
+  '< 1.3.0':
+    - java: '8'
+
 doi:
   '>= 1.1':
     - biocache-service: '>= 2.5.0'
@@ -115,6 +135,18 @@ doi:
   '>= 2.0':
     - java: '11'
   '< 2.0':
+    - java: '8'
+
+ecodata:
+  any:
+    - java: '8'
+
+ecodata-reporting:
+  any:
+    - java: '8'
+
+hadoop:
+  any:
     - java: '8'
 
 images:
@@ -131,6 +163,18 @@ logger:
   '< 4.1.0':
     - java: '8'
 
+nameindexer:
+  any:
+    - java: '8'
+
+namematching-service:
+  any:
+    - java: '8'
+
+pdfgen:
+  any:
+    - java: '8'
+
 pipelines:
   any:
     - biocache-service: '>= 3.0.0'
@@ -140,9 +184,29 @@ pipelines:
     - images: '>= 1.1.1-7'
     - java: '8'
 
+sensitive-data-service:
+  any:
+    - java: '8'
+
+solr:
+  '< 8.0.0':
+    - java: '8'
+  '>= 8.0.0':
+    - java: '11'
+
+solrcloud:
+  '< 8.0.0':
+    - java: '8'
+  '>= 8.0.0':
+    - java: '11'
+
 spatial:
   '>= 0.3.12':
     - spatial-service: '> 0.3.12'
+  any:
+    - java: '8'
+
+spark:
   any:
     - java: '8'
 
@@ -166,6 +230,11 @@ userdetails:
     - java: '11'
   '< 3.0.1':
     - java: '8'
+
+zookeeper:
+  # I mean, recent versions
+  any:
+    - java: '11'
 
 # From here la-toolkit and related:
 
