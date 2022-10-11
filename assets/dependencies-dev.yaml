@@ -331,3 +331,7 @@ la-toolkit:
   '>= 1.3.11':
     - ala-install: '>= 2.1.9'
     - la-generator: '>= 1.2.48'
+
+  '>= 1.4.0':
+    - ala-install: '> 2.1.9'
+    - la-generator: '>= 1.2.55'
