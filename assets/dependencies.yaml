@@ -1,7 +1,7 @@
 #
 # LA dependencies
 
-# See: https://github.com/AtlasOfLivingAustralia/documentation/wiki/Dependencies#dependencies-list
+# See: https://github.com/AtlasOfLivingAustralia/documentation/wiki/Dependencies
 
 # In order to be correctly parsed module names should be:
 #
@@ -17,6 +17,10 @@
 ala-install:
   '>= 2.0.3':
     - ansible: '2.10.3'
+
+ala-hub:
+  any:
+    - java: '8'
 
 alerts:
   '>= 1.5.1':
@@ -114,6 +118,12 @@ cas-management:
   '< 6.5.5-2':
     - java: '8'
 
+collectory:
+  '>= 3.1.0':
+    - java: '11'
+  '< 3.1.0':
+    - java: '8'
+
 dashboard:
   '>= 2.2':
     - ala-install: '>= 2.0.5'
@@ -184,7 +194,17 @@ pipelines:
     - images: '>= 1.1.1-7'
     - java: '8'
 
+regions:
+  '< 3.4.0':
+    - java: '8'
+  '>= 3.4.0':
+    - java: '11'
+
 sensitive-data-service:
+  any:
+    - java: '8'
+
+sds:
   any:
     - java: '8'
 
