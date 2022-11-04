@@ -19,8 +19,10 @@ ala-install:
     - ansible: '2.10.3'
 
 ala-hub:
-  any:
+  '< 5.0.0':
     - java: '8'
+  '>= 5.0.0':
+    - java: '11'
 
 alerts:
   '>= 1.5.1':
@@ -70,10 +72,14 @@ biocache-service:
   '>=2.7.0':
     - biocache-cli: '>= 2.6.1'
   # biocache-service 3.x uses pipelines
-  '>= 3.0.0':
+  '>= 3.0.0 < 3.1.2':
     - pipelines: any
     - namematching-service: any
     - java: '8'
+  '>= 3.1.2':
+    - pipelines: any
+    - namematching-service: any
+    - java: '11'
   '< 3.0.0':
     - nameindexer: any
     - java: '8'
