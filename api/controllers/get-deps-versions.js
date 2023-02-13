@@ -4,7 +4,7 @@ const parser = require('fast-xml-parser');
 const cp = require('child_process');
 const {defExecTimeout, logErr} = require('../libs/utils.js');
 
-const pkgVersions = async (pkg) => {
+const pkgVersions = async (pkg, update= false) => {
   let preCmd = sails.config.preCmd;
 
   try {
@@ -12,13 +12,15 @@ const pkgVersions = async (pkg) => {
       preCmd = preCmd.replace('exec', 'exec -w /home/ubuntu/');
       preCmd = preCmd + ' ';
     }
-    cp.execSync(
-      `${preCmd}sudo apt update`,
-      {
-        cwd: sails.config.projectDir,
-        timeout: defExecTimeout,
-      }
-    );
+    if (update) {
+      cp.execSync(
+        `${preCmd}sudo apt update`,
+        {
+          cwd: sails.config.projectDir,
+          timeout: defExecTimeout,
+        }
+      );
+    }
     // console.log("Checking 'la-pipelines' available versions");
     let currentVersions = cp.execSync(
       `${preCmd} apt-cache madison ${pkg}  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort | uniq  | cut -d "|" -f 2 | sed 's/^ /"/g'| sed 's/$/",/g' | paste -s - - | egrep -v "^$" | sed 's/,$/]/' | sed 's/^/[/' `,
@@ -70,7 +72,7 @@ module.exports = {
   fn: async function (inputs) {
     let result = {};
     let depList = Object.keys(inputs.deps);
-    let pVersions = await pkgVersions('la-pipelines');
+    let pVersions = await pkgVersions('la-pipelines', true);
     let nmVersions = await pkgVersions('ala-namematching-service');
     let sdsVersions = await pkgVersions('ala-sensitive-data-service');
     await Promise.all(
@@ -81,7 +83,9 @@ module.exports = {
           // multiple artifacts for the same service can be specified separated by commas, like "collectory ala-collectory"
           for (let artifact of artifacts.split(' ')) {
             try {
-              if (artifact === 'solr' || artifact === 'solrcloud') {
+              if (artifact === 'pdfgen' && repo === 'snapshots') {
+                result['pdfgen']['snapshots'] = result['pdfgen']['releases'];
+              } else if (artifact === 'solr' || artifact === 'solrcloud') {
                 // As solr does not provide a list of versions, we maintain this json in github :-/
                 const solrData = await request('https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/solr-versions.json');
                 result[service][repo] = JSON.parse(solrData);
