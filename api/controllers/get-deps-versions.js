@@ -4,6 +4,18 @@ const parser = require('fast-xml-parser');
 const cp = require('child_process');
 const {defExecTimeout, logErr} = require('../libs/utils.js');
 
+const pkgJsonS = (pkg, currentVersions) =>
+  `{
+         "metadata": {
+           "groupId": "au.org.ala",
+           "artifactId": "${pkg}",
+           "versioning": {
+             "versions": {
+                "version": ${currentVersions}
+             }
+           }
+         }
+       }`;
 const pkgVersions = async (pkg, update= false) => {
   let preCmd = sails.config.preCmd;
 
@@ -17,7 +29,7 @@ const pkgVersions = async (pkg, update= false) => {
         `${preCmd}sudo apt update`,
         {
           cwd: sails.config.projectDir,
-          timeout: defExecTimeout,
+          timeout: 30000,
         }
       );
     }
@@ -30,22 +42,10 @@ const pkgVersions = async (pkg, update= false) => {
       }
     ).toString();
     // console.log(`versions:\n${currentVersions}`);
-    let pkgJsonS =
-      `{
-         "metadata": {
-           "groupId": "au.org.ala",
-           "artifactId": "${pkg}",
-           "versioning": {
-             "versions": {
-                "version": ${currentVersions}
-             }
-           }
-         }
-       }`;
-    return JSON.parse(pkgJsonS);
+    return JSON.parse(pkgJsonS(pkg, currentVersions));
   } catch (err) {
     logErr(err);
-    return err;
+    return JSON.parse(pkgJsonS(pkg, []));
   }
 }
 
