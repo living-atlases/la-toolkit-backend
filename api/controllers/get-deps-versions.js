@@ -4,6 +4,10 @@ const parser = require('fast-xml-parser');
 const cp = require('child_process');
 const {defExecTimeout, logErr} = require('../libs/utils.js');
 
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 3600 }); // 1h
+const cachedData = cache.get('apt-pkgs');
+
 const pkgJsonS = (pkg, currentVersions) =>
   `{
          "metadata": {
@@ -19,33 +23,42 @@ const pkgJsonS = (pkg, currentVersions) =>
 const pkgVersions = async (pkg, update= false) => {
   let preCmd = sails.config.preCmd;
 
-  try {
-    if (preCmd !== '') {
-      preCmd = preCmd.replace('exec', 'exec -w /home/ubuntu/');
-      preCmd = preCmd + ' ';
-    }
-    if (update) {
-      cp.execSync(
-        `${preCmd}sudo apt update`,
+  const cachedData = cache.get(pkg);
+  if (cachedData) {
+    return cachedData;
+  } else {
+
+    let result;
+    try {
+      if (preCmd !== '') {
+        preCmd = preCmd.replace('exec', 'exec -w /home/ubuntu/');
+        preCmd = preCmd + ' ';
+      }
+      if (update) {
+        cp.execSync(
+          `${preCmd}sudo apt update`,
+          {
+            cwd: sails.config.projectDir,
+            timeout: 30000,
+          }
+        );
+      }
+      // console.log("Checking 'la-pipelines' available versions");
+      let currentVersions = cp.execSync(
+        `${preCmd} apt-cache madison ${pkg}  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort | uniq  | cut -d "|" -f 2 | sed 's/^ /"/g'| sed 's/$/",/g' | paste -s - - | egrep -v "^$" | sed 's/,$/]/' | sed 's/^/[/' `,
         {
           cwd: sails.config.projectDir,
-          timeout: 30000,
+          timeout: defExecTimeout,
         }
-      );
+      ).toString();
+      // console.log(`versions:\n${currentVersions}`);
+      result = JSON.parse(pkgJsonS(pkg, currentVersions));
+    } catch (err) {
+      logErr(err);
+      result = JSON.parse(pkgJsonS(pkg, "[]"));
     }
-    // console.log("Checking 'la-pipelines' available versions");
-    let currentVersions = cp.execSync(
-      `${preCmd} apt-cache madison ${pkg}  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort | uniq  | cut -d "|" -f 2 | sed 's/^ /"/g'| sed 's/$/",/g' | paste -s - - | egrep -v "^$" | sed 's/,$/]/' | sed 's/^/[/' `,
-      {
-        cwd: sails.config.projectDir,
-        timeout: defExecTimeout,
-      }
-    ).toString();
-    // console.log(`versions:\n${currentVersions}`);
-    return JSON.parse(pkgJsonS(pkg, currentVersions));
-  } catch (err) {
-    logErr(err);
-    return JSON.parse(pkgJsonS(pkg, []));
+    cache.set(pkg, result);
+    return result;
   }
 }
 
