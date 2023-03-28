@@ -58,3 +58,6 @@ Or without `forewer` and `watch` just:
 ```bash
 sails lift
 ```
+## CREDITS
+
+- [Weakness icon created by Freepik - Flaticon]("https://www.flaticon.com/free-icons/weakness)
