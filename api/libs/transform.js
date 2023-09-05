@@ -192,6 +192,8 @@ module.exports = function (inputs) {
     LA_variable_sds_faq_url: "LA_variable_sds_faq_url",
     LA_variable_sds_spatial_layers: "LA_variable_sds_spatial_layers",
     LA_variable_sds_flag_rules: "LA_variable_sds_flag_rules",
+    LA_variable_mapbox_access_token: "LA_variable_mapbox_access_token",
+    LA_variable_oidc_use: "LA_variable_oidc_use",
     LA_is_hub: "LA_is_hub",
     LA_software_versions: "LA_software_versions",
     LA_pipelines_hostname: "LA_pipelines_hostname",
