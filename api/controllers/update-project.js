@@ -5,17 +5,17 @@ const toIds = (rows) =>
 
 // noinspection JSUnresolvedFunction
 module.exports = {
-  friendlyName: 'Update project',
+  friendlyName: "Update project",
 
   inputs: {
     project: {
-      type: 'json',
-      description: 'A project to update',
+      type: "json",
+      description: "A project to update",
       required: true,
       custom: function (value) {
         return _.isObject(value);
       },
-    }
+    },
   },
 
   exits: {},
@@ -24,23 +24,25 @@ module.exports = {
     let p = inputs.project;
     let assoc = [];
     assoc.push([p.servers, Server]);
+    assoc.push([p.clusters, Cluster]);
     assoc.push([p.services, Service]);
     assoc.push([p.serviceDeploys, ServiceDeploy]);
     assoc.push([p.variables, Variable]);
     p.servers = toIds(p.servers);
+    p.clusters = toIds(p.clusters);
     p.services = toIds(p.services);
     p.serviceDeploys = toIds(p.serviceDeploys);
     p.variables = toIds(p.variables);
     for (const a of assoc) {
       for (const el of a[0]) {
-        if (!(await a[1].findOne({id: el.id}))) {
+        if (!(await a[1].findOne({ id: el.id }))) {
           // console.log(`creating ${JSON.stringify(el)}`);
           // noinspection JSUnresolvedFunction
-          await a[1].findOrCreate({id: el.id}, el);
+          await a[1].findOrCreate({ id: el.id }, el);
         } else {
           // console.log(`updating ${JSON.stringify(el)}`);
           // noinspection JSUnresolvedFunction
-          await a[1].updateOne({id: el.id}).set(el);
+          await a[1].updateOne({ id: el.id }).set(el);
         }
       }
     }
@@ -49,10 +51,14 @@ module.exports = {
     delete p.hubs;
     delete p.cmdHistoryEntries;
     // noinspection JSUnresolvedFunction
-    await Project.updateOne({id: p.id}).set(p);
+    await Project.updateOne({ id: p.id }).set(p);
     let projects = await sails.helpers.populateProject();
     // Notify subs socket clients
-    Project.publish(projects.map(p => p.id), projects, this.req);
-    return this.res.json({projects: projects});
+    Project.publish(
+      projects.map((p) => p.id),
+      projects,
+      this.req
+    );
+    return this.res.json({ projects: projects });
   },
 };

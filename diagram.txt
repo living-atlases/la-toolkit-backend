@@ -34,6 +34,12 @@ class Server {
  + osVersion
 }
 
+class Cluster {
+ + id
+ + name
+ + type
+}
+
 class Service {
  + id
  + nameInt
@@ -87,12 +93,15 @@ class Group {
 
 Project "1" *-- "many" Project : has hubs
 Project "1" *-- "many" Server : has
+Project "1" *-- "many" Cluster : has
 Project "1" *-- "many" Service : has
 Project "1" *-- "many" Variable : has
 Project "1" *-- "many" ServiceDeploy : has
 Project "1" *-- "many" CmdHistoryEntry : executed
 
-Server "1" *-- "many" ServiceDeploy : contains
+Server "0..1" *-- "many" ServiceDeploy : contains
+
+Cluster "0..1" *-- "many" ServiceDeploy : contains
 
 Service "1" *-- "many" ServiceDeploy : has
 

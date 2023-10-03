@@ -1,27 +1,28 @@
 /**
- * ServiceDeploy.js
+ * Cluster.js
  *
  * @description :: A model definition represents a database table/collection.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
 module.exports = {
-  tableName: "service_deploys",
+  tableName: "clusters",
   attributes: {
-    additionalVariables: { type: "string", allowNull: false },
-    // Status
-    status: {
-      type: "string",
-      defaultsTo: "unknown",
-      isIn: ["unknown", "success", "failed"],
-    },
-    softwareVersions: { type: "json" },
-    checkedAt: { type: "number", allowNull: true },
+    name: { type: "string" },
 
-    serviceId: { model: "service" },
-    serverId: { model: "server" },
-    clusterId: { model: "cluster" },
-    projectId: { model: "project" },
+    // Facts
+    type: {
+      type: "string",
+      defaultsTo: "vm",
+      isIn: ["vm", "dockerSwarm", "k8s"],
+    },
+
+    // Relations
+    projectId: {
+      model: "project",
+    },
+
+    serviceDeploys: { collection: "serviceDeploy", via: "clusterId" },
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
     //  ╠═╝╠╦╝║║║║║ ║ ║╚╗╔╝║╣ ╚═╗
