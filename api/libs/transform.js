@@ -29,6 +29,9 @@ module.exports = function (inputs) {
     LA_use_data_quality: "LA_use_data_quality",
     LA_use_events: "LA_use_events",
     LA_use_events_elasticsearch: "LA_use_events_elasticsearch",
+    LA_use_docker_swarm: "LA_use_docker_swarm",
+    LA_use_gatus: "LA_use_gatus",
+    LA_use_portainer: "LA_use_portainer",
     LA_enable_ssl: "LA_enable_ssl",
     LA_use_git: { key: "LA_use_git", default: true },
     LA_generate_branding: { key: "LA_generate_branding", default: true },
@@ -132,6 +135,13 @@ module.exports = function (inputs) {
     LA_events_elasticsearch_hostname: "LA_events_elasticsearch_hostname",
     LA_events_path: "LA_events_path",
     LA_events_url: "LA_events_url",
+    LA_docker_swarm_hostname: "LA_docker_swarm_hostname",
+    LA_gatus_hostname: "LA_gatus_hostname",
+    LA_gatus_path: "LA_gatus_path",
+    LA_gatus_url: "LA_gatus_url",
+    LA_portainer_hostname: "LA_portainer_hostname",
+    LA_portainer_path: "LA_portainer_path",
+    LA_portainer_url: "LA_portainer_url",
     LA_server_ips: "LA_server_ips",
     LA_theme: "LA_theme",
     LA_collectory_map_centreMapLat: "LA_collectory_map_centreMapLat",
@@ -204,6 +214,8 @@ module.exports = function (inputs) {
     LA_variable_pipelines_jenkins_use: "LA_use_pipelines_jenkins",
     LA_variable_enable_data_quality: "LA_enable_data_quality",
     LA_collectory_version_ge_3: "LA_collectory_version_ge_3",
+    LA_nginx_docker_internal_aliases: "LA_nginx_docker_internal_aliases",
+    LA_docker_solr_hosts: "LA_docker_solr_hosts",
   };
 
   let objMapped = objectMapper(inputs.conf, map);
