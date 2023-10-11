@@ -1,7 +1,7 @@
 {
   "name": "la-toolkit-backend",
   "private": true,
-  "version": "1.4.6",
+  "version": "1.5.0",
   "description": "LA Toolkit Backend",
   "keywords": [],
   "dependencies": {
