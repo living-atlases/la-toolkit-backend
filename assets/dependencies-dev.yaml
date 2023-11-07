@@ -390,4 +390,4 @@ la-toolkit:
 
   '>= 1.5.1':
     - ala-install: '>= 2.2.0'
-    - la-generator: '>= 1.5.2'
+    - la-generator: '>= 1.5.3'
