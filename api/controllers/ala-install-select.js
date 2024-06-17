@@ -22,16 +22,20 @@ const alaInstallSelect = (version) => {
       cp.execSync(`${preCmd}git stash`, {
         cwd: alaInstallLocation,
       });
-      cp.execSync(`${preCmd}git fetch --tags origin master`, {
+      cp.execSync(`${preCmd}git fetch --all --tags`, {
         cwd: alaInstallLocation,
       });
     }
-    if (version !== 'upstream' && version !== 'custom') {
+    if (version !== 'upstream' && version !== 'custom' && version !== 'la-develop') {
       cp.execSync(`${preCmd}git checkout tags/${version}`, {
         cwd: alaInstallLocation,
       });
     } else if (version === 'upstream') {
       cp.execSync(`${preCmd}git pull --rebase origin master`, {
+        cwd: alaInstallLocation,
+      });
+    } else if (version === 'la-develop') {
+      cp.execSync(`${preCmd}git checkout origin/la-develop`, {
         cwd: alaInstallLocation,
       });
     }
