@@ -18,9 +18,9 @@ const basicAsshConf = () => {
   } else {
     t.defaults.StrictHostKeyChecking = 'accept-new';
   }
-  t.defaults.ControlMaster = 'auto';
-  t.defaults.ControlPath = '/home/ubuntu/.ssh/%h-%p-%r.sock';
-  t.defaults.ControlPersist = '90m';
+//  t.defaults.ControlMaster = 'auto';
+//  t.defaults.ControlPath = '/home/ubuntu/.ssh/%h-%p-%r.sock';
+//  t.defaults.ControlPersist = '90m';
   // t.defaults.ControlMasterMkdir = true;
   return t;
 };
