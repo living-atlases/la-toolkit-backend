@@ -35,7 +35,11 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    let sshCommand = `'sudo mysql --defaults-file=/root/.my.cnf -D ${inputs.db} -e "${inputs.query}" -s -N'`;
+    let escapedQuery = inputs.query
+      .replace(/\\/g, "\\\\") // Scape backslashes
+      .replace(/'/g, "'\\''"); // Scape single quotes
+
+    let sshCommand = `'sudo mysql --defaults-file=/root/.my.cnf -D ${inputs.db} -e "${escapedQuery}" -s -N'`;
 
     try {
       const result = await sails.helpers.sshCmd.with({
