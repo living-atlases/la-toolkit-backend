@@ -213,8 +213,10 @@ sensitive-data-service:
     - java: '8'
 
 sds:
-  any:
+  '< 1.7.0':
     - java: '8'
+  '>= 1.7.0':
+    - java: '11'
 
 solr:
   '< 8.0.0':
