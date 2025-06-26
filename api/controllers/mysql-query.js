@@ -1,4 +1,11 @@
 const { exec } = require("child_process");
+const { defExecTimeout } = require("../libs/utils.js");
+const cp = require("child_process");
+
+let preCmd = ""; // sails.config.preCmd;
+if (preCmd !== "") {
+  preCmd = preCmd + " ";
+}
 
 module.exports = {
   friendlyName: "MySql query",
@@ -40,21 +47,27 @@ module.exports = {
       .replace(/'/g, "'\\''"); // Scape single quotes
 
     let sshCommand = `'sudo mysql --defaults-file=/root/.my.cnf -D ${inputs.db} -e "${escapedQuery}" -s -N'`;
+    sshCommand = `mysql -u root -h 192.168.68.56 -P 3306 -pcooedchalkiestunprolific collectory -e "${inputs.query}" -s -N`;
 
     try {
-      const result = await sails.helpers.sshCmd.with({
+      const result = cp
+        .execSync(`${preCmd} ${sshCommand}`, {
+          cwd: sails.config.projectDir,
+          timeout: defExecTimeout,
+        })
+        .toString();
+
+      // result = JSON.parse(pkgJsonS(pkg, currentVersions));
+
+      /* const result = await sails.helpers.sshCmd.with({
         server: inputs.sshHost,
         cmd: sshCommand,
-      });
+      }); */
 
-      if (result.code !== 0) {
-        console.error(`error: ${JSON.stringify(result.code)}`);
-        this.res.serverError(result.err);
-        return;
-      }
+      // console.log(result);
 
       // console.log(`stdout: ${result.out}`);
-      return result.out;
+      return result;
     } catch (error) {
       console.error(`error: ${JSON.stringify(error)}`);
       this.res.serverError(error);
