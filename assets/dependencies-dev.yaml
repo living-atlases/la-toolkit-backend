@@ -403,5 +403,5 @@ la-toolkit:
     - la-generator: '>= 1.6.10'
 
   '>= 1.5.9':
-    - ala-install: '>= 2.3.0'
-    - la-generator: '>= 1.6.12'
+    - ala-install: '>= 2.4.0'
+    - la-generator: '>= 1.7.1'
