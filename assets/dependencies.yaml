@@ -18,11 +18,14 @@ ala-install:
   '>= 2.0.3':
     - ansible: '2.10.3'
 
+#aka biocache-hub
 ala-hub:
   '<= 4.0.12-4':
     - java: '8'
-  '>= 5.0.0':
+  '>= 5.0.0 < 8.0.0':
     - java: '11'
+  '>= 8.0.0':
+    - java: '17'
 
 alerts:
   '>= 1.5.1':
