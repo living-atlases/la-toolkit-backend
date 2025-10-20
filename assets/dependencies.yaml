@@ -72,18 +72,22 @@ biocache-service:
   '>=2.7.0':
     - biocache-cli: '>= 2.6.1'
   # biocache-service 3.x uses pipelines
+  '< 3.0.0':
+    - nameindexer: any
+    - java: '8'
   '>= 3.0.0 < 3.1.2':
     - pipelines: any
     - namematching-service: any
     - java: '8'
-  '>= 3.1.2':
+  '>= 3.1.2 < 3.7.0':
     - pipelines: any
     - namematching-service: any
     - java: '11'
-  '< 3.0.0':
-    - nameindexer: any
-    - java: '8'
-
+  '>= 3.7.0':
+    - pipelines: any
+    - namematching-service: any
+    - java: '17'
+    
 biocollect:
   any:
     - ala-install: '>= 2.1.7'
