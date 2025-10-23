@@ -18,11 +18,14 @@ ala-install:
   '>= 2.0.3':
     - ansible: '2.10.3'
 
+#aka biocache-hub
 ala-hub:
   '<= 4.0.12-4':
     - java: '8'
-  '>= 5.0.0':
+  '>= 5.0.0 < 8.0.0':
     - java: '11'
+  '>= 8.0.0':
+    - java: '17'
 
 alerts:
   '>= 1.5.1':
@@ -72,18 +75,22 @@ biocache-service:
   '>=2.7.0':
     - biocache-cli: '>= 2.6.1'
   # biocache-service 3.x uses pipelines
+  '< 3.0.0':
+    - nameindexer: any
+    - java: '8'
   '>= 3.0.0 < 3.1.2':
     - pipelines: any
     - namematching-service: any
     - java: '8'
-  '>= 3.1.2':
+  '>= 3.1.2 < 3.7.0':
     - pipelines: any
     - namematching-service: any
     - java: '11'
-  '< 3.0.0':
-    - nameindexer: any
-    - java: '8'
-
+  '>= 3.7.0':
+    - pipelines: any
+    - namematching-service: any
+    - java: '17'
+    
 biocollect:
   any:
     - ala-install: '>= 2.1.7'
@@ -239,14 +246,18 @@ spatial:
     - spatial-service: '> 0.3.12'
   '< 1.1.0':
     - java: '8'
-  '>= 1.1.0':
+  '>= 1.1.0 < 3.0.0':
     - java: '11'
+  '>= 3.0.0':
+    - java: '17'
 
 spatial-service:
   '< 1.1.0':
     - java: '8'
-  '>= 1.1.0':
+  '>= 1.1.0 < 3.0.0':
     - java: '11'
+  '>= 3.0.0':
+    - java: '17'
 
 spark:
   any:
