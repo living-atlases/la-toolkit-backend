@@ -57,7 +57,7 @@ const pkgVersions = async (pkg, update = false) => {
       if (update) {
         cp.execSync(`${preCmd}sudo apt update`, {
           cwd: sails.config.projectDir,
-          timeout: 30000,
+          timeout: 50000,
         });
       }
       // console.log(`Checking ${pkg} available versions`);
@@ -66,7 +66,7 @@ const pkgVersions = async (pkg, update = false) => {
           `${preCmd} apt-cache madison ${pkg}  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort | uniq  | cut -d "|" -f 2 | sed 's/^ /"/g'| sed 's/$/",/g' | paste -s - - | egrep -v "^$" | sed 's/,$/]/' | sed 's/^/[/' `,
           {
             cwd: sails.config.projectDir,
-            timeout: defExecTimeout,
+            timeout: 40000,
           }
         )
         .toString();
