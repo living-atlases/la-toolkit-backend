@@ -45,26 +45,89 @@ const csvToJson = async (csvToConvert) => {
   });
 }
 
-let checkAndUpdateDb = async (cmd, outFileProdDev, results, id, checks, server, debug = false) => {
+let checkAndUpdateDb = async (cmd, outFileProdDev, results, id, checks, server, updateDb = true, debug = false) => {
   let fullcmd = `${preCmd}${cmd}`;
   if (debug) console.log(`check_by_ssh start for ${server}`)
-  await cp.execSync(fullcmd, {
-    cwd: sails.config.sshDir,
-    timeout: defExecTimeout,
-  });
+
+  try {
+    // Use async exec instead of execSync to avoid blocking the event loop
+    await new Promise((resolve, reject) => {
+      cp.exec(fullcmd, {
+        cwd: sails.config.sshDir,
+        timeout: defExecTimeout,
+      }, (error, stdout, stderr) => {
+        if (error) {
+          // Log full stderr for debugging SSH issues
+          if (stderr && stderr.trim().length > 0) {
+            console.error(`      SSH stderr for ${server}:`);
+            console.error(stderr);
+          }
+          // Also log stdout in case there's useful info
+          if (stdout && stdout.trim().length > 0) {
+            console.error(`      SSH stdout for ${server}:`);
+            console.error(stdout.substring(0, 500));
+          }
+          // Attach stdout/stderr to error for later detection
+          const err = new Error(`check_by_ssh failed for ${server}: ${error.message.split('\n')[0]}`);
+          err.stdout = stdout;
+          err.stderr = stderr;
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  } catch (execError) {
+    // Preserve stdout/stderr in the error
+    const err = new Error(`SSH execution failed for ${server}: ${execError.message}`);
+    err.stdout = execError.stdout;
+    err.stderr = execError.stderr;
+    throw err;
+  }
+
+  // Verify file exists before reading
+  if (!fs.existsSync(outFileProdDev)) {
+    throw new Error(`Output file not found for ${server}: ${outFileProdDev}`);
+  }
+
   let outS = await fs.readFileSync(outFileProdDev).toString();
+
+  if (!outS || outS.trim().length === 0) {
+    throw new Error(`Empty output file for ${server}`);
+  }
+
   // console.log(outS.toString());
   // console.log(`check_by_ssh end and output ready for ${server}`)
   // console.log(`ssh checks completed in ${server}`);
 
   let checksRes = await csvToJson(outS);
   if (debug) console.log(`checks converted in ${server}`);
-  results[id] = checksRes;
+
+  // Accumulate results instead of overwriting
+  if (!results[id]) {
+    results[id] = checksRes;
+  } else {
+    // Append to existing results
+    results[id] = results[id].concat(checksRes);
+  }
+
+  // Only update DB if requested (not for individual fallback checks)
+  if (updateDb) {
+    await updateServiceDeployStatus(results[id], checks, server, debug);
+  }
+};
+
+// Separate function to update DB from accumulated results
+let updateServiceDeployStatus = async (checksResults, checks, server, debug = false) => {
   let sdStatus = {};
   // let sStatus = {};
-  for await (let checkRes of checksRes) {
+  for await (let checkRes of checksResults) {
     // console.log(checkRes);
     // console.log(checks[checkRes.checkId]);
+    if (!checks[checkRes.checkId]) {
+      console.warn(`Check ID ${checkRes.checkId} not found in checks for ${server}`);
+      continue;
+    }
     for (let s of checks[checkRes.checkId].serviceDeploys) {
       let currentCodeStatus = parseInt(checkRes.code)
       if (sdStatus[s] != null) sdStatus[s] += currentCodeStatus;
@@ -129,8 +192,10 @@ module.exports = {
     // serviceDeployIds.forEach((s) => (results[s] = {status: 'unknown'}));
 
     // -t timeout
+    // NOTE: Do NOT use -v (verbose) - it causes "Error parsing output" because
+    // debug info gets mixed with the actual check output and breaks parsing
     const checkSshBase =
-      '/usr/local/bin/check_by_ssh -t 40 -v -F /home/ubuntu/.ssh/config -j';
+      '/usr/local/bin/check_by_ssh -t 40 -F /home/ubuntu/.ssh/config -j';
     const plugins = 'sudo /usr/lib/nagios/plugins/';
     //  -H ala-install-test-1 -n ala-1 -s uptime:uptime:mysql:https -C uptime -C uptime -C 'sudo /usr/lib/nagios/plugins/check_mysql' -C '/usr/lib/nagios/plugins/check_tcp -H localhost -p 443'
 
@@ -149,8 +214,7 @@ module.exports = {
     }
 
     try {
-      await Promise.all(
-        serversIds.map(async (id) => {
+      const checkPromises = serversIds.map(async (id) => {
             let s = await Server.findOne({id: id});
 
             let server = s.name;
@@ -171,10 +235,12 @@ module.exports = {
             const serverCheckBase = `${checkSshBase} -H ${server} -n ${id}`;
             const checkIds = Object.keys(checks);
             console.log(`>>> Checking server ${server}`);
+            console.log(`    Total checks to process: ${checkIds.length}`);
             for await (const checkId of checkIds) {
               let check = checks[checkId];
               let type = check.type;
               let checkServiceName = check.name;
+              console.log(`    Processing check: ${checkServiceName} (type: ${type}, args: ${check.args})`);
               switch (type) {
                 case "tcp":
                   let host = check.host; // parseInt(check.args) === 8983 || parseInt(check.args) === 9000 ? server : "localhost";
@@ -183,6 +249,7 @@ module.exports = {
                     `${plugins}check_tcp -H ${host} -r crit -p ${check.args}`;
                   serviceName.push(`${checkId}þ${checkServiceName}þcheck_tcpþ${check.args}þ${Base64.encode(tcpServiceCmd)}`);
                   serviceCommand.push(tcpServiceCmd);
+                  console.log(`      → TCP check added: port ${check.args} on ${host}`);
                   break;
                 case "udp":
                   let udpServiceCmd = `${plugins}check_udp -H localhost -p ${check.args}`;
@@ -207,14 +274,64 @@ module.exports = {
                       checkExecutable = 'pgsql';
                       args = `-H 127.0.0.1 -l postgres -p ${passwords['postgresql_password']}| paste -s - - | grep -v '^$'`;
                       break;
+                    case 'spark':
+                      checkExecutable = 'procs';
+                      // Check if Spark master or worker process is running
+                      args = `-a 'org.apache.spark.deploy' -C 1`;
+                      break;
+                    case 'hadoop':
+                      checkExecutable = 'procs';
+                      // Check if Hadoop NameNode or DataNode process is running
+                      args = `-a 'org.apache.hadoop' -C 1`;
+                      break;
+                    // Skip these - they're already covered by TCP checks
+                    case 'nginx':
+                    case 'tomcat':
+                    case 'solr':
+                    case 'elasticsearch':
+                    case 'cassandra':
+                    case 'zookeeper':
+                    case 'cas':
+                    case 'userdetails':
+                    case 'apikey':
+                    case 'cas-management':
+                    case 'postfix':
+                    case 'namematching-service':
+                    case 'doi':
+                    case 'collectory':
+                    case 'biocache-service':
+                    case 'ala-bie':
+                    case 'bie-index':
+                    case 'images':
+                    case 'logger':
+                    case 'alerts':
+                    case 'regions':
+                    case 'spatial-hub':
+                    case 'spatial-service':
+                    case 'dashboard':
+                    case 'sds':
+                    case 'webapi':
+                    case 'species-lists':
+                    case 'events':
+                    case 'sensitive-data-service':
+                    case 'data-quality-filter':
+                    case 'pipelines':
+                    case 'biocollect':
+                    case 'ecodata':
+                    case 'pdfgen':
+                      // These services are checked via TCP ports, skip 'other' check
+                      console.log(`      → OTHER check SKIPPED (${check.args}): already checked via TCP`);
+                      checkName = '';
+                      break;
                     default:
-                      console.log(`No tests properly configured for ${check.args}`)
+                      console.log(`      → No tests properly configured for ${check.args}`)
                       checkName = '';
                   }
                   if (checkName !== '') {
                     let otherServiceCmd = `(set -o pipefail && ${plugins}check_${checkExecutable} ${args})`;
                     serviceName.push(`${checkId}þ${checkServiceName}þcheck_${checkName}þþ${Base64.encode(otherServiceCmd)}`);
                     serviceCommand.push(otherServiceCmd);
+                    console.log(`      → OTHER check added: ${checkName} (${checkExecutable})`);
                   }
                   break;
                 case "url":
@@ -225,13 +342,17 @@ module.exports = {
                   let port = pUrl.port != null && pUrl.port.length > 0 ? pUrl.port : pUrl.protocol === 'http:' ? '80' : '443 -S';
                   let pathname = pUrl.pathname;
                   if (pathname.includes('/admin/') || pathname.includes('/alaAdmin/')) {
+                    console.log(`      → URL check SKIPPED (admin path): ${url}`);
                     // skip
                     break;
                   }
-                  let urlArgs = `-H ${hostname} -I ${server} -t 40 --sni -f follow -p ${port} -u '${pathname}'`;
+                  // Don't use -I parameter - it expects IP address not hostname
+                  // The checks are executed FROM the server via SSH, so hostname resolution works fine
+                  let urlArgs = `-H ${hostname} -t 40 --sni -f follow -p ${port} -u '${pathname}'`;
                   let urlServiceCmd = `${plugins}check_http ${urlArgs}`;
                   serviceName.push(`${checkId}þ${checkServiceName}þcheck_urlþ${Base64.encode(url)}þ${Base64.encode(urlServiceCmd)}`);
                   serviceCommand.push(urlServiceCmd);
+                  console.log(`      → URL check added: ${url}`);
                   break;
                 default:
                   break;
@@ -246,31 +367,122 @@ module.exports = {
                 outFile
               )}`;
 
-              // console.log(cmd);
               console.log(`checks started in ${server}`);
+              console.log(`    Total checks to execute: ${serviceName.length}`);
+              console.log(`    Command preview: ${cmd.substring(0, 200)}...`);
               try {
-                await checkAndUpdateDb(cmd, outFileProdDev, results, id, checks, server);
+                await checkAndUpdateDb(cmd, outFileProdDev, results, id, checks, server, true);
                 console.log(`<<< End of checks of ${server}`);
               } catch (err) {
+                // Check if the error is due to missing monitoring tools
+                // Check both the error message AND the content (which may be in stdout/stderr)
+                const errorContent = err.message + (err.stdout || '') + (err.stderr || '');
+                const isMissingMonitoringTools =
+                  errorContent.includes('No such file or directory') ||
+                  errorContent.includes('/usr/lib/nagios/plugins') ||
+                  errorContent.includes('sudo: a terminal is required to read the password') ||
+                  errorContent.includes('Remote command execution failed: sudo:');
+
+                if (isMissingMonitoringTools) {
+                  console.warn(`⚠️  ${server}: Monitoring tools (Nagios plugins) not installed or sudo not configured`);
+                  console.warn(`    Run pre-deploy to install monitoring tools`);
+                  // Mark this in results so UI can show a warning
+                  // IMPORTANT: Initialize results[id] as empty array to ensure UI receives data
+                  if (!results[id]) results[id] = [];
+                  results['_monitoring_' + id] = {
+                    monitoringToolsInstalled: false,
+                    serverName: server,
+                    error: 'Monitoring tools not installed. Run pre-deploy step.'
+                  };
+                  console.log(`<<< Skipping checks for ${server} - monitoring tools not installed`);
+                  return; // Skip this server
+                }
+
                 // Process typical: 'check_by_ssh: Error parsing output' error when the services are not deployed/ready
-                logErr(err);
+                console.error(`Batch check failed for ${server}, trying individual checks...`);
+                console.error(`    Batch error: ${err.message}`);
                 console.log(`Checking ${server} cmd by cmd as some failed --------------- `);
-                // lets try cmd by cmd
+                // Execute individual checks sequentially to avoid file conflicts
+                let individualCheckCount = 0;
+                let individualFailCount = 0;
+                let allErrorsSudo = true; // Track if all errors are sudo-related
                 for (let i = 0; i < serviceName.length; i++) {
-                  let cmd = `${serverCheckBase} -s ${serviceName[i]} -C "${serviceCommand[i]}" -O ${p.join(
+                  let svcName = serviceName[i];
+                  let svcParts = svcName.split('þ');
+                  let checkType = svcParts[2] || 'unknown';
+                  console.log(`    Individual check ${i + 1}/${serviceName.length}: ${checkType}`);
+                  let cmd = `${serverCheckBase} -s ${svcName} -C "${serviceCommand[i]}" -O ${p.join(
                     logsProdFolder,
                     outFile
                   )}`;
                   try {
-                    await checkAndUpdateDb(cmd, outFileProdDev, results, id, checks, server);
-                  } catch (err) {
-                    logErr(err);
+                    // Don't update DB for individual checks, will update at the end
+                    await checkAndUpdateDb(cmd, outFileProdDev, results, id, checks, server, false);
+                    individualCheckCount++;
+                    console.log(`      ✓ Success`);
+                    allErrorsSudo = false; // At least one succeeded
+                  } catch (individualErr) {
+                    individualFailCount++;
+                    // Check if this specific error is sudo-related
+                    const individualErrorContent = individualErr.message + (individualErr.stdout || '') + (individualErr.stderr || '');
+                    const isSudoError =
+                      individualErrorContent.includes('sudo: a terminal is required') ||
+                      individualErrorContent.includes('Remote command execution failed: sudo:') ||
+                      individualErrorContent.includes('No such file or directory');
+
+                    if (!isSudoError) {
+                      allErrorsSudo = false; // This is a different kind of error
+                    }
+
+                    // Only log once per individual check, not the full error
+                    console.error(`      ✗ Individual check failed for ${server}: ${checkType} - ${individualErr.message}`);
                   }
+                }
+                console.log(`Individual checks for ${server}: ${individualCheckCount} succeeded, ${individualFailCount} failed`);
+
+                // If ALL checks failed and ALL were sudo errors, mark as missing monitoring tools
+                if (individualCheckCount === 0 && allErrorsSudo && individualFailCount > 0) {
+                  console.warn(`⚠️  ${server}: All checks failed with sudo errors - monitoring tools not configured`);
+                  console.warn(`    Run pre-deploy to install monitoring tools and configure sudo`);
+                  if (!results[id]) results[id] = [];
+                  results['_monitoring_' + id] = {
+                    monitoringToolsInstalled: false,
+                    serverName: server,
+                    error: 'Monitoring tools not installed. Run pre-deploy step.'
+                  };
+                  console.log(`<<< Skipping ${server} - monitoring tools not installed`);
+                  return;
+                }
+
+                // Now update DB with all accumulated results
+                if (results[id] && results[id].length > 0) {
+                  await updateServiceDeployStatus(results[id], checks, server);
+                  console.log(`<<< End of checks of ${server} (individual mode)`);
+                } else {
+                  console.error(`No results accumulated for ${server}`);
                 }
               }
             }
           }
-        ));
+        );
+
+      // Use Promise.allSettled instead of Promise.all to prevent one failed server from stopping all checks
+      const checkResults = await Promise.allSettled(checkPromises);
+
+      // Log results summary
+      let successCount = 0;
+      let failedCount = 0;
+      checkResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          successCount++;
+        } else {
+          failedCount++;
+          console.error(`Failed to check server ${serversIds[index]}:`, result.reason);
+        }
+      });
+
+      console.log(`\n=== Check Summary: ${successCount} servers checked successfully, ${failedCount} failed ===\n`);
+
       let sds = await ServiceDeploy.find({projectId: pId});
       let ss = await Service.find({projectId: pId});
       console.log(`--- Returning check results for ${Object.keys(results).length} servers`)
