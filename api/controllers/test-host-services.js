@@ -404,6 +404,11 @@ module.exports = {
               }
 
               // Monitoring tools exist, proceed with checks
+              // Remove any old monitoring warning if it exists from previous runs
+              if (results['_monitoring_' + id]) {
+                delete results['_monitoring_' + id];
+              }
+
               let cmd = `${serverCheckBase} -s ${serviceName.join(
                 ':'
               )} \\\n -C "${serviceCommand.join('" \\\n -C "')}" -O ${p.join(
@@ -418,38 +423,15 @@ module.exports = {
                 await checkAndUpdateDb(cmd, outFileProdDev, results, id, checks, server, true);
                 console.log(`<<< End of checks of ${server}`);
               } catch (err) {
-                // Check if the error is due to missing monitoring tools
-                // Check both the error message AND the content (which may be in stdout/stderr)
-                const errorContent = err.message + (err.stdout || '') + (err.stderr || '');
-                const isMissingMonitoringTools =
-                  errorContent.includes('No such file or directory') ||
-                  errorContent.includes('/usr/lib/nagios/plugins') ||
-                  errorContent.includes('sudo: a terminal is required to read the password') ||
-                  errorContent.includes('Remote command execution failed: sudo:');
-
-                if (isMissingMonitoringTools) {
-                  console.warn(`⚠️  ${server}: Monitoring tools (Nagios plugins) not installed or sudo not configured`);
-                  console.warn(`    Run pre-deploy to install monitoring tools`);
-                  // Mark this in results so UI can show a warning
-                  // IMPORTANT: Initialize results[id] as empty array to ensure UI receives data
-                  if (!results[id]) results[id] = [];
-                  results['_monitoring_' + id] = {
-                    monitoringToolsInstalled: false,
-                    serverName: server,
-                    error: 'Monitoring tools not installed. Run pre-deploy step.'
-                  };
-                  console.log(`<<< Skipping checks for ${server} - monitoring tools not installed`);
-                  return; // Skip this server
-                }
-
-                // Process typical: 'check_by_ssh: Error parsing output' error when the services are not deployed/ready
+                // Process typical batch check failures by trying individual checks
+                // Note: We no longer detect "monitoring tools not found" here because
+                // the pre-check with 'ls' already handles that before we get here
                 console.error(`Batch check failed for ${server}, trying individual checks...`);
                 console.error(`    Batch error: ${err.message}`);
                 console.log(`Checking ${server} cmd by cmd as some failed --------------- `);
                 // Execute individual checks sequentially to avoid file conflicts
                 let individualCheckCount = 0;
                 let individualFailCount = 0;
-                let allErrorsSudo = true; // Track if all errors are sudo-related
                 for (let i = 0; i < serviceName.length; i++) {
                   let svcName = serviceName[i];
                   let svcParts = svcName.split('þ');
@@ -464,39 +446,13 @@ module.exports = {
                     await checkAndUpdateDb(cmd, outFileProdDev, results, id, checks, server, false);
                     individualCheckCount++;
                     console.log(`      ✓ Success`);
-                    allErrorsSudo = false; // At least one succeeded
                   } catch (individualErr) {
                     individualFailCount++;
-                    // Check if this specific error is sudo-related
-                    const individualErrorContent = individualErr.message + (individualErr.stdout || '') + (individualErr.stderr || '');
-                    const isSudoError =
-                      individualErrorContent.includes('sudo: a terminal is required') ||
-                      individualErrorContent.includes('Remote command execution failed: sudo:') ||
-                      individualErrorContent.includes('No such file or directory');
-
-                    if (!isSudoError) {
-                      allErrorsSudo = false; // This is a different kind of error
-                    }
-
                     // Only log once per individual check, not the full error
                     console.error(`      ✗ Individual check failed for ${server}: ${checkType} - ${individualErr.message}`);
                   }
                 }
                 console.log(`Individual checks for ${server}: ${individualCheckCount} succeeded, ${individualFailCount} failed`);
-
-                // If ALL checks failed and ALL were sudo errors, mark as missing monitoring tools
-                if (individualCheckCount === 0 && allErrorsSudo && individualFailCount > 0) {
-                  console.warn(`⚠️  ${server}: All checks failed with sudo errors - monitoring tools not configured`);
-                  console.warn(`    Run pre-deploy to install monitoring tools and configure sudo`);
-                  if (!results[id]) results[id] = [];
-                  results['_monitoring_' + id] = {
-                    monitoringToolsInstalled: false,
-                    serverName: server,
-                    error: 'Monitoring tools not installed. Run pre-deploy step.'
-                  };
-                  console.log(`<<< Skipping ${server} - monitoring tools not installed`);
-                  return;
-                }
 
                 // Now update DB with all accumulated results
                 if (results[id] && results[id].length > 0) {
