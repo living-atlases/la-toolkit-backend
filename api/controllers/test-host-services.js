@@ -360,6 +360,50 @@ module.exports = {
             }
 
             if (serviceName.length > 0 && serviceCommand.length > 0) {
+              // PRE-CHECK: Verify monitoring tools are installed before running checks
+              console.log(`>>> Pre-checking monitoring tools on ${server}...`);
+              const preCheckCmd = `docker exec -u ubuntu la-toolkit ssh -F /home/ubuntu/.ssh/config ${server} "ls /usr/lib/nagios/plugins/check_tcp"`;
+
+              try {
+                await new Promise((resolve, reject) => {
+                  cp.exec(preCheckCmd, {
+                    cwd: sails.config.sshDir,
+                    timeout: 10000, // 10 second timeout for pre-check
+                  }, (error, stdout, stderr) => {
+                    if (error) {
+                      // Plugin doesn't exist or SSH failed
+                      const errorMsg = (stderr || stdout || error.message).toLowerCase();
+                      if (errorMsg.includes('no such file') ||
+                          errorMsg.includes('cannot access') ||
+                          errorMsg.includes('not found')) {
+                        console.warn(`⚠️  ${server}: Monitoring tools (Nagios plugins) NOT FOUND`);
+                        reject(new Error('MONITORING_TOOLS_NOT_FOUND'));
+                      } else {
+                        // Other SSH error (connection, permission, etc)
+                        console.warn(`⚠️  ${server}: Pre-check failed - ${errorMsg.substring(0, 100)}`);
+                        reject(new Error('SSH_PRE_CHECK_FAILED'));
+                      }
+                    } else {
+                      // Plugin exists!
+                      console.log(`    ✓ Monitoring tools found on ${server}`);
+                      resolve();
+                    }
+                  });
+                });
+              } catch (preCheckError) {
+                // Pre-check failed - mark as missing monitoring tools
+                console.warn(`    Run pre-deploy to install monitoring tools`);
+                if (!results[id]) results[id] = [];
+                results['_monitoring_' + id] = {
+                  monitoringToolsInstalled: false,
+                  serverName: server,
+                  error: 'Monitoring tools not installed. Run pre-deploy step.'
+                };
+                console.log(`<<< Skipping checks for ${server} - monitoring tools not installed`);
+                return; // Skip this server
+              }
+
+              // Monitoring tools exist, proceed with checks
               let cmd = `${serverCheckBase} -s ${serviceName.join(
                 ':'
               )} \\\n -C "${serviceCommand.join('" \\\n -C "')}" -O ${p.join(
