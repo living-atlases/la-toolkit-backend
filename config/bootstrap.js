@@ -11,6 +11,17 @@
 
 module.exports.bootstrap = async function() {
 
+  // Pre-load common package versions to improve client startup performance
+  // This caches the most frequently requested dependency versions
+  const getDepsVersions = require('../api/controllers/get-deps-versions');
+
+  if (getDepsVersions.preloadVersions) {
+    // Run in background to not block server startup
+    getDepsVersions.preloadVersions().catch(err => {
+      console.error('Background version pre-loading failed:', err.message);
+    });
+  }
+
   // By convention, this is a good place to set up fake data during development.
   //
   // For example:
