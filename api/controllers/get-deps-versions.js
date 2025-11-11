@@ -55,21 +55,53 @@ const pkgVersions = async (pkg, update = false) => {
         preCmd = preCmd + " ";
       }
       if (update) {
-        cp.execSync(`${preCmd}sudo apt update`, {
-          cwd: sails.config.projectDir,
-          timeout: 50000,
+        // Use async exec for apt update to avoid blocking
+        await new Promise((resolve, reject) => {
+          cp.exec(`${preCmd}sudo apt update`, {
+            cwd: sails.config.projectDir,
+            timeout: 120000, // 120s for apt update
+          }, (error, stdout, stderr) => {
+            if (error) {
+              console.warn(`apt update warning: ${error.message}`);
+              // Don't reject - continue even if apt update has warnings
+            }
+            resolve();
+          });
         });
       }
       // console.log(`Checking ${pkg} available versions`);
-      currentVersions = cp
-        .execSync(
+      // Use async exec with increased timeout to avoid blocking
+      currentVersions = await new Promise((resolve, reject) => {
+        cp.exec(
           `${preCmd} apt-cache madison ${pkg}  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort | uniq  | cut -d "|" -f 2 | sed 's/^ /"/g'| sed 's/$/",/g' | paste -s - - | egrep -v "^$" | sed 's/,$/]/' | sed 's/^/[/' `,
           {
             cwd: sails.config.projectDir,
-            timeout: 40000,
+            timeout: 120000, // Increased to 120s for slower systems
+            maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+          },
+          (error, stdout, stderr) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(stdout.toString().trim());
+            }
           }
-        )
-        .toString();
+        );
+      });
+
+      // Validate that currentVersions is a valid JSON array
+      if (!currentVersions || currentVersions === '' || !currentVersions.startsWith('[')) {
+        console.warn(`Invalid or empty versions for ${pkg}, using empty array`);
+        currentVersions = '[]';
+      }
+
+      // Validate JSON before parsing
+      try {
+        JSON.parse(currentVersions);
+      } catch (jsonErr) {
+        console.warn(`Invalid JSON format for ${pkg} versions: ${currentVersions}`);
+        currentVersions = '[]';
+      }
 
       result = JSON.parse(pkgJsonS(pkg, currentVersions));
     } catch (err) {
@@ -84,6 +116,7 @@ const pkgVersions = async (pkg, update = false) => {
   }
 };
 
+// Sails.js controller export
 module.exports = {
   friendlyName: "get ala nexus artifact versions",
 
@@ -198,3 +231,56 @@ module.exports = {
     }
   },
 };
+
+// Export helper functions for use in bootstrap
+module.exports.pkgVersions = pkgVersions;
+
+// Function to preload common package versions on server startup
+module.exports.preloadVersions = async function() {
+  console.log('🔄 Pre-loading common package versions...');
+  const commonPackages = [
+    'la-pipelines',
+    'ala-namematching-service',
+    'ala-sensitive-data-service'
+  ];
+
+  const startTime = Date.now();
+  let successCount = 0;
+  let failedPackages = [];
+
+  try {
+    // Load packages SEQUENTIALLY to avoid overloading the system
+    // First package updates apt cache
+    for (let i = 0; i < commonPackages.length; i++) {
+      const pkg = commonPackages[i];
+      const updateApt = i === 0; // Only update apt for first package
+
+      try {
+        console.log(`  📦 Loading ${pkg}...`);
+        await pkgVersions(pkg, updateApt);
+        successCount++;
+        console.log(`  ✅ ${pkg} loaded successfully`);
+      } catch (err) {
+        failedPackages.push(pkg);
+        console.error(`  ❌ Failed to load ${pkg}: ${err.message}`);
+        // Continue with next package even if one fails
+      }
+    }
+
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+    if (successCount === commonPackages.length) {
+      console.log(`✅ Successfully pre-loaded all ${successCount} package versions in ${duration}s`);
+      console.log('📦 Cached versions ready for client requests');
+    } else {
+      console.log(`⚠️  Pre-loaded ${successCount}/${commonPackages.length} packages in ${duration}s`);
+      if (failedPackages.length > 0) {
+        console.log(`   Failed packages: ${failedPackages.join(', ')}`);
+      }
+    }
+  } catch (err) {
+    console.error('❌ Error during pre-loading:', err.message);
+    // Don't throw - server should start even if pre-loading fails
+  }
+};
+
