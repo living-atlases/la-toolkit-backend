@@ -175,9 +175,10 @@ module.exports = {
                   artifact === "ala-namematching-server"
                     ? "names/ala-namematching-server"
                     : artifact;
-                let nexusUrl = `https://nexus.ala.org.au/service/local/repositories/${repo}/content/au/org/ala/${artifactConv}/maven-metadata.xml`;
+                // let nexusUrlOld = `https://nexus.ala.org.au/service/local/repositories/${repo}/content/au/org/ala/${artifactConv}/maven-metadata.xml`;
+                let nexusUrl = `https://nexus.ala.org.au/repository/${repo}/au/org/ala/${artifactConv}/maven-metadata.xml`;
                 // if (process.env.NODE_ENV !== "production")
-                //  console.log(`url: ${nexusUrl}`);
+                // console.log(`url: ${nexusUrl}`);
                 const xmlData = await fetchWithRedirects(nexusUrl);
                 // https://nexus.ala.org.au/service/local/repositories/releases/content/au/org/ala/ala-hub/4.0.8/ala-hub-4.0.8.war
                 // https://nexus.ala.org.au/service/local/repositories/snapshots/content/au/org/ala/ala-hub/maven-metadata.xml
