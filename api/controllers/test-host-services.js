@@ -362,7 +362,7 @@ module.exports = {
             if (serviceName.length > 0 && serviceCommand.length > 0) {
               // PRE-CHECK: Verify monitoring tools are installed before running checks
               console.log(`>>> Pre-checking monitoring tools on ${server}...`);
-              const preCheckCmd = `docker exec -u ubuntu la-toolkit ssh -F /home/ubuntu/.ssh/config ${server} "ls /usr/lib/nagios/plugins/check_tcp"`;
+              const preCheckCmd = `${preCmd}ssh -F /home/ubuntu/.ssh/config ${server} "ls /usr/lib/nagios/plugins/check_tcp"`;
 
               try {
                 await new Promise((resolve, reject) => {
