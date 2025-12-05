@@ -47,7 +47,7 @@ module.exports = {
       .replace(/'/g, "'\\''"); // Scape single quotes
 
     let sshCommand = `'sudo mysql --defaults-file=/root/.my.cnf -D ${inputs.db} -e "${escapedQuery}" -s -N'`;
-    sshCommand = `mysql -u root -h 192.168.68.56 -P 3306 -pcooedchalkiestunprolific collectory -e "${inputs.query}" -s -N`;
+    // sshCommand = `mysql -u root -h 192.168.68.56 -P 3306 -pcoXXXXXXXic collectory -e "${inputs.query}" -s -N`;
 
     try {
       const result = cp
