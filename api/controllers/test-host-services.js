@@ -267,7 +267,9 @@ module.exports = {
                       break;
                     case 'mongo':
                       checkExecutable = 'mongodb';
-                      args = `-H 127.0.0.1 -u admin -p ${passwords['mongodb_root_password']}`;
+                      // args = `-H 127.0.0.1 -u admin -p ${passwords['mongodb_root_password']}`;
+                      // This fails with CRITICAL - General MongoDB Error: 'Collection' object is not callable. If you meant to call the 'authenticate' method on a 'Database' object it is failing because no such method exists. So lets check without auth for now
+                      args = `-H 127.0.0.1`;
                       break;
                     case 'postgresql':
                       checkName = ''; // we disable this check now as the admin user are not currently created
