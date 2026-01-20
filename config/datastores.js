@@ -51,8 +51,11 @@ module.exports.datastores = {
     adapter: 'sails-mongo',
     // WARN: should match session.js conf
     url: process.env.DATABASE_URL,
-    // https://stackoverflow.com/questions/46504258/sails-mongo-reconnect
-    reconnectTries: Number.MAX_VALUE,
-    reconnectInterval: 1000
+    // The old options `reconnectTries` and `reconnectInterval` are not supported
+    // by the modern mongodb driver. If you need retry behavior, configure it
+    // using the connection string or the driver's new options when creating
+    // the MongoClient. For now we remove the legacy keys to avoid parse errors.
+    // reconnectTries: Number.MAX_VALUE,
+    // reconnectInterval: 1000
   },
 };
