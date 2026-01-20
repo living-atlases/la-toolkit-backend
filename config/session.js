@@ -27,22 +27,29 @@ module.exports.session = {
    * session management when responding to simple requests for static assets, *
    * like images or stylesheets.)                                             *
    *                                                                          *
-   * https://sailsjs.com/config/session                                       *
-   *                                                                          *
    ***************************************************************************/
   // isSessionDisabled: function (req){
   //   return !!req.path.match(req._sails.LOOKS_LIKE_ASSET_RX);
   // },
 
-  // https://sailsjs.com/documentation/reference/configuration/sails-config-session
-  adapter: 'connect-mongo',
-  url: process.env.DATABASE_URL,
-  collection: 'sessions',
-  // stringify: true,
-  // auto_reconnect: false,
-  // mongoOptions: {
-  //   server: {
-  //     ssl: true
-  //   }
-  // }
+  /***************************************************************************
+   *                                                                          *
+   * Use a Connect-compatible session store. We create the store instance     *
+   * using connect-mongo's modern API to avoid the legacy-constructor error.  *
+   *                                                                          *
+   ***************************************************************************/
+  store: (function(){
+    try {
+      const MongoStore = require('connect-mongo');
+      return MongoStore.create({
+        mongoUrl: process.env.DATABASE_URL,
+        collectionName: 'sessions',
+        // Optional: set TTL (seconds) for session documents, e.g. 14 days
+        ttl: 14 * 24 * 60 * 60
+      });
+    } catch (e) {
+      // If require fails, rethrow a clearer error for the Sails startup logs
+      throw new Error('Unable to create session store with connect-mongo: ' + e.message);
+    }
+  })(),
 };
