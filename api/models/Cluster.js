@@ -14,7 +14,7 @@ module.exports = {
     type: {
       type: "string",
       defaultsTo: "vm",
-      isIn: ["vm", "dockerSwarm", "k8s"],
+      isIn: ["vm", "dockerSwarm", "k8s", "dockerCompose"],
     },
 
     // Relations
