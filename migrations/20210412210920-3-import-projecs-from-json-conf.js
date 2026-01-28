@@ -3,13 +3,34 @@ const { appConfSync } = require('../api/libs/utils.js');
 
 module.exports = {
   async up(db, client) {
+    // Check if migration was already applied
+    const projectsCollection = db.collection('projects');
+    const existingProjects = await projectsCollection.find({}).limit(1).toArray();
+
+    // If there are projects and they already have genConf, skip migration
+    if (existingProjects.length > 0 && existingProjects[0].genConf) {
+      console.log('Migration already applied (projects have genConf), skipping');
+      return;
+    }
+
     let conf = await appConfSync();
     let projsToTrans = conf['projects'];
     let projectsMap = conf['projectsMap'];
 
+    // If there's nothing to migrate, skip
+    if (!projsToTrans || projsToTrans.length === 0) {
+      console.log('No old-format projects to migrate, skipping');
+      return;
+    }
+
     return new Promise((resolve, reject) => {
       sails.lift({
-        hooks: { grunt: false },
+        hooks: {
+          grunt: false,
+          // Disable problematic hooks during migration
+          helpers: false,
+          security: false
+        },
         log: { level: 'error' }
       }, async (err) => {
         if (err) return reject(err);
@@ -123,3 +144,4 @@ module.exports = {
     // No-op
   }
 };
+
