@@ -61,6 +61,7 @@ module.exports.routes = {
   "POST /api/v1/pre-deploy": { action: "pre-deploy" },
   "POST /api/v1/post-deploy": { action: "post-deploy" },
   "POST /api/v1/test-host-services": { action: "test-host-services" },
+  "POST /api/v1/test-host-services-stream": { action: "test-host-services-stream" },
   "POST /api/v1/add-projects": { action: "add-projects" },
   "POST /api/v1/add-project": { action: "add-project" },
   "PATCH /api/v1/update-project": { action: "update-project" },
@@ -72,4 +73,5 @@ module.exports.routes = {
   "GET /api/v1/projects-subs": { action: "projects-subs" },
   "POST /api/v1/solr-query": { action: "solr-query" },
   "POST /api/v1/mysql-query": { action: "mysql-query" },
+  "GET /api/v1/get-system-status": { action: "get-system-status" },
 };
