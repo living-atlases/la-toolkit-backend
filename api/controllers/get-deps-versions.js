@@ -42,7 +42,7 @@ const pkgJsonS = (pkg, currentVersions) =>
          }
        }`;
 const pkgVersions = async (pkg, update = false) => {
-  let preCmd = sails.config.preCmd;
+  let preCmd = sails.config.preCmd || "";
   let currentVersions = "";
   const cachedData = cache.get(pkg);
   if (cachedData) {
@@ -50,7 +50,7 @@ const pkgVersions = async (pkg, update = false) => {
   } else {
     let result;
     try {
-      if (preCmd !== "") {
+      if (preCmd && preCmd !== "") {
         preCmd = preCmd.replace("exec", "exec -w /home/ubuntu/");
         preCmd = preCmd + " ";
       }
@@ -195,13 +195,13 @@ module.exports = {
                     result[service][repo]["metadata"]["versioning"]["versions"][
                       "version"
                     ] = [
-                      ...result[service][repo]["metadata"]["versioning"][
+                        ...result[service][repo]["metadata"]["versioning"][
                         "versions"
-                      ]["version"],
-                      ...[].concat(
-                        jsonObj["metadata"]["versioning"]["versions"]["version"]
-                      ),
-                    ];
+                        ]["version"],
+                        ...[].concat(
+                          jsonObj["metadata"]["versioning"]["versions"]["version"]
+                        ),
+                      ];
                   } else {
                     result[service][repo] = jsonObj;
                   }
@@ -237,7 +237,7 @@ module.exports = {
 module.exports.pkgVersions = pkgVersions;
 
 // Function to preload common package versions on server startup
-module.exports.preloadVersions = async function() {
+module.exports.preloadVersions = async function () {
   console.log('🔄 Pre-loading common package versions...');
   const commonPackages = [
     'la-pipelines',
