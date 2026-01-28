@@ -20,7 +20,9 @@
     "grunt": "1.0.4",
     "ico-to-png": "^0.2.1",
     "js-base64": "^3.6.0",
+    "machinepack-redis": "^1.3.0",
     "meta-extractor": "^2.1.0",
+    "migrate-mongo": "^11.0.0",
     "node-cache": "^5.1.2",
     "object-mapper": "^6.2.0",
     "pkill": "^2.0.0",
@@ -43,6 +45,7 @@
   "scripts": {
     "start": "NODE_ENV=production node app.js",
     "test": "npm run custom-tests && echo 'Done.'",
+    "migrate": "migrate-mongo up",
     "lint": "./node_modules/eslint/bin/eslint.js . --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
     "custom-tests": "ava"
   },

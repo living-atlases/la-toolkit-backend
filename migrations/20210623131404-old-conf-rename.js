@@ -1,40 +1,17 @@
-'use strict';
-const p = require('path');
 const fs = require('fs');
 const { appConf } = require('../api/libs/utils.js');
 
-var dbm;
-var type;
-var seed;
+module.exports = {
+  async up(db, client) {
+    console.log('Renaming old conf file');
+    let oldAppConf = appConf();
+    if (fs.existsSync(oldAppConf)) {
+      fs.renameSync(oldAppConf, `${oldAppConf}.migrated`);
+      console.log(`Old '${oldAppConf}' renamed to '${oldAppConf}.migrated' as is already migrated`);
+    }
+  },
 
-/**
- * We receive the dbmigrate dependency from dbmigrate initially.
- * This enables us to not have to rely on NODE_PATH.
- */
-exports.setup = function (options, seedLink) {
-  dbm = options.dbmigrate;
-  type = dbm.dataType;
-  seed = seedLink;
-};
-
-exports.up = async function (db) {
-  console.log('Renaming old conf file');
-  let oldAppConf = appConf();
-  if (fs.existsSync(oldAppConf)) {
-    fs.rename(oldAppConf, `${oldAppConf}.migrated`, () => {
-      console.log(
-        `Old '${oldAppConf}' renamed to '${oldAppConf}.migrated' as is already migrated`
-      );
-    });
+  async down(db, client) {
+    // No-op
   }
-  sails.lower();
-  return;
-};
-
-exports.down = async function (db) {
-  return;
-};
-
-exports._meta = {
-  version: 1,
 };
