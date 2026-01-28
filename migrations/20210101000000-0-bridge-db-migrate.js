@@ -15,9 +15,14 @@ module.exports = {
 
     for (const oldMigration of oldMigrations) {
       // db-migrate stores name as '/migrations/2021...'
-      // migrate-mongo expects filename '2021...'
+      // migrate-mongo expects filename '2021....js'
       const nameParts = oldMigration.name.split('/');
-      const fileName = nameParts[nameParts.length - 1];
+      let fileName = nameParts[nameParts.length - 1];
+
+      // Add .js extension if not present (db-migrate stored without extension)
+      if (!fileName.endsWith('.js')) {
+        fileName = fileName + '.js';
+      }
 
       // Check if already in changelog to avoid duplicates
       const exists = await changelogColl.findOne({ fileName });
@@ -27,6 +32,8 @@ module.exports = {
           appliedAt: oldMigration.run_on || new Date()
         });
         console.log(`Ported status for ${fileName}`);
+      } else {
+        console.log(`${fileName} already in changelog, skipping`);
       }
     }
 
@@ -38,3 +45,4 @@ module.exports = {
     // No-op
   }
 };
+
