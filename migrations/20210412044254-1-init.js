@@ -1,67 +1,47 @@
-'use strict';
+module.exports = {
+  async up(db, client) {
+    // Helper function to create collection only if it doesn't exist
+    async function createCollectionIfNotExists(collectionName) {
+      const collections = await db.listCollections({ name: collectionName }).toArray();
+      if (collections.length === 0) {
+        await db.createCollection(collectionName);
+        console.log(`Created collection ${collectionName}`);
+      } else {
+        console.log(`Collection ${collectionName} already exists, skipping`);
+      }
+    }
 
-var dbm;
-var type;
-var seed;
+    await createCollectionIfNotExists('cmds');
+    await createCollectionIfNotExists('cmd_history_entries');
+    await createCollectionIfNotExists('variables');
+    await createCollectionIfNotExists('service_deploys');
+    await createCollectionIfNotExists('services');
+    await createCollectionIfNotExists('servers');
+    await createCollectionIfNotExists('projects');
+    await createCollectionIfNotExists('groups');
+    await createCollectionIfNotExists('users');
+  },
 
-/**
- * We receive the dbmigrate dependency from dbmigrate initially.
- * This enables us to not have to rely on NODE_PATH.
- */
-exports.setup = function (options, seedLink) {
-  dbm = options.dbmigrate;
-  type = dbm.dataType;
-  seed = seedLink;
-};
+  async down(db, client) {
+    // Helper function to drop collection only if it exists
+    async function dropCollectionIfExists(collectionName) {
+      const collections = await db.listCollections({ name: collectionName }).toArray();
+      if (collections.length > 0) {
+        await db.dropCollection(collectionName);
+        console.log(`Dropped collection ${collectionName}`);
+      } else {
+        console.log(`Collection ${collectionName} not found, skipping`);
+      }
+    }
 
-/*
-   Types from:
-   node_modules/db-migrate-shared/data_type.js
-
-  CHAR: 'char',
-  STRING: 'string',
-  TEXT: 'text',
-  SMALLINT: 'smallint',
-  BIGINT: 'bigint',
-  INTEGER: 'int',
-  SMALL_INTEGER: 'smallint',
-  BIG_INTEGER: 'bigint',
-  REAL: 'real',
-  DATE: 'date',
-  DATE_TIME: 'datetime',
-  TIME: 'time',
-  BLOB: 'blob',
-  TIMESTAMP: 'timestamp',
-  BINARY: 'binary',
-  BOOLEAN: 'boolean',
-  DECIMAL: 'decimal'
-*/
-
-// https://db-migrate.readthedocs.io/en/latest/API/NoSQL/
-exports.up = async function (db) {
-  await db.createCollection('cmds');
-  await db.createCollection('cmd_history_entries');
-  await db.createCollection('variables');
-  await db.createCollection('service_deploys');
-  await db.createCollection('services');
-  await db.createCollection('servers');
-  await db.createCollection('projects');
-  await db.createCollection('groups');
-  return await db.createCollection('users');
-};
-
-exports.down = async function (db) {
-  await db.dropCollection('projects');
-  await db.dropCollection('servers');
-  await db.dropCollection('services');
-  await db.dropCollection('service_deploys');
-  await db.dropCollection('variables');
-  await db.dropCollection('cmd_history_entries');
-  await db.dropCollection('cmds');
-  await db.dropCollection('groups');
-  return await db.dropCollection('users');
-};
-
-exports._meta = {
-  version: 1,
+    await dropCollectionIfExists('projects');
+    await dropCollectionIfExists('servers');
+    await dropCollectionIfExists('services');
+    await dropCollectionIfExists('service_deploys');
+    await dropCollectionIfExists('variables');
+    await dropCollectionIfExists('cmd_history_entries');
+    await dropCollectionIfExists('cmds');
+    await dropCollectionIfExists('groups');
+    await dropCollectionIfExists('users');
+  }
 };
