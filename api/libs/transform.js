@@ -210,6 +210,12 @@ module.exports = function (inputs) {
     LA_variable_oidc_use: "LA_variable_oidc_use",
     LA_variable_jwt_in_use: "LA_variable_jwt_in_use",
     LA_variable_jwt_out_use: "LA_variable_jwt_out_use",
+    LA_variable_branding_source: "LA_variable_branding_source",
+    LA_variable_use_la_site_certs: "LA_variable_use_la_site_certs",
+    LA_variable_docker_mail_development_mode:
+      "LA_variable_docker_mail_development_mode",
+    LA_variable_docker_mail_development_url:
+      "LA_variable_docker_mail_development_url",
     LA_is_hub: "LA_is_hub",
     LA_software_versions: "LA_software_versions",
     LA_pipelines_hostname: "LA_pipelines_hostname",
@@ -221,7 +227,8 @@ module.exports = function (inputs) {
     LA_variable_enable_data_quality: "LA_enable_data_quality",
     LA_variable_enable_events: "LA_enable_events",
     LA_collectory_version_ge_3: "LA_collectory_version_ge_3",
-    LA_nginx_docker_internal_aliases: "LA_nginx_docker_internal_aliases",
+    LA_nginx_docker_internal_aliases_by_host:
+      "LA_nginx_docker_internal_aliases_by_host",
     LA_docker_solr_hosts: "LA_docker_solr_hosts",
   };
 
