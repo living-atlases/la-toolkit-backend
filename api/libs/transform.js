@@ -245,17 +245,12 @@ module.exports = function (inputs) {
 
   if (!objMapped.LA_use_species) objMapped.LA_use_species_lists = false;
 
-  let debug = false;
+  let debug = true;
 
-  if (debug) {
-    for (let [key, value] of Object.entries(objMapped)) {
-      if (
-        key !== "LA_pkg_name" &&
-        (typeof value === "string" || typeof value === "number")
-      ) {
-        objMapped[key] = `_GEN_${value}_GEN_`;
-      }
-    }
+  if (true) {
+    console.log("DEBUG: inputs.conf", JSON.stringify(inputs.conf, null, 2));
+    console.log("------");
+    console.log("DEBUG: objMapped", JSON.stringify(objMapped, null, 2));
   }
 
   return {
