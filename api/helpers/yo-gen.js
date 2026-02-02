@@ -21,9 +21,14 @@ async function yoGen(pkgName, path, yoRc) {
               });
             }
             console.log('Generating inventories');
+            try {
+              cp.execSync('cat .yo-rc.json', { cwd: path });
+            } catch (e) {
+              console.log('Error cat .yo-rc.json', e);
+            }
             cp.execSync(
               'yo living-atlas --replay-dont-ask --force', //  --debug",
-              { cwd: path, timeout: defExecTimeout}
+              { cwd: path, timeout: defExecTimeout }
             );
             if (
               !fsn.existsSync(
@@ -32,7 +37,7 @@ async function yoGen(pkgName, path, yoRc) {
             ) {
               cp.execSync(
                 `cp -f ${pkgName}-branding/app/js/settings.js.sample ${pkgName}-branding/app/js/settings.js`,
-                { cwd: path, timeout: defExecTimeout}
+                { cwd: path, timeout: defExecTimeout }
               );
             }
             console.log('End of yo');

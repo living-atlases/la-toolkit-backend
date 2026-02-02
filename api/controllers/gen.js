@@ -46,13 +46,18 @@ module.exports = {
     // temporal directory
     const tmpobj = tmp.dirSync({ unsafeCleanup: true });
 
-    let p = await Project.findOne({ id: inputs.id });
+    // let p = await Project.findOne({ id: inputs.id });
 
-    const yoRc = sails.helpers.transform({ conf: p.genConf });
-
-    // console.log(yoRc);
-
-    const pkgName = p.dirName;
+    // const yoRc = sails.helpers.transform({ conf: p.genConf });
+    // const yoRc = sails.helpers.transform({ conf: p.genConf });
+    const body = this.req.body;
+    const yoRc = {
+      "generator-living-atlas": {
+        "promptValues": body,
+        "firstRun": false
+      }
+    };
+    const pkgName = body['LA_pkg_name'];
 
     const path = inputs.download
       ? tmpobj.name
