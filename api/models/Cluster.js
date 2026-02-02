@@ -22,6 +22,10 @@ module.exports = {
       model: "project",
     },
 
+    serverId: {
+      model: "server",
+    },
+
     serviceDeploys: { collection: "serviceDeploy", via: "clusterId" },
 
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
