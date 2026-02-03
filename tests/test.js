@@ -149,6 +149,11 @@ test.before((/* t */) => {
       // and disable all logs except errors and warnings:
       hooks: { grunt: false },
       log: { level: 'warn' },
+      datastores: {
+        default: {
+          adapter: 'sails-disk',
+        },
+      },
       port: 13370,
       sshDir: '/var/tmp/la-toolkit/.ssh/',
       asshDir: '/var/tmp/la-toolkit/.ssh/assh.d/',
@@ -246,7 +251,7 @@ test('hosts', (t) => {
   t.is(dest[P][G].LA_alerts_hostname, 'vm14');
   t.is(dest[P][G].LA_doi_hostname, 'vm15');
   t.is(dest[P][G].LA_dashboard_hostname, 'vm16');
-  t.is(dest[P][G].LA_main_hostname, 'vm17');
+  t.is(dest[P][G].LA_branding_hostname, 'vm17');
 });
 
 test('json validation default', (t) => {

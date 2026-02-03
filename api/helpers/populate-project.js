@@ -27,7 +27,10 @@ async function populateP(query) {
           }).populate("serviceId");
           let serverServices = [];
           for (const sd of sds) {
-            serverServices.push(sd.serviceId.nameInt);
+            // Only add if not part of a cluster
+            if (!sd.clusterId) {
+              serverServices.push(sd.serviceId.nameInt);
+            }
           }
           p.serverServices[s.id] = serverServices;
           sMap[s.id] = s;
