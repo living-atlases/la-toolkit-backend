@@ -150,22 +150,55 @@ module.exports = {
           let artifacts = inputs.deps[service];
           // multiple artifacts for the same service can be specified separated by commas, like "collectory ala-collectory"
           for (let artifact of artifacts.split(" ")) {
+            let fetchUrl = "N/A";
             try {
               if (artifact === "pdfgen" && repo === "snapshots") {
                 result["pdfgen"]["snapshots"] = result["pdfgen"]["releases"];
               } else if (artifact === "solr" || artifact === "solrcloud") {
                 // As solr does not provide a list of versions, we maintain this json in github :-/
+                fetchUrl = "https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/solr-versions.json";
                 const solrData = await request(
-                  "https://raw.githubusercontent.com/living-atlases/la-toolkit-backend/master/assets/solr-versions.json"
+                  fetchUrl
                 );
                 result[service][repo] = JSON.parse(solrData);
               } else if (artifact === "pipelines") {
-                // apt install la-pipelines=2.9.9-SNAPSHOT\*
-                // apt-cache madison la-pipelines  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort -r | uniq
-                // Other option but does not match la-pipelines releases:
-                // let pipelinesUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
-                // console.log(`${artifact} ${versions}`);
-                result[service][repo] = pVersions;
+                if (service.endsWith('_nexus')) {
+                  const tagsUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
+                  try {
+                    const tagsData = await request(tagsUrl, null, {
+                      'User-Agent': 'LA-Toolkit'
+                    });
+                    const tags = JSON.parse(tagsData);
+                    const versions = tags
+                      .map((tag) => tag.name.replace("pipelines-parent-", ""))
+                      .sort((a, b) =>
+                        a.localeCompare(b, undefined, {
+                          numeric: true,
+                          sensitivity: "base",
+                        })
+                      );
+                    result[service][repo] = {
+                      metadata: {
+                        versioning: {
+                          latest: versions[versions.length - 1],
+                          versions: {
+                            version: versions
+                          }
+                        }
+                      }
+                    };
+                  } catch (e) {
+                    console.warn(`Failed to fetch github tags for pipelines: ${e.message}`);
+                    result[service][repo] = JSON.parse(pkgJsonS(artifact, "[]"));
+                  }
+                } else {
+                  // apt install la-pipelines=2.9.9-SNAPSHOT\*
+                  // apt-cache madison la-pipelines  | cut -d"|" -f 1,2 | cut -d"+" -f 1 | sort -r | uniq
+                  // Other option but does not match la-pipelines releases:
+                  // let pipelinesUrl = 'https://api.github.com/repos/gbif/pipelines/tags';
+                  // console.log(`${artifact} ${versions}`);
+                  result[service][repo] = pVersions;
+                }
               } else if (artifact === "namematching_service") {
                 result[service][repo] = nmVersions;
               } else if (artifact === "sensitive_data_service") {
@@ -177,6 +210,7 @@ module.exports = {
                     : artifact;
                 // let nexusUrlOld = `https://nexus.ala.org.au/service/local/repositories/${repo}/content/au/org/ala/${artifactConv}/maven-metadata.xml`;
                 let nexusUrl = `https://nexus.ala.org.au/repository/${repo}/au/org/ala/${artifactConv}/maven-metadata.xml`;
+                fetchUrl = nexusUrl;
                 // if (process.env.NODE_ENV !== "production")
                 // console.log(`url: ${nexusUrl}`);
                 const xmlData = await fetchWithRedirects(nexusUrl);
