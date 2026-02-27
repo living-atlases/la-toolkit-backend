@@ -47,7 +47,8 @@
     "test": "npm run custom-tests && echo 'Done.'",
     "migrate": "migrate-mongo up",
     "lint": "./node_modules/eslint/bin/eslint.js . --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
-    "custom-tests": "ava"
+    "custom-tests": "ava",
+    "dev": "DATABASE_URL=mongodb://la_toolkit_user:la_toolkit_changeme@localhost:27017/la_toolkit forever -w ./app.js"
   },
   "main": "app.js",
   "repository": {
