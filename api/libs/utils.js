@@ -17,7 +17,7 @@ const logsProdDevLocation = () =>
   process.env.NODE_ENV === 'production'
     ? logsProdFolder
     : `${sails.config.logsDir}`;
-const defExecTimeout = 20000;
+const defExecTimeout = 300000;
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
