@@ -26,10 +26,25 @@ async function yoGen(pkgName, path, yoRc) {
             } catch (e) {
               console.log('Error cat .yo-rc.json', e);
             }
-            cp.execSync(
-              'yo living-atlas --replay-dont-ask --force', //  --debug",
-              { cwd: path, timeout: defExecTimeout }
-            );
+      try {
+        console.log('PATH:', process.env.PATH);
+        try {
+           console.log('yo version check:', cp.execSync('yo --version', { encoding: 'utf8' }).trim());
+        } catch (verErr) {
+           console.log('WARNING: `yo` command not found or failed:', verErr.message);
+        }
+
+        cp.execSync(
+          'yo living-atlas --replay-dont-ask --force',
+          { cwd: path, timeout: defExecTimeout }
+        );
+      } catch (e) {
+        console.log('Generic Error during yo generation:', e.message);
+        if (e.stdout) console.log('Error output:', e.stdout.toString());
+        if (e.stderr) console.log('Error stderr:', e.stderr.toString());
+        console.log('Full Error Object:', e);
+        throw e;
+      }
             if (
               !fsn.existsSync(
                 p.join(path, `${pkgName}-branding/app/js/settings.js`)
