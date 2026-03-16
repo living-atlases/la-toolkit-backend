@@ -73,4 +73,7 @@ module.exports.routes = {
   "GET /api/v1/projects-subs": { action: "projects-subs" },
   "POST /api/v1/solr-query": { action: "solr-query" },
   "POST /api/v1/mysql-query": { action: "mysql-query" },
+
+  // AI Assistant endpoints
+  "POST /api/v1/ai/query": { action: "ai-query" },
 };

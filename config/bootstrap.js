@@ -55,6 +55,29 @@ module.exports.bootstrap = async function () {
     });
   }
 
+  // Initialize ChromaDB connection for AI Assistant
+  try {
+    const ChromaClient = require('chromadb').ChromaClient;
+    const chromaDbPath = process.env.CHROMA_DB_PATH || '/home/ubuntu/kb-data';
+
+    sails.log.info(`[AI] Initializing ChromaDB at: ${chromaDbPath}`);
+
+    // Create ChromaDB client
+    const chromaClient = new ChromaClient({
+      path: chromaDbPath
+    });
+
+    // Test connection
+    await chromaClient.heartbeat();
+
+    sails.config.custom.chromaClient = chromaClient;
+    sails.log.info('[AI] ChromaDB initialized successfully');
+  } catch (error) {
+    sails.log.warn('[AI] ChromaDB initialization failed:', error.message);
+    sails.log.warn('[AI] AI Assistant will not be available');
+    sails.config.custom.chromaClient = null;
+  }
+
   // By convention, this is a good place to set up fake data during development.
   //
   // For example:

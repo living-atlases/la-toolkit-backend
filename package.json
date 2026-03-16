@@ -11,6 +11,7 @@
     "archiver": "^5.3.0",
     "ava": "^3.15.0",
     "bent": "^7.3.12",
+    "chromadb": "^3.3.3",
     "connect-mongo": "^4.6.0",
     "csvtojson": "^2.0.10",
     "execution-time": "^1.4.1",
@@ -35,6 +36,7 @@
     "tmp": "^0.2.1",
     "tree-kill": "^1.2.2",
     "url-parse": "^1.5.1",
+    "uuid": "^13.0.0",
     "validator": "^13.5.2",
     "wait-on": "^5.3.0",
     "write-yaml-file": "^4.2.0"
