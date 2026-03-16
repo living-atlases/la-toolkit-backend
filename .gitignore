@@ -132,3 +132,8 @@ lib-cov
 *.out
 *.pid
 
+# KB Data - large ChromaDB files (~50MB+)
+# For development, use SSH tunnel to remote KB
+# For production, download separately or use embedded KB
+kb-data/
+
