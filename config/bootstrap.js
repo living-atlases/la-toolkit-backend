@@ -64,9 +64,10 @@ module.exports.bootstrap = async function () {
     let chromaClient;
 
     // Check if ChromaDB URL is remote (HTTP) or local path
+    const { ChromaClient } = require('chromadb');
+    
     if (chromaDbUrl.startsWith('http://') || chromaDbUrl.startsWith('https://')) {
       // Remote ChromaDB via HTTP
-      const ChromaClient = require('chromadb').HttpClient;
       const url = new URL(chromaDbUrl);
       chromaClient = new ChromaClient({
         host: url.hostname,
@@ -75,7 +76,6 @@ module.exports.bootstrap = async function () {
       sails.log.info(`[AI] Using remote ChromaDB at ${url.hostname}:${url.port || 8000}`);
     } else {
       // Local ChromaDB
-      const ChromaClient = require('chromadb').ChromaClient;
       chromaClient = new ChromaClient({
         path: chromaDbUrl
       });
