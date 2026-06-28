@@ -457,6 +457,10 @@ la-toolkit:
     - ala-install: '>= 2.3.0'
     - la-generator: '>= 1.6.10'
 
-  '>= 1.5.9':
+  '>= 1.5.9 < 1.7.0':
     - ala-install: '>= 2.4.0'
     - la-generator: '>= 1.7.1'
+
+  '>= 1.7.0':
+    - ala-install: '>= 2.4.0'
+    - la-generator: '>= 1.8.23'
