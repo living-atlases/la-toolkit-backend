@@ -55,45 +55,6 @@ module.exports.bootstrap = async function () {
     });
   }
 
-  // Initialize ChromaDB connection for AI Assistant
-  try {
-    const chromaDbUrl = process.env.CHROMA_DB_PATH || '/home/ubuntu/kb-data';
-
-    sails.log.info(`[AI] Initializing ChromaDB from: ${chromaDbUrl}`);
-
-    let chromaClient;
-
-    // Check if ChromaDB URL is remote (HTTP) or local path
-    const { ChromaClient } = require('chromadb');
-    
-    if (chromaDbUrl.startsWith('http://') || chromaDbUrl.startsWith('https://')) {
-      // Remote ChromaDB via HTTP
-      const url = new URL(chromaDbUrl);
-      chromaClient = new ChromaClient({
-        host: url.hostname,
-        port: url.port ? parseInt(url.port) : 8000
-      });
-      sails.log.info(`[AI] Using remote ChromaDB at ${url.hostname}:${url.port || 8000}`);
-    } else {
-      // Local ChromaDB
-      chromaClient = new ChromaClient({
-        path: chromaDbUrl
-      });
-      sails.log.info(`[AI] Using local ChromaDB at ${chromaDbUrl}`);
-    }
-
-    // Test connection
-    await chromaClient.heartbeat();
-
-    sails.config.custom.chromaClient = chromaClient;
-    sails.log.info('[AI] ChromaDB initialized successfully');
-  } catch (error) {
-    sails.log.warn('[AI] ChromaDB initialization failed:', error.message);
-    sails.log.warn('[AI] AI Assistant will not be available');
-    sails.log.warn('[AI] To enable: use CHROMA_DB_PATH=/path/to/kb-data or CHROMA_DB_PATH=http://host:8000');
-    sails.config.custom.chromaClient = null;
-  }
-
   // By convention, this is a good place to set up fake data during development.
   //
   // For example:

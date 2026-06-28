@@ -1,7 +1,7 @@
 {
   "name": "la-toolkit-backend",
   "private": true,
-  "version": "1.6.9",
+  "version": "1.7.0",
   "description": "LA Toolkit Backend",
   "keywords": [],
   "dependencies": {
@@ -11,7 +11,6 @@
     "archiver": "^5.3.0",
     "ava": "^3.15.0",
     "bent": "^7.3.12",
-    "chromadb": "^3.3.3",
     "connect-mongo": "^4.6.0",
     "csvtojson": "^2.0.10",
     "dotenv-cli": "^11.0.0",
