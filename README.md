@@ -11,13 +11,18 @@ module.exports = {
   projectsDir: '/data/la-toolkit/config/',
   logsDir: '/data/la-toolkit/logs/',
   baseBrandingLocation: '/data/la-generator/base-branding',
-  preCmd: 'docker exec -u ubuntu la-toolkit',
+  preCmd: 'docker exec -u ubuntu la-toolkit-dev',
   ttydMinPort: 20011,
   ttydMaxPort: 20100,
 };
 };
 ```
 The ttyd ports configuration should match the la-toolkit docker compose ports configuration.
+
+Note: in development the container is named `la-toolkit-dev` (service under
+`profiles: [dev]` in la-toolkit's `docker-compose.yml`, started with
+`docker compose --profile dev up -d`). In production the container is named `la-toolkit`,
+and `preCmd` is empty there (see below) because the backend runs inside that container.
 
 ### Production configuration
 
