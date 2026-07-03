@@ -1,0 +1,39 @@
+#
+# LA "nextgen" compatibility guard
+#
+# See: https://github.com/AtlasOfLivingAustralia/documentation/wiki/Dependencies
+#
+# "Nextgen" ALA app releases require platform capabilities that the community Living Atlas stack
+# does not provide yet. The la-toolkit reads this file (like dependencies.yaml) and shows a lint
+# warning so these versions are NOT selected until support lands. This file is fetched from GitHub
+# master at runtime, so it can be updated without releasing a new toolkit.
+#
+# Schema:
+#   nextgen-compat:
+#     <service>:
+#       from: '<version constraint>'   # versions considered nextgen / not yet supported
+#       last-safe: '<version>'         # last community-supported version (shown in the warning)
+#       reason: <reason-key>           # maps to an explanation in the toolkit
+#
+# Service names must match dependencies.yaml (collectory, ala-hub, logger, alerts, ...).
+#
+# reason keys currently understood by the toolkit:
+#   bootstrap5-branding -> app switched to the new ala-bootstrap5 branding (brand-2023), which
+#                          fetches .mustache templates. The community branding (commonui-bs3) ships
+#                          only .html templates, so these versions fail (HTTP 500) until a
+#                          bootstrap5-capable branding (footer.mustache/header.mustache) exists.
+#
+
+nextgen-compat:
+
+  # logger-service switched to ala-bootstrap5 after v4.5.0 (last ala-bootstrap3 release).
+  logger:
+    from: '> 4.5.0'
+    last-safe: '4.5.0'
+    reason: bootstrap5-branding
+
+  # alerts switched to ala-bootstrap5 in 5.2.5 (5.2.4 was the last ala-bootstrap3 release).
+  alerts:
+    from: '> 5.2.4'
+    last-safe: '5.2.4'
+    reason: bootstrap5-branding
