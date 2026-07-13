@@ -83,19 +83,16 @@ module.exports = {
           .readFileSync(resultsPath, 'utf8')
           .replace(/,\n$/, ']');
       let logsType = logsTypeF(cmdEntry.cmd[0].type);
-      let logs = fs.readFileSync(
-        logsFile(logsProdDevLocation(), inputs.logsPrefix, inputs.logsSuffix, false, logsType),
-        'utf8'
+      // Old entries may have their .log files rotated/removed. Read them
+      // defensively so a missing log yields empty output (a 200 with empty logs)
+      // instead of an ENOENT that turns into a 404 and an error dialog.
+      let readIfExists = (path) =>
+        fs.existsSync(path) ? fs.readFileSync(path, 'utf8') : '';
+      let logs = readIfExists(
+        logsFile(logsProdDevLocation(), inputs.logsPrefix, inputs.logsSuffix, false, logsType)
       );
-      let logsColorized = fs.readFileSync(
-        logsFile(
-          logsProdDevLocation(),
-          inputs.logsPrefix,
-          inputs.logsSuffix,
-          true,
-          logsType
-        ),
-        'utf8'
+      let logsColorized = readIfExists(
+        logsFile(logsProdDevLocation(), inputs.logsPrefix, inputs.logsSuffix, true, logsType)
       );
       let logsEnc = Base64.encode(logs);
       let logsColorizedEnc = Base64.encode(logsColorized);
