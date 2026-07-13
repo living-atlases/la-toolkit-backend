@@ -94,6 +94,18 @@ module.exports = {
       cmd = cmd + ` --limit${sep}${inputs.cmd.limitToServers.join(',')}`;
     }
 
+    // Docker-compose deploys: target la-docker-compose (site.yml against the
+    // docker_compose group, all-in-one) instead of the per-service ala-install
+    // playbooks. Granularity is a deny-list passed as skip_services.
+    if (aw && inputs.cmd.dockerCompose) {
+      cmd = cmd + ` --ladocker=/home/ubuntu/ansible/la-docker-compose`;
+      let extra = 'auto_deploy=true';
+      if (inputs.cmd.skipServices && inputs.cmd.skipServices.length > 0) {
+        extra = `${extra} skip_services=${inputs.cmd.skipServices.join(',')}`;
+      }
+      cmd = cmd + ` --extra="${extra}"`;
+    }
+
     cmd = cmd + ` --user ${inputs.ansibleUser}`;
 
     if (aw) {
