@@ -69,17 +69,18 @@ module.exports = {
       }
 
       // As the ansible callbacks are not a correct json object is like {},{},{}, we transform it to [{},{},{}]
+      // The results json is only written when ansible reaches the play recap, so
+      // it can be missing for generator-only/interrupted runs or old entries. In
+      // that case fall back to [] and still return the logs instead of failing.
       let isBashCmd = isBashCmdF(cmdEntry.cmd[0].type);
-      let results = isBashCmd ? '[]' :
+      let resultsPath = p.join(
+        logsProdDevLocation(),
+        resultsFile(inputs.logsPrefix, inputs.logsSuffix)
+      );
+      let results = isBashCmd || !fs.existsSync(resultsPath) ? '[]' :
         '[' +
         fs
-          .readFileSync(
-            p.join(
-              logsProdDevLocation(),
-              resultsFile(inputs.logsPrefix, inputs.logsSuffix)
-            ),
-            'utf8'
-          )
+          .readFileSync(resultsPath, 'utf8')
           .replace(/,\n$/, ']');
       let logsType = logsTypeF(cmdEntry.cmd[0].type);
       let logs = fs.readFileSync(
