@@ -55,6 +55,10 @@ module.exports.routes = {
     action: "generator-select",
     skipAssets: false,
   },
+  "GET /api/v1/docker-compose-select/:version": {
+    action: "docker-compose-select",
+    skipAssets: false,
+  },
   "POST /api/v1/check-dir-name": { action: "check-dir-name" },
   "POST /api/v1/term-logs": { action: "term-logs" },
   "GET /api/v1/get-backend-version": { action: "get-backend-version" },
