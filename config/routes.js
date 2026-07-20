@@ -60,6 +60,7 @@ module.exports.routes = {
     skipAssets: false,
   },
   "POST /api/v1/check-dir-name": { action: "check-dir-name" },
+  "POST /api/v1/duplicate-project-files": { action: "duplicate-project-files" },
   "POST /api/v1/term-logs": { action: "term-logs" },
   "GET /api/v1/get-backend-version": { action: "get-backend-version" },
   "POST /api/v1/pre-deploy": { action: "pre-deploy" },
