@@ -30,6 +30,7 @@ module.exports = {
     let services = p.services;
     let serviceDeploys = p.serviceDeploys;
     let variables = p.variables;
+    let clusters = p.clusters || [];
     if (p.isHub) {
       assert(parentId, "parentId cannot be null");
     }
@@ -37,6 +38,7 @@ module.exports = {
     delete p.services;
     delete p.variables;
     delete p.serviceDeploys;
+    delete p.clusters;
     let createdP = await Project.create(p).fetch();
     if (p.isHub) {
       await Project.addToCollection(createdP.id, 'parent', parentId);
@@ -44,12 +46,16 @@ module.exports = {
     let vAdded = await Variable.createEach(variables).fetch();
     let svAdded = await Service.createEach(services).fetch();
     let sAdded = await Server.createEach(servers).fetch();
+    let cAdded = clusters.length
+      ? await Cluster.createEach(clusters).fetch()
+      : [];
     let sdAdded = await ServiceDeploy.createEach(serviceDeploys).fetch();
     if (process.env.NODE_ENV !== 'production') {
       assert(servers.length === sAdded.length);
       assert(services.length === svAdded.length);
       assert(serviceDeploys.length === sdAdded.length);
       assert(variables.length === vAdded.length);
+      assert(clusters.length === cAdded.length);
     }
   },
 };
