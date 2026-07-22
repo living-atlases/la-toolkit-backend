@@ -6,6 +6,7 @@ const sails = require('sails');
 const kill = require('tree-kill');
 const {delay, exitCodeFile, logsProdDevLocation, logErr} = require('./utils.js');
 const findPidFromPort = require("find-pid-from-port")
+const {parse: shellParse} = require('shell-quote');
 const perf = require('execution-time')();
 
 const portPool = new PortPool(
@@ -99,15 +100,19 @@ const ttyd = async (
     // --max-clients 1
     const scriptArgs = `ttyd -t scrollback=50000 -t fontSize=14 -t disableReconnect=false -t disableLeaveAlert=true --check-origin -p ${port} ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
 
-    const ttydCmd = `${preCmd}${scriptArgs}`.split(' ');
+    // Tokenize respecting quotes so a quoted argument that contains spaces
+    // (e.g. --extra="auto_deploy=true skip_services=a,b,c", exactly as
+    // la-docker-compose's own ansiblew tests invoke it) survives as a SINGLE
+    // argv entry. A naive .split(' ') shattered it on the inner space, so
+    // ansiblew's docopt saw `skip_services=...` as a stray positional and
+    // aborted with a Usage error. shell-quote strips the quotes and keeps the
+    // value intact. Non-string tokens (operators/globs) are stringified back so
+    // behaviour is unchanged for everything else.
+    const ttydCmd = shellParse(`${preCmd}${scriptArgs}`).map((tok) =>
+      typeof tok === 'string' ? tok : tok.pattern || tok.op || String(tok)
+    );
 
     console.log(`cmd: ${ttydCmd.join(' ')}`);
-
-    if (ttydCmd.indexOf('  ') !== -1) {
-      console.warn(
-        'WARNING: The cmd has some double space. This will make the spawn fail'
-      );
-    }
     perf.start();
     const ttyd = spawn(ttydCmd.shift(), ttydCmd, {
       cwd: cwd,
