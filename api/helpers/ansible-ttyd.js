@@ -1,4 +1,5 @@
-const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
+const {ttyd, spawnDetached, ttyFreePort} = require('../libs/ttyd-utils.js');
+const fs = require('fs');
 const {logsProdFolder, resultsFile, logsFile, dateSuffix} = require('../libs/utils.js');
 
 module.exports = {
@@ -139,6 +140,12 @@ module.exports = {
     );
     env.ANSIBLE_JSON_FILE = resultsFile(projectPath, logDate);
     env.ANSIBLE_FORCE_COLOR = true;
+    // Make echo-bash tee the full colorized terminal stream to a log file. This
+    // is the SAME file term-logs / cmd-results read back
+    // (logsFile(..., colorized=true, 'ansible')), so every disposable `less -f`
+    // viewer tails exactly what the deploy prints — live and on reconnect.
+    env.BASH_LOG_FILE = logsFile(logsProdFolder, projectPath, logDate, false, logsType);
+    env.BASH_LOG_FILE_COLORIZED = logsFile(logsProdFolder, projectPath, logDate, true, logsType);
     let logsPrefix = projectPath;
     let logsSuffix = logDate;
     try {
@@ -161,13 +168,47 @@ module.exports = {
       }).fetch();
       cmdEntry.cmd = cmdCreated;
 
+      // Run the deploy DETACHED from the terminal. A dropped websocket can no
+      // longer SIGHUP and cancel it — it runs to completion and records its own
+      // exit code (see spawnDetached).
+      let deployPid = await spawnDetached(
+        cmd,
+        inputs.invPath,
+        env,
+        logsPrefix,
+        logsSuffix,
+        cmdEntry.id
+      );
+
+      // The terminal the user sees is a disposable live-follow viewer of the
+      // deploy's colorized log — identical to the term-logs reconnect path.
+      // Killing it (close, or a dropped socket) only kills `less`, never the
+      // deploy. Ensure the log exists first so the viewer never races a missing
+      // file (which would make ttyd --once exit immediately).
+      let colorizedLog = env.BASH_LOG_FILE_COLORIZED;
+      try {
+        if (!fs.existsSync(colorizedLog)) {
+          fs.writeFileSync(colorizedLog, '', {encoding: 'utf8'});
+        }
+      } catch (ferr) {
+        console.log(`could not pre-create deploy log ${colorizedLog}: ${ferr}`);
+      }
+
       let port = await ttyFreePort();
-      let ttydPid = await ttyd(cmd, port, true, inputs.invPath, env, logsPrefix, logsSuffix, cmdEntry.id);
+      // Stream the log with `tail -F` (not `less`): a plain continuous stream so
+      // ttyd's own scrollback (50000 lines) captures the whole deploy and the
+      // user scrolls normally — matching the old direct-terminal UX. `less` is a
+      // full-screen pager, so ttyd's scrollback stayed empty and it showed a
+      // "Waiting for data..." status line. `-n +1` prints from the start, then
+      // follows; raw ANSI in the colorized log renders as colors in xterm.
+      let viewerCmd = `tail -n +1 -F ${colorizedLog}`;
+      let ttydPid = await ttyd(viewerCmd, port, true);
 
       return {
         cmdEntry: cmdEntry,
         port: port,
-        ttydPid: ttydPid
+        ttydPid: ttydPid,
+        deployPid: deployPid
       };
     } catch (e) {
       console.log(`ttyd ansiblew call failed (${e})`);

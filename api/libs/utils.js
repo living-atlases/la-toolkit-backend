@@ -11,6 +11,10 @@ const logsFile = (folder, prefix, suffix, colorized = false, type = "ansible") =
 const resultsFile = (prefix, suffix) => `${prefix}-results-${suffix}.json`;
 const exitCodeFile = (folder, prefix, suffix) =>
   p.join(folder, `${prefix}-exit-${suffix}.out`);
+// Pidfile for a detached deploy so it can be cancelled after its ttyd viewer
+// (which no longer owns the deploy's lifetime) is gone.
+const deployPidFile = (folder, prefix, suffix) =>
+  p.join(folder, `${prefix}-deploy-pid-${suffix}.out`);
 const appConf = () => `${sails.config.projectsDir}la-toolkit-conf.json`;
 
 const logsProdDevLocation = () =>
@@ -89,6 +93,7 @@ module.exports = {
   logsFile,
   resultsFile,
   exitCodeFile,
+  deployPidFile,
   logsProdDevLocation,
   appConf,
   defExecTimeout,

@@ -62,6 +62,7 @@ module.exports.routes = {
   "POST /api/v1/check-dir-name": { action: "check-dir-name" },
   "POST /api/v1/duplicate-project-files": { action: "duplicate-project-files" },
   "POST /api/v1/term-logs": { action: "term-logs" },
+  "POST /api/v1/deploy-cancel": { action: "deploy-cancel" },
   "GET /api/v1/get-backend-version": { action: "get-backend-version" },
   "POST /api/v1/pre-deploy": { action: "pre-deploy" },
   "POST /api/v1/post-deploy": { action: "post-deploy" },

@@ -4,7 +4,7 @@ const fs = require('fs');
 const PortPool = require('./port-pool.js');
 const sails = require('sails');
 const kill = require('tree-kill');
-const {delay, exitCodeFile, logsProdDevLocation, logErr} = require('./utils.js');
+const {delay, exitCodeFile, deployPidFile, logsProdDevLocation, logErr} = require('./utils.js');
 const findPidFromPort = require("find-pid-from-port")
 const {parse: shellParse} = require('shell-quote');
 const perf = require('execution-time')();
@@ -98,7 +98,11 @@ const ttyd = async (
     const extraArgs = `${once ? '--once ' : ''}`;
     // -t disableReconnect=true
     // --max-clients 1
-    const scriptArgs = `ttyd -t scrollback=50000 -t fontSize=14 -t disableReconnect=false -t disableLeaveAlert=true --check-origin -p ${port} ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
+    // --ping-interval keeps the websocket non-idle during long, quiet phases
+    // (docker image pulls emit no output for minutes) so the live view stays
+    // attached. The deploy itself no longer depends on this connection (it runs
+    // detached via spawnDetached), but this avoids needless "Connection Closed".
+    const scriptArgs = `ttyd -t scrollback=50000 -t fontSize=14 -t disableReconnect=false -t disableLeaveAlert=true --ping-interval 30 --check-origin -p ${port} ${extraArgs}/usr/local/bin/echo-bash ${cmd}`;
 
     // Tokenize respecting quotes so a quoted argument that contains spaces
     // (e.g. --extra="auto_deploy=true skip_services=a,b,c", exactly as
@@ -165,8 +169,130 @@ const ttyd = async (
   console.log('finished ttyd call');
 };
 
+// Launch a deploy as a DETACHED background process, decoupled from any ttyd
+// terminal. Previously the deploy ran as ttyd's child under `--once`, so a
+// dropped websocket made ttyd exit and SIGHUP the deploy (exit 255) — long,
+// quiet docker-compose deploys were being cancelled by mere disconnects.
+//
+// Here echo-bash runs detached (its own process group, unref'd from the request
+// lifecycle). It tees the colorized terminal stream to BASH_LOG_FILE_COLORIZED,
+// which every disposable `less -f` viewer tails, and we record the real exit
+// code + duration on close — exactly as the old ttyd close handler did — so
+// cmd-results can report completion. Killing a viewer never touches this.
+//
+// Note: with a non-empty preCmd (docker-exec setups) the returned pid is the
+// host-side `docker exec` client; killing it does not stop the in-container
+// process (moby#9098). The target deployment runs echo-bash directly (empty
+// preCmd), so cancel works there.
+const spawnDetached = async (
+  cmd,
+  cwd = '/home/ubuntu',
+  env = {},
+  logsPrefix,
+  logsSuffix,
+  cmdEntryId
+) => {
+  try {
+    let preCmd = sails.config.preCmd;
+    if (preCmd !== '') {
+      preCmd = preCmd.replace('exec', `exec -w ${cwd}`);
+      if (Object.entries(env).length !== 0) {
+        let envDocker = '';
+        for (let [key, value] of Object.entries(env)) {
+          envDocker = envDocker + ` --env ${key}=${value}`;
+        }
+        preCmd = preCmd.replace('exec', `exec ${envDocker.trim()}`);
+      }
+      preCmd = preCmd + ' ';
+      cwd = null;
+    }
+
+    const scriptArgs = `${preCmd}/usr/local/bin/echo-bash ${cmd}`;
+    const deployCmd = shellParse(scriptArgs).map((tok) =>
+      typeof tok === 'string' ? tok : tok.pattern || tok.op || String(tok)
+    );
+
+    console.log(`detached deploy cmd: ${deployCmd.join(' ')}`);
+    const perfDeploy = require('execution-time')();
+    perfDeploy.start();
+    const child = spawn(deployCmd.shift(), deployCmd, {
+      cwd: cwd,
+      env: {...process.env, ...env},
+      detached: true,
+      stdio: 'ignore',
+    });
+    child.unref();
+
+    console.log(`detached deploy pid: ${child.pid}`);
+
+    // Persist the pid so a later cancel can kill the deploy's process group.
+    try {
+      fs.writeFileSync(
+        deployPidFile(logsProdDevLocation(), logsPrefix, logsSuffix),
+        `${child.pid}`,
+        {encoding: 'utf8'}
+      );
+    } catch (perr) {
+      logErr(perr);
+    }
+
+    child.on('close', async (code) => {
+      console.log(`detached deploy exited with code ${code} (pid ${child.pid})`);
+      const results = perfDeploy.stop();
+      console.log(`Deploy duration: ${results.time}`);
+      if (cmdEntryId != null) {
+        await CmdHistoryEntry.updateOne({id: cmdEntryId}).set({
+          duration: results.time,
+        });
+      }
+      if (
+        typeof logsSuffix !== 'undefined' &&
+        typeof logsPrefix !== 'undefined'
+      ) {
+        // The exit-code file is what cmd-results reads to report completion.
+        fs.writeFileSync(
+          exitCodeFile(logsProdDevLocation(), logsPrefix, logsSuffix),
+          `${code}`,
+          {encoding: 'utf8'}
+        );
+      }
+    });
+
+    return child.pid;
+  } catch (werr) {
+    console.log(`detached deploy call failed (${werr})`);
+  }
+};
+
+// Cancel a running detached deploy by reading its pidfile and killing the
+// process tree. Returns true if a pid was found and a kill was attempted.
+const killDeploy = async (logsPrefix, logsSuffix) => {
+  try {
+    const pidFile = deployPidFile(
+      logsProdDevLocation(),
+      logsPrefix,
+      logsSuffix
+    );
+    if (!fs.existsSync(pidFile)) {
+      console.log(`No deploy pidfile at ${pidFile}`);
+      return false;
+    }
+    const pid = parseInt(fs.readFileSync(pidFile, 'utf8'), 10);
+    if (Number.isNaN(pid)) {
+      return false;
+    }
+    await pidKill(pid);
+    return true;
+  } catch (error) {
+    logErr(error);
+    return false;
+  }
+};
+
 module.exports = {
   ttyd,
+  spawnDetached,
+  killDeploy,
   ttyFreePort,
   pidKill,
   killByPort,
