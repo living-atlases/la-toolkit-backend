@@ -1,5 +1,4 @@
 const {ttyd, spawnDetached, ttyFreePort} = require('../libs/ttyd-utils.js');
-const fs = require('fs');
 const {logsProdFolder, resultsFile, logsFile, dateSuffix} = require('../libs/utils.js');
 
 module.exports = {
@@ -180,29 +179,23 @@ module.exports = {
         cmdEntry.id
       );
 
-      // The terminal the user sees is a disposable live-follow viewer of the
-      // deploy's colorized log — identical to the term-logs reconnect path.
-      // Killing it (close, or a dropped socket) only kills `less`, never the
-      // deploy. Ensure the log exists first so the viewer never races a missing
-      // file (which would make ttyd --once exit immediately).
+      // The terminal the user sees is just a live-follow viewer of the deploy's
+      // colorized log — killing it (close, or a dropped socket) never touches the
+      // detached deploy. `tail -F` retries until the log appears (echo-bash's tee
+      // creates it in-container), so no pre-create is needed — and the backend
+      // can't write that path anyway when the deploy runs via `docker exec`.
       let colorizedLog = env.BASH_LOG_FILE_COLORIZED;
-      try {
-        if (!fs.existsSync(colorizedLog)) {
-          fs.writeFileSync(colorizedLog, '', {encoding: 'utf8'});
-        }
-      } catch (ferr) {
-        console.log(`could not pre-create deploy log ${colorizedLog}: ${ferr}`);
-      }
 
       let port = await ttyFreePort();
       // Stream the log with `tail -F` (not `less`): a plain continuous stream so
       // ttyd's own scrollback (50000 lines) captures the whole deploy and the
-      // user scrolls normally — matching the old direct-terminal UX. `less` is a
-      // full-screen pager, so ttyd's scrollback stayed empty and it showed a
-      // "Waiting for data..." status line. `-n +1` prints from the start, then
-      // follows; raw ANSI in the colorized log renders as colors in xterm.
+      // user scrolls normally — matching the old direct-terminal UX. `-n +1`
+      // prints from the start, then follows; raw ANSI renders as colors in xterm.
       let viewerCmd = `tail -n +1 -F ${colorizedLog}`;
-      let ttydPid = await ttyd(viewerCmd, port, true);
+      // once=false: keep ttyd alive after a client disconnect so the xterm client
+      // auto-reconnects (disableReconnect=false) and re-follows the log, instead
+      // of a dead "Connection Closed". term-close tears it down on dialog close.
+      let ttydPid = await ttyd(viewerCmd, port, false);
 
       return {
         cmdEntry: cmdEntry,

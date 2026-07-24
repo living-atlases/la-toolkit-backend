@@ -15,6 +15,14 @@ const portPool = new PortPool(
 );
 const ttyFreePort = () => portPool.getNext();
 
+// Container name for docker-exec setups, derived from preCmd like
+// "docker exec -u ubuntu la-toolkit-dev". Empty preCmd (production) runs the
+// commands directly on the host, so there is no container.
+const dockerContainer = () => {
+  const pre = (sails.config.preCmd || '').trim();
+  return pre === '' ? null : pre.split(/\s+/).pop();
+};
+
 // eslint-disable-next-line no-unused-vars
 const pidKill = async (pid) => {
   return new Promise((resolve) => {
@@ -46,7 +54,11 @@ const killByPort = async (port) => {
     } else {
       // As "Kill docker exec command will not terminate the spawned process"
       // https://github.com/moby/moby/issues/9098
-      let cmd = `for i in $(docker container top la-toolkit | grep "\\-p ${port}" | awk '{print $2}'); do kill $i; done`;
+      // `docker container top` reports HOST-namespace pids of in-container
+      // processes, which ARE killable from the host. Use the actual container
+      // from preCmd (e.g. la-toolkit-dev), not a hardcoded name.
+      const container = dockerContainer() || 'la-toolkit';
+      let cmd = `for i in $(docker container top ${container} | grep "\\-p ${port}" | awk '{print $2}'); do kill $i; done`;
       execSync(cmd);
     }
   } catch (error) {
@@ -268,6 +280,18 @@ const spawnDetached = async (
 // process tree. Returns true if a pid was found and a kill was attempted.
 const killDeploy = async (logsPrefix, logsSuffix) => {
   try {
+    const container = dockerContainer();
+    if (container != null) {
+      // docker-exec setup: the pidfile holds the host-side `docker exec` client
+      // pid, which does NOT control the in-container deploy (moby#9098). Kill it
+      // inside the container by name. Note: this kills any ansible run in that
+      // container, which is fine for single-deploy-at-a-time usage.
+      execSync(
+        `docker exec ${container} sh -c "pkill -TERM -f ansiblew; pkill -TERM -f ansible-playbook; true"`
+      );
+      return true;
+    }
+    // direct setup (empty preCmd): kill the detached process tree by pid.
     const pidFile = deployPidFile(
       logsProdDevLocation(),
       logsPrefix,
