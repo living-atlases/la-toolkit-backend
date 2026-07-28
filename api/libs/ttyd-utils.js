@@ -1,5 +1,6 @@
 const spawn = require('child_process').spawn;
 const execSync = require('child_process').execSync;
+const execFileSync = require('child_process').execFileSync;
 const fs = require('fs');
 const PortPool = require('./port-pool.js');
 const sails = require('sails');
@@ -192,10 +193,10 @@ const ttyd = async (
 // code + duration on close — exactly as the old ttyd close handler did — so
 // cmd-results can report completion. Killing a viewer never touches this.
 //
-// Note: with a non-empty preCmd (docker-exec setups) the returned pid is the
-// host-side `docker exec` client; killing it does not stop the in-container
-// process (moby#9098). The target deployment runs echo-bash directly (empty
-// preCmd), so cancel works there.
+// Note: with a non-empty preCmd (docker-exec setups) the returned pid — and so
+// the pidfile — is the host-side `docker exec` client; killing it does not stop
+// the in-container process (moby#9098). killDeploy handles that case by
+// signalling from inside the container instead.
 const spawnDetached = async (
   cmd,
   cwd = '/home/ubuntu',
@@ -276,19 +277,158 @@ const spawnDetached = async (
   }
 };
 
-// Cancel a running detached deploy by reading its pidfile and killing the
-// process tree. Returns true if a pid was found and a kill was attempted.
+// Run a command DETACHED plus a disposable ttyd viewer that live-follows its
+// colorized log. This is the shape every long-running job (ansible deploy,
+// branding deploy, pipelines) uses: the job survives the console being closed
+// or its websocket dropping, and can only be stopped through killDeploy.
+//
+// env must carry BASH_LOG_FILE_COLORIZED (echo-bash tees the terminal stream
+// there); the viewer just tails it.
+const runDetachedWithViewer = async ({
+  cmd,
+  cwd,
+  env,
+  logsPrefix,
+  logsSuffix,
+  cmdEntryId,
+}) => {
+  const deployPid = await spawnDetached(
+    cmd,
+    cwd,
+    env,
+    logsPrefix,
+    logsSuffix,
+    cmdEntryId
+  );
+
+  // `tail -F` retries until the log appears (echo-bash's tee creates it
+  // in-container), so no pre-create is needed — and the backend can't write
+  // that path anyway when the job runs via `docker exec`. `-n +1` prints from
+  // the start, then follows; raw ANSI renders as colors in xterm.
+  const viewerCmd = `tail -n +1 -F ${env.BASH_LOG_FILE_COLORIZED}`;
+  // once=false: keep ttyd alive after a client disconnect so the xterm client
+  // auto-reconnects (disableReconnect=false) and re-follows the log, instead of
+  // a dead "Connection Closed". term-close tears it down on dialog close.
+  const port = await ttyFreePort();
+  const ttydPid = await ttyd(viewerCmd, port, false);
+
+  return {deployPid: deployPid, port: port, ttydPid: ttydPid};
+};
+
+// Run `script` inside the container, returning its stdout. execFileSync (argv,
+// no host shell) so the container name and script are never re-parsed here.
+// Never throws on a non-zero exit: pgrep/grep return 1 for "no match", which is
+// an answer, not an error.
+const containerSh = (container, script, args = []) => {
+  try {
+    return execFileSync(
+      'docker',
+      // 'sh' after the script is $0; the rest land in the script as $1, $2...
+      ['exec', container, 'sh', '-c', script, 'sh', ...args],
+      {encoding: 'utf8'}
+    ).trim();
+  } catch (error) {
+    if (error.status !== 1) {
+      logErr(error);
+    }
+    return (error.stdout || '').toString().trim();
+  }
+};
+
+const parsePids = (out) =>
+  out
+    .split('\n')
+    .map((l) => parseInt(l.trim(), 10))
+    .filter((pid) => !Number.isNaN(pid));
+
+// Pids of THIS run inside the container. The job's processes (echo-bash, the
+// ansiblew/deploy.sh wrapper and every child they fork) inherit
+// BASH_LOG_FILE_COLORIZED, whose path carries the run's unique logsSuffix — so
+// scanning /proc/*/environ scopes the kill to one run instead of nuking any
+// ansible in the container. It also can't self-match: the scanning shell has no
+// such variable in its own environment.
+//
+// `docker exec` runs as the same uid as the job (ubuntu), so environ is readable.
+const containerRunPids = (container, logsSuffix) =>
+  parsePids(
+    containerSh(
+      container,
+      'for d in /proc/[0-9]*; do grep -qaF "$1" "$d/environ" 2>/dev/null && echo "${d#/proc/}"; done',
+      [logsSuffix]
+    )
+  );
+
+// Fallback for runs started before environ scoping existed. The bracket trick
+// ([a]nsiblew) keeps the pattern from matching the cmdline of the very shell
+// that runs it — a plain `-f ansiblew` self-matches and kills it, which is why
+// cancel used to report failure even when it worked.
+const containerAnsiblePids = (container) =>
+  parsePids(
+    containerSh(container, "pgrep -f '[a]nsiblew|[a]nsible-playbook' || true")
+  );
+
+// Grace period between SIGTERM and SIGKILL when cancelling a deploy.
+const killGraceMs = 3000;
+
+// Signal 0 doesn't deliver anything, it just probes that the pid is ours and
+// alive — so we never report a cancel we didn't actually make.
+const pidAlive = (pid) => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (unused) {
+    return false;
+  }
+};
+
+const treeKill = (pid, signal) =>
+  new Promise((resolve) => {
+    kill(pid, signal, (kerr) => {
+      if (kerr) {
+        logErr(kerr);
+      }
+      resolve();
+    });
+  });
+
+// Cancel a running detached deploy. Returns true only when live processes were
+// found and signalled, so the UI can tell "cancelled" from "nothing to cancel".
 const killDeploy = async (logsPrefix, logsSuffix) => {
   try {
     const container = dockerContainer();
     if (container != null) {
       // docker-exec setup: the pidfile holds the host-side `docker exec` client
-      // pid, which does NOT control the in-container deploy (moby#9098). Kill it
-      // inside the container by name. Note: this kills any ansible run in that
-      // container, which is fine for single-deploy-at-a-time usage.
-      execSync(
-        `docker exec ${container} sh -c "pkill -TERM -f ansiblew; pkill -TERM -f ansible-playbook; true"`
+      // pid, which does NOT control the in-container job (moby#9098), so signal
+      // it from inside the container instead.
+      let pids = containerRunPids(container, logsSuffix);
+      if (pids.length === 0) {
+        pids = containerAnsiblePids(container);
+      }
+      if (pids.length === 0) {
+        console.log(`No running deploy found in ${container} for ${logsSuffix}`);
+        return false;
+      }
+      console.log(`Cancelling deploy ${logsSuffix}, pids: ${pids.join(' ')}`);
+      containerSh(container, `kill -TERM ${pids.join(' ')} 2>/dev/null || true`);
+      // echo-bash and ansiblew are bash wrappers, and bash defers SIGTERM while
+      // a foreground child runs — so give them a moment, then force whatever is
+      // still alive.
+      await delay(killGraceMs);
+      const survivors = parsePids(
+        containerSh(
+          container,
+          `for p in ${pids.join(' ')}; do [ -d /proc/$p ] && echo $p; done`
+        )
       );
+      if (survivors.length > 0) {
+        console.log(
+          `Deploy ${logsSuffix} survived TERM, killing ${survivors.join(' ')}`
+        );
+        containerSh(
+          container,
+          `kill -KILL ${survivors.join(' ')} 2>/dev/null || true`
+        );
+      }
       return true;
     }
     // direct setup (empty preCmd): kill the detached process tree by pid.
@@ -302,10 +442,16 @@ const killDeploy = async (logsPrefix, logsSuffix) => {
       return false;
     }
     const pid = parseInt(fs.readFileSync(pidFile, 'utf8'), 10);
-    if (Number.isNaN(pid)) {
+    if (Number.isNaN(pid) || !pidAlive(pid)) {
+      console.log(`No live deploy for pid ${pid}`);
       return false;
     }
-    await pidKill(pid);
+    // Same TERM-then-KILL escalation as above, on the whole process tree.
+    await treeKill(pid, 'SIGTERM');
+    await delay(killGraceMs);
+    if (pidAlive(pid)) {
+      await treeKill(pid, 'SIGKILL');
+    }
     return true;
   } catch (error) {
     logErr(error);
@@ -316,6 +462,7 @@ const killDeploy = async (logsPrefix, logsSuffix) => {
 module.exports = {
   ttyd,
   spawnDetached,
+  runDetachedWithViewer,
   killDeploy,
   ttyFreePort,
   pidKill,

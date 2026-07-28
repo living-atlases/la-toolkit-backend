@@ -6,6 +6,7 @@
 # In order to be correctly parsed module names should be:
 #
 # collectory, ala-hub, biocache-service, ala-bie, bie-index, images, species-lists,
+# species-lists-service,
 # regions, logger, solr, solrcloud, zookeeper, cas, userdetails, cas-management,
 # apikey, spatial, spatial-service, geoserver, webapi, dashboard, sds, alerts, doi,
 # biocache-backend, branding, biocache-cli, nameindexer, namematching-service,
@@ -306,6 +307,14 @@ species-lists:
     - namematching-service: any
     - java: '11'
 
+# New Spring Boot microservice (AtlasOfLivingAustralia/species-lists), progressively
+# replacing specieslist-webapp. Requires Java 21.
+# Evidence: species-lists 1.0.4 -> lists-service/pom.xml <java.version>21</java.version>,
+# Dockerfile openjdk-21-jdk.
+species-lists-service:
+  any:
+    - java: '21'
+
 userdetails:
   '>= 3.0.1':
     - cas: '>= 6.5.6-3'
@@ -461,6 +470,12 @@ la-toolkit:
     - ala-install: '>= 2.4.0'
     - la-generator: '>= 1.7.1'
 
-  '>= 1.7.0':
+  '>= 1.7.0 < 1.7.1':
     - ala-install: '>= 2.4.0'
     - la-generator: '>= 1.8.28'
+
+  # Hybrid portals (VM + docker-compose legs in one ansiblew run) need the
+  # ansiblew --ladocker + positional-services support added in 1.8.33
+  '>= 1.7.1':
+    - ala-install: '>= 2.4.0'
+    - la-generator: '>= 1.8.33'

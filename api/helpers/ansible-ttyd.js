@@ -1,4 +1,4 @@
-const {ttyd, spawnDetached, ttyFreePort} = require('../libs/ttyd-utils.js');
+const {runDetachedWithViewer} = require('../libs/ttyd-utils.js');
 const {logsProdFolder, resultsFile, logsFile, dateSuffix} = require('../libs/utils.js');
 
 module.exports = {
@@ -167,35 +167,18 @@ module.exports = {
       }).fetch();
       cmdEntry.cmd = cmdCreated;
 
-      // Run the deploy DETACHED from the terminal. A dropped websocket can no
-      // longer SIGHUP and cancel it — it runs to completion and records its own
-      // exit code (see spawnDetached).
-      let deployPid = await spawnDetached(
-        cmd,
-        inputs.invPath,
-        env,
-        logsPrefix,
-        logsSuffix,
-        cmdEntry.id
-      );
-
-      // The terminal the user sees is just a live-follow viewer of the deploy's
-      // colorized log — killing it (close, or a dropped socket) never touches the
-      // detached deploy. `tail -F` retries until the log appears (echo-bash's tee
-      // creates it in-container), so no pre-create is needed — and the backend
-      // can't write that path anyway when the deploy runs via `docker exec`.
-      let colorizedLog = env.BASH_LOG_FILE_COLORIZED;
-
-      let port = await ttyFreePort();
-      // Stream the log with `tail -F` (not `less`): a plain continuous stream so
-      // ttyd's own scrollback (50000 lines) captures the whole deploy and the
-      // user scrolls normally — matching the old direct-terminal UX. `-n +1`
-      // prints from the start, then follows; raw ANSI renders as colors in xterm.
-      let viewerCmd = `tail -n +1 -F ${colorizedLog}`;
-      // once=false: keep ttyd alive after a client disconnect so the xterm client
-      // auto-reconnects (disableReconnect=false) and re-follows the log, instead
-      // of a dead "Connection Closed". term-close tears it down on dialog close.
-      let ttydPid = await ttyd(viewerCmd, port, false);
+      // Run the deploy DETACHED from the terminal, with the console as a mere
+      // live-follow viewer of its log. A dropped websocket can no longer SIGHUP
+      // and cancel it — it runs to completion and records its own exit code
+      // (see spawnDetached); only deploy-cancel stops it.
+      let {deployPid, port, ttydPid} = await runDetachedWithViewer({
+        cmd: cmd,
+        cwd: inputs.invPath,
+        env: env,
+        logsPrefix: logsPrefix,
+        logsSuffix: logsSuffix,
+        cmdEntryId: cmdEntry.id,
+      });
 
       return {
         cmdEntry: cmdEntry,

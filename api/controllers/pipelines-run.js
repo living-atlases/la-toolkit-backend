@@ -1,7 +1,7 @@
 const {
   projectPath,
 } = require('../libs/project-utils.js');
-const {ttyd, ttyFreePort} = require('../libs/ttyd-utils.js');
+const {runDetachedWithViewer} = require('../libs/ttyd-utils.js');
 const {dateSuffix, logsProdFolder, logsFile} = require('../libs/utils.js');
 
 module.exports = {
@@ -109,8 +109,17 @@ module.exports = {
       }).fetch();
       cmdEntry.cmd = cmdCreated;
 
-      let port = await ttyFreePort();
-      let ttydPid = await ttyd(finalCmd, port, true, '/home/ubuntu', env, logsPrefix, logsSuffix, cmdEntry.id);
+      // Detached + log viewer, like the ansible deploy: closing the console (or
+      // losing its websocket) no longer aborts the run, and it can be stopped
+      // explicitly through deploy-cancel.
+      let {port, ttydPid} = await runDetachedWithViewer({
+        cmd: finalCmd,
+        cwd: '/home/ubuntu',
+        env: env,
+        logsPrefix: logsPrefix,
+        logsSuffix: logsSuffix,
+        cmdEntryId: cmdEntry.id,
+      });
 
       return {
         cmdEntry: cmdEntry,
