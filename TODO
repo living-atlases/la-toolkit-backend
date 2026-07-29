@@ -1,0 +1,2 @@
+Thank you, right now I can not upgrade because I don't have the time resources to do the transition to pipelines yet, and biocache-service > 3 depends on it. The current dependencies list does not mention that ala-hub > 6 depends on biocache-service >3, so it might worth adding 
+@Vicente J. Ruiz Jurado (GBIF.ES)

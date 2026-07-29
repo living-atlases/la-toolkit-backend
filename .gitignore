@@ -137,3 +137,8 @@ lib-cov
 # For production, download separately or use embedded KB
 kb-data/
 
+
+# Local scratch: diagram renderer and throwaway probes
+plantuml.jar
+test_sorting.js
+test_write_access.txt
