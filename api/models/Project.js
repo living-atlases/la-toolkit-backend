@@ -27,6 +27,12 @@ module.exports = {
     // Software vars
     alaInstallRelease: { type: "string", allowNull: true },
     generatorRelease: { type: "string", allowNull: true },
+    // Without the attribute Waterline dropped it on save, so the version picked in the
+    // UI never reached the DB and came back null. The deploy only checks the
+    // la-docker-compose repo out when it is set (dockerComposeSelect in the app
+    // middleware), so it silently kept deploying whatever tag happened to be checked
+    // out: gbif-es was still on v1.1.3 after selecting v1.1.4.
+    dockerComposeRelease: { type: "string", allowNull: true },
 
     // Relations
     servers: { collection: "server", via: "projectId" },

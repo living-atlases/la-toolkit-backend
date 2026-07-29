@@ -59,11 +59,13 @@ const dockerComposeSelect = (version) => {
       preCmd
     );
 
-    if (version === 'master') {
-      // Reset to origin/master to discard local changes
-      console.log('Running git reset --hard origin/master...');
+    // la-docker-compose's default branch is `main`; the toolkit has historically
+    // offered (and stored) 'master' for it, and `git reset --hard origin/master` then
+    // fails against a branch that does not exist. Accept both names for the branch.
+    if (version === 'master' || version === 'main') {
+      console.log('Running git reset --hard origin/main...');
       runGitCommand(
-        'git reset --hard origin/master',
+        'git reset --hard origin/main',
         dockerComposeLocation,
         preCmd
       );
