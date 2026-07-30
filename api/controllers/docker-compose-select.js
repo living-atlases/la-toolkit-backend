@@ -61,8 +61,9 @@ const dockerComposeSelect = (version) => {
 
     // la-docker-compose's default branch is `main`; the toolkit has historically
     // offered (and stored) 'master' for it, and `git reset --hard origin/master` then
-    // fails against a branch that does not exist. Accept both names for the branch.
-    if (version === 'master' || version === 'main') {
+    // fails against a branch that does not exist. Accept both legacy names plus
+    // 'upstream' (the option now offered in the UI to test the latest commits).
+    if (version === 'master' || version === 'main' || version === 'upstream') {
       console.log('Running git reset --hard origin/main...');
       runGitCommand(
         'git reset --hard origin/main',
