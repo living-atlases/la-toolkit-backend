@@ -5,7 +5,7 @@ const fs = require('fs');
 const PortPool = require('./port-pool.js');
 const sails = require('sails');
 const kill = require('tree-kill');
-const {delay, exitCodeFile, deployPidFile, logsProdDevLocation, logErr} = require('./utils.js');
+const {delay, exitCodeFile, deployPidFile, logsProdFolder, logsProdDevLocation, logErr} = require('./utils.js');
 const findPidFromPort = require("find-pid-from-port")
 const {parse: shellParse} = require('shell-quote');
 const perf = require('execution-time')();
@@ -182,6 +182,26 @@ const ttyd = async (
   console.log('finished ttyd call');
 };
 
+// Record a run's outcome, but never over the job's own word: the detached job
+// writes this file itself (see spawnDetached), and it knows the real code —
+// every caller here is a fallback for the cases where it could not, so first
+// writer wins.
+const writeExitCode = (logsPrefix, logsSuffix, code) => {
+  if (typeof logsPrefix === 'undefined' || typeof logsSuffix === 'undefined') {
+    return;
+  }
+  try {
+    // The exit-code file is what cmd-results reads to report completion.
+    const file = exitCodeFile(logsProdDevLocation(), logsPrefix, logsSuffix);
+    if (fs.existsSync(file)) {
+      return;
+    }
+    fs.writeFileSync(file, `${code}`, {encoding: 'utf8'});
+  } catch (werr) {
+    logErr(werr);
+  }
+};
+
 // Launch a deploy as a DETACHED background process, decoupled from any ttyd
 // terminal. Previously the deploy ran as ttyd's child under `--once`, so a
 // dropped websocket made ttyd exit and SIGHUP the deploy (exit 255) — long,
@@ -189,9 +209,9 @@ const ttyd = async (
 //
 // Here echo-bash runs detached (its own process group, unref'd from the request
 // lifecycle). It tees the colorized terminal stream to BASH_LOG_FILE_COLORIZED,
-// which every disposable `less -f` viewer tails, and we record the real exit
-// code + duration on close — exactly as the old ttyd close handler did — so
-// cmd-results can report completion. Killing a viewer never touches this.
+// which every disposable `less -f` viewer tails, and it records its own exit
+// code so cmd-results can report completion even when the run outlives this
+// backend. Killing a viewer never touches this.
 //
 // Note: with a non-empty preCmd (docker-exec setups) the returned pid — and so
 // the pidfile — is the host-side `docker exec` client; killing it does not stop
@@ -220,10 +240,38 @@ const spawnDetached = async (
       cwd = null;
     }
 
-    const scriptArgs = `${preCmd}/usr/local/bin/echo-bash ${cmd}`;
-    const deployCmd = shellParse(scriptArgs).map((tok) =>
-      typeof tok === 'string' ? tok : tok.pattern || tok.op || String(tok)
+    // The exit code has to outlive US: the deploy is detached and can easily
+    // outlast this backend process (a dev restart, a redeploy), and then the
+    // 'close' handler below never fires and the run stays exit-code-less —
+    // cmd-results reports "aborted" with no stats for a deploy that actually
+    // finished. So the job records its own exit code, in the same shared logs
+    // volume, before anything of ours is involved.
+    //
+    // The wrapper is spliced in as literal argv rather than re-parsed: quoted
+    // arguments like --extra="a=1 b=2" only survive one trip through
+    // shell-quote (see the a0aa8dd regression), so preCmd and cmd are parsed
+    // separately and nothing else is ever handed back to the parser.
+    const toArg = (tok) =>
+      typeof tok === 'string' ? tok : tok.pattern || tok.op || String(tok);
+    const exitFile = exitCodeFile(
+      // Both sides see the same bind mount under different roots: inside the
+      // container it is logsProdFolder, out here logsProdDevLocation().
+      preCmd === '' ? logsProdDevLocation() : logsProdFolder,
+      logsPrefix,
+      logsSuffix
     );
+    const deployCmd = [
+      ...(preCmd === '' ? [] : shellParse(preCmd).map(toArg)),
+      'sh',
+      '-c',
+      // `exit "$rc"` matters: without it sh would exit with the status of the
+      // echo, and the 'close' handler below would record every run as 0.
+      'ec="$1"; shift; "$@"; rc=$?; echo "$rc" > "$ec"; exit "$rc"',
+      'sh',
+      exitFile,
+      '/usr/local/bin/echo-bash',
+      ...shellParse(cmd).map(toArg),
+    ];
 
     console.log(`detached deploy cmd: ${deployCmd.join(' ')}`);
     const perfDeploy = require('execution-time')();
@@ -249,7 +297,14 @@ const spawnDetached = async (
       logErr(perr);
     }
 
+    // Guards against writing the exit-code file twice: a spawn-level failure
+    // can raise 'error' and then still raise 'close' afterwards (Node doesn't
+    // guarantee only one fires), and we only want the first outcome recorded.
+    let settled = false;
+
     child.on('close', async (code) => {
+      if (settled) return;
+      settled = true;
       console.log(`detached deploy exited with code ${code} (pid ${child.pid})`);
       const results = perfDeploy.stop();
       console.log(`Deploy duration: ${results.time}`);
@@ -258,17 +313,25 @@ const spawnDetached = async (
           duration: results.time,
         });
       }
-      if (
-        typeof logsSuffix !== 'undefined' &&
-        typeof logsPrefix !== 'undefined'
-      ) {
-        // The exit-code file is what cmd-results reads to report completion.
-        fs.writeFileSync(
-          exitCodeFile(logsProdDevLocation(), logsPrefix, logsSuffix),
-          `${code}`,
-          {encoding: 'utf8'}
-        );
+      writeExitCode(logsPrefix, logsSuffix, code);
+    });
+
+    // A spawn-level failure (e.g. ENOENT, EACCES) never reaches 'close' with a
+    // usable code — without this, that class of failure left no exit-code file
+    // at all, and the run stayed unresolved ("aborted" only after cmd-results'
+    // own default, with no record of what actually happened).
+    child.on('error', async (err) => {
+      if (settled) return;
+      settled = true;
+      logErr(err);
+      const results = perfDeploy.stop();
+      console.log(`Deploy duration: ${results.time}`);
+      if (cmdEntryId != null) {
+        await CmdHistoryEntry.updateOne({id: cmdEntryId}).set({
+          duration: results.time,
+        });
       }
+      writeExitCode(logsPrefix, logsSuffix, 1);
     });
 
     return child.pid;
@@ -370,6 +433,11 @@ const containerAnsiblePids = (container) =>
 // Grace period between SIGTERM and SIGKILL when cancelling a deploy.
 const killGraceMs = 3000;
 
+// Exit code recorded for a cancelled run: the shell convention for "killed by
+// SIGTERM" (128 + 15), so it reads as a real termination rather than as the
+// "we never found out" default.
+const cancelledExitCode = 143;
+
 // Signal 0 doesn't deliver anything, it just probes that the pid is ours and
 // alive — so we never report a cancel we didn't actually make.
 const pidAlive = (pid) => {
@@ -390,6 +458,37 @@ const treeKill = (pid, signal) =>
       resolve();
     });
   });
+
+// Is this run still going? Closing the console asks this before it decides
+// whether to report results: a deploy that is merely slow is not a deploy that
+// failed, and conflating the two is how a live run ended up on the results page
+// as "didn't finish correctly" with an all-zero summary.
+//
+// Unlike killDeploy this never falls back to containerAnsiblePids: that pattern
+// matches any ansible in the container, and answering "yes, running" because
+// some *other* deploy is alive would hide the results of the one being asked
+// about. A run too old to be environ-scoped simply reads as finished.
+const deployAlive = (logsPrefix, logsSuffix) => {
+  try {
+    const container = dockerContainer();
+    if (container !== null) {
+      return containerRunPids(container, logsSuffix).length > 0;
+    }
+    const pidFile = deployPidFile(
+      logsProdDevLocation(),
+      logsPrefix,
+      logsSuffix
+    );
+    if (!fs.existsSync(pidFile)) {
+      return false;
+    }
+    const pid = parseInt(fs.readFileSync(pidFile, 'utf8'), 10);
+    return !Number.isNaN(pid) && pidAlive(pid);
+  } catch (error) {
+    logErr(error);
+    return false;
+  }
+};
 
 // Cancel a running detached deploy. Returns true only when live processes were
 // found and signalled, so the UI can tell "cancelled" from "nothing to cancel".
@@ -429,6 +528,10 @@ const killDeploy = async (logsPrefix, logsSuffix) => {
           `kill -KILL ${survivors.join(' ')} 2>/dev/null || true`
         );
       }
+      // The signalled set includes the `sh` wrapper that would have recorded the
+      // exit code, so a cancelled run leaves none behind and cmd-results falls
+      // back to "unknown". Record the cancellation ourselves instead.
+      writeExitCode(logsPrefix, logsSuffix, cancelledExitCode);
       return true;
     }
     // direct setup (empty preCmd): kill the detached process tree by pid.
@@ -452,6 +555,7 @@ const killDeploy = async (logsPrefix, logsSuffix) => {
     if (pidAlive(pid)) {
       await treeKill(pid, 'SIGKILL');
     }
+    writeExitCode(logsPrefix, logsSuffix, cancelledExitCode);
     return true;
   } catch (error) {
     logErr(error);
@@ -464,7 +568,9 @@ module.exports = {
   spawnDetached,
   runDetachedWithViewer,
   killDeploy,
+  deployAlive,
   ttyFreePort,
   pidKill,
   killByPort,
+  pidAlive,
 };

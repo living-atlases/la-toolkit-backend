@@ -139,6 +139,13 @@ module.exports = {
     );
     env.ANSIBLE_JSON_FILE = resultsFile(projectPath, logDate);
     env.ANSIBLE_FORCE_COLOR = true;
+    // Force line-buffered stdout for ansible-playbook (and anything it shells
+    // out through). Without this, Python block-buffers stdout when it isn't a
+    // TTY; if the process is killed mid-run (e.g. a long, silent healthcheck
+    // task whose SSH session dies) whatever is still sitting in that buffer —
+    // including the final PLAY RECAP or a fatal error — is lost, and the saved
+    // log looks truncated instead of explaining what happened.
+    env.PYTHONUNBUFFERED = '1';
     // Make echo-bash tee the full colorized terminal stream to a log file. This
     // is the SAME file term-logs / cmd-results read back
     // (logsFile(..., colorized=true, 'ansible')), so every disposable `less -f`
