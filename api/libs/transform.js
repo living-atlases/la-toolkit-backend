@@ -207,6 +207,11 @@ module.exports = function (inputs) {
     LA_variable_jwt_in_use: "LA_variable_jwt_in_use",
     LA_variable_jwt_out_use: "LA_variable_jwt_out_use",
     LA_variable_branding_source: "LA_variable_branding_source",
+    // Toolkit variable `branding_as_home`, emitted by toGeneratorJson() as a top
+    // level key because that is where the generator reads it from. Kept here for
+    // completeness only: the live generation path (controllers/gen.js) writes
+    // req.body straight into .yo-rc.json and never calls this transform.
+    LA_branding_as_home: "LA_branding_as_home",
     LA_variable_use_la_site_certs: "LA_variable_use_la_site_certs",
     LA_variable_docker_mail_development_mode:
       "LA_variable_docker_mail_development_mode",
