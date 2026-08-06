@@ -22,6 +22,9 @@
 #                          fetches .mustache templates. The community branding (commonui-bs3) ships
 #                          only .html templates, so these versions fail (HTTP 500) until a
 #                          bootstrap5-capable branding (footer.mustache/header.mustache) exists.
+#   no-community-image  -> no published livingatlases container image exists for that version range
+#                          (e.g. doi/sds legacy tags below the first containerised release), so the
+#                          toolkit steers the deployer to a version that can actually be pulled.
 #
 
 nextgen-compat:
@@ -37,3 +40,19 @@ nextgen-compat:
     from: '> 5.2.4'
     last-safe: '5.2.4'
     reason: bootstrap5-branding
+
+  # doi-service: ALA moved these apps to the nextgen build/CI. The community stack runs them from
+  # published livingatlases images and, for doi, a dedicated ES7 sidecar (doi 4.x uses
+  # grails-elasticsearch RC1, whose ES7-era mapping API — include_type_name — ES8 rejects; its REST
+  # client is pointed at the sidecar on port 9200). Only 3.0.2+ have a published community image, so
+  # warn away from the older tags (the old toolkit defaults 2.0.0 / 1.6.3 had no image).
+  doi:
+    from: '< 3.0.2'
+    last-safe: '4.1.0'
+    reason: no-community-image
+
+  # sds (legacy sds-webapp2): only 1.6.4/1.7.0/1.7.1 have a published community image.
+  sds:
+    from: '< 1.6.4'
+    last-safe: '1.7.1'
+    reason: no-community-image

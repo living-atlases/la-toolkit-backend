@@ -100,14 +100,12 @@ module.exports = {
     if (aw && inputs.cmd.dockerCompose) {
       cmd = cmd + ` --ladocker=/home/ubuntu/ansible/la-docker-compose`;
       let extra = 'auto_deploy=true';
-      // TEMPORARY: SDS is not yet functional under la-docker-compose (ALA is mid
-      // next-gen migration; it works in neither legacy nor next-gen mode). Mirror
-      // the la-docker-compose Jenkinsfile, which defers these immature services via
-      // SKIP_SERVICES. Remove this once SDS deploys cleanly. Tokens use the names
-      // la-docker-compose recognises (inventory group / desc key), not the toolkit's
-      // internal `sds` name, so both the next-gen `sensitiveDataService` and the
-      // legacy `sds` descriptors are removed from services_enabled.
-      const composeDeferred = ['sensitive-data-service', 'sds-static-home', 'sds'];
+      // Mirror the la-docker-compose Jenkinsfile SKIP_SERVICES default. The legacy `sds`
+      // (sds-webapp2) and `sensitive-data-service` now deploy cleanly (sds data files repaired,
+      // species category/zone refs normalized), so they are no longer deferred. Only
+      // `sds-static-home` (next-gen static home) stays deferred. Tokens use the names
+      // la-docker-compose recognises (inventory group / desc key), not the toolkit's internal names.
+      const composeDeferred = ['sds-static-home'];
       const skips = [
         ...new Set([...(inputs.cmd.skipServices || []), ...composeDeferred]),
       ];
