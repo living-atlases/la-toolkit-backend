@@ -73,8 +73,10 @@ bie-index:
 biocache-service:
   '>= 2.5.0':
     - tomcat: '>= 9.0.0'
-  # biocache-service 2.x uses biocache-store
-  '>=2.7.0':
+  # biocache-service 2.x uses biocache-store (2.x only: without the upper bound
+  # this matched 3.9.0 too and dragged biocache-cli -> solr < 8 / java 8 into an
+  # unsatisfiable set against the solr >= 8 / java 17 that 3.7+ itself requires)
+  '>= 2.7.0 < 3.0.0':
     - biocache-cli: '>= 2.6.1'
   # biocache-service 3.x uses pipelines
   '< 3.0.0':
