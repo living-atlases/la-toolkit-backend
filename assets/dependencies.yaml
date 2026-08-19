@@ -481,3 +481,18 @@ la-toolkit:
   '>= 1.7.1':
     - ala-install: '>= 2.4.0'
     - la-generator: '>= 1.8.33'
+
+# The key is 'docker-compose' and not 'la-docker-compose' because the toolkit
+# normalizes unknown keys through LAServiceName, where the service is spelled
+# docker_compose. A 'la-docker-compose' key resolves to nothing and is skipped
+# without warning.
+docker-compose:
+  # The functional floor is lower than this: the docker leg needs 1.8.34 to resolve
+  # la-docker-compose roles and 1.9.1 to load its ansible.cfg, without which every
+  # task pays a full SSH round-trip and nginx_vhost alone runs for hours. The pin is
+  # at the current latest because la-docker-compose CI installs
+  # generator-living-atlas@latest, so that is the only pairing 1.4.0 has been run
+  # against. Lower it to '>= 1.9.1' if someone needs an older generator and is
+  # willing to test the combination.
+  '>= 1.4.0':
+    - la-generator: '>= 1.9.7'
