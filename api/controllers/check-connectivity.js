@@ -12,26 +12,9 @@ const log = (preCmd, cmd) => {
   console.log(`test-connectivity:\npreCmd: ${preCmd}\ncmd: ${cmd}`);
 };
 
-const asshReConfig = async () => {
-  let preCmd = sails.config.preCmd;
-  if (preCmd !== '') {
-    preCmd = preCmd + ' ';
-  }
-
-  try {
-    let cmd = `${preCmd}bash -c "/usr/local/bin/assh config build > /home/ubuntu/.ssh/config"`;
-    log(preCmd, cmd);
-    await execAsync(cmd, {
-      cwd: sails.config.sshDir,
-      shell: "/bin/bash",
-      timeout: defExecTimeout,
-    });
-    return '';
-  } catch (err) {
-    logErr(err);
-    return err.message || err.toString();
-  }
-};
+// Shared with gen-ssh-conf (gh-7): the config must be rebuilt whenever the
+// assh YAMLs change, not only on connectivity checks.
+const {asshReConfig} = require('../libs/assh.js');
 
 const pingTest = async (server) => {
   let preCmd = sails.config.preCmd;

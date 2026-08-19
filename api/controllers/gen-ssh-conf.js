@@ -1,6 +1,7 @@
 const yaml = require('write-yaml-file')
 const cp = require('child_process');
 const {logErr} = require('../libs/utils.js');
+const {asshReConfig} = require('../libs/assh.js');
 const dest = sails.config.sshDir;
 const destIncDir = sails.config.asshDir;
 const fs = require('fs');
@@ -138,7 +139,10 @@ module.exports = {
         `${destIncDir}assh-${p.dirName}.yml`,
         serversTransformed, yamlOpts);
       await yaml(`${dest}assh.yml`, basicAsshConf(), yamlOpts);
-      // assh config build > ~/.ssh/config
+      // Rebuild ~/.ssh/config now that the assh YAMLs changed. Before this,
+      // the config was only built by check-connectivity, so terminals opened
+      // before any connectivity check died with EIO (gh-7).
+      await asshReConfig();
       return exits.success();
     } catch (err) {
       throw new Error(err);
