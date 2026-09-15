@@ -117,3 +117,50 @@ test.serial('a PATCH never re-parents a cluster that belongs to another project'
   t.is(String((await Server.findOne({ id: portal.servers[0].id })).projectId), portal.id);
   t.is(await Cluster.count({ projectId: portal.id }), 1);
 });
+
+test.serial('a PATCH removes the rows this project owns that the client dropped', async (t) => {
+  const p = payload('pruned');
+  const clusterId = p.clusters[0].id;
+  const serverId = p.servers[0].id;
+  p.serviceDeploys.push(
+    { id: oid(), serviceId: p.services[0].id, clusterId, serverId, type: 'dockerCompose', projectId: p.id },
+    { id: oid(), serviceId: p.services[0].id, clusterId, serverId, type: 'dockerCompose', projectId: p.id }
+  );
+  await sails.helpers.addProject.with({ project: JSON.parse(JSON.stringify(p)) });
+  t.is(await ServiceDeploy.count({ projectId: p.id }), 2);
+
+  // The user unassigns the service on one cluster: the body no longer carries
+  // that deploy.
+  const edited = JSON.parse(JSON.stringify(p));
+  edited.serviceDeploys.shift();
+  const kept = edited.serviceDeploys[0];
+  const { res } = await patch(edited);
+  t.is(res.statusCode, 200);
+
+  const left = await ServiceDeploy.find({ projectId: p.id });
+  t.deepEqual(left.map((d) => d.id), [kept.id]);
+  // Rows of other projects are untouched.
+  t.true((await Cluster.count()) >= 1);
+});
+
+test.serial('pruning never touches the rows of another project', async (t) => {
+  const portal = payload('keeper');
+  await sails.helpers.addProject.with({ project: JSON.parse(JSON.stringify(portal)) });
+  const hub = payload('pruner');
+  hub.isHub = true;
+  hub.serviceDeploys.push({
+    id: oid(), serviceId: hub.services[0].id, clusterId: portal.clusters[0].id,
+    serverId: portal.servers[0].id, type: 'dockerCompose', projectId: hub.id,
+  });
+  await sails.helpers.addProject.with({ project: JSON.parse(JSON.stringify({ ...hub, parent: portal.id })) });
+
+  const edited = JSON.parse(JSON.stringify(hub));
+  edited.serviceDeploys = [];
+  const { res } = await patch(edited);
+  t.is(res.statusCode, 200);
+
+  t.is(await ServiceDeploy.count({ projectId: hub.id }), 0);
+  t.is(await Cluster.count({ projectId: portal.id }), 1);
+  t.is(await Server.count({ projectId: portal.id }), 1);
+  t.is(await Service.count({ projectId: portal.id }), 1);
+});

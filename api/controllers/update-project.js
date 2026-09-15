@@ -34,6 +34,9 @@ module.exports = {
     assoc.push([p.serviceDeploys, ServiceDeploy]);
     assoc.push([p.variables, Variable]);
     for (const a of assoc) {
+      // Waterline mutates the values it is handed (`findOrCreate` nulls the
+      // id), so take the ids before the loop.
+      const sentIds = a[0].map((el) => el.id);
       for (const el of a[0]) {
         const existing = await a[1].findOne({ id: el.id });
         if (!existing) {
@@ -58,6 +61,11 @@ module.exports = {
           await a[1].updateOne({ id }).set(values);
         }
       }
+      // The body carries the complete list: a row this project owns that the
+      // client dropped (an unassigned deploy, a removed server) is gone. This
+      // is what `set({serviceDeploys: [ids]})` used to do by nulling the
+      // projectId; deleting leaves no orphans behind.
+      await a[1].destroy({ projectId: p.id, id: { nin: sentIds } });
     }
     // Not update populated objects here
     delete p.parent;
