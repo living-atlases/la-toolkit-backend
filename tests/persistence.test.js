@@ -12,6 +12,9 @@ test.before((t) => {
         datastores: {
           default: {
             adapter: 'sails-disk',
+            // Own directory: ava runs files in parallel and `migrate: 'drop'`
+            // on the shared .tmp/localDiskDb races with tests/test.js.
+            dir: '.tmp/localDiskDb-persistence',
           },
         },
         models: {

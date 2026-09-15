@@ -36,16 +36,22 @@ async function populateP(query) {
           sMap[s.id] = s;
         }
         for (const c of p.clusters) {
-          let cds = await ServiceDeploy.find({
-            projectId: p.id,
-            clusterId: c.id,
-          }).populate("serviceId");
-          let clusterServices = [];
-          for (const cd of cds) {
-            clusterServices.push(cd.serviceId.nameInt);
-          }
-          p.clusterServices[c.id] = clusterServices;
+          p.clusterServices[c.id] = [];
           cMap[c.id] = c;
+        }
+        // Bucket by the deploy's clusterId, not by the project's own clusters:
+        // a data hub places its services on the PORTAL's compose cluster, so
+        // its deploys reference a cluster this project does not own, and
+        // iterating p.clusters dropped them on every reload.
+        const clusterDeploys = await ServiceDeploy.find({
+          projectId: p.id,
+          clusterId: { "!=": null },
+        }).populate("serviceId");
+        for (const cd of clusterDeploys) {
+          if (!cd.serviceId) continue;
+          const key = String(cd.clusterId);
+          if (!p.clusterServices[key]) p.clusterServices[key] = [];
+          p.clusterServices[key].push(cd.serviceId.nameInt);
         }
 
         for (const sv of p.services) {

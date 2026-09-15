@@ -14,6 +14,14 @@ module.exports = {
   exits: {},
 
   fn: async function (inputs) {
+    // A data hub's deploys reference the portal's clusters: once those go,
+    // the hub rows pointing at them would dangle.
+    const clusterIds = (await Cluster.find({ projectId: inputs.id })).map(
+      (c) => c.id
+    );
+    if (clusterIds.length > 0) {
+      await ServiceDeploy.destroy({ clusterId: { in: clusterIds } });
+    }
     await CmdHistoryEntry.destroy({ projectId: inputs.id });
     await ServiceDeploy.destroy({ projectId: inputs.id });
     await Service.destroy({ projectId: inputs.id });
