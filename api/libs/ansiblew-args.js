@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 // The arguments a deploy passes to the generated ansiblew (or to ansible-playbook directly
 // when useAnsiblew is false), from the DeployCmd the client sends. Shared by the Ansible
 // deploy (helpers/ansible-ttyd.js) and the fast deploy (controllers/fast-deploy.js), which
@@ -65,12 +67,19 @@ const ansiblewArgs = (deployCmd, useAnsiblew, ansibleUser) => {
 
 const ladockerDir = '/home/ubuntu/ansible/la-docker-compose';
 const bundleCacheDir = '/home/ubuntu/ansible/la-inventories/.bundle-cache';
+const fastDeployScript = `${ladockerDir}/scripts/bundle/fast-deploy.sh`;
 
 // The fast deploy line: la-docker-compose's fast-deploy.sh runs the project's ansiblew with
 // these same arguments (recording, not running, the playbook) to render and apply bundles.
 // What a bundle cannot do is refused here, before anything starts: a dry run, a partial
 // deploy (tags, limit) and a non docker-compose line.
-const fastDeployCmd = (deployCmd, ansibleUser, invPath) => {
+const fastDeployCmd = (deployCmd, ansibleUser, invPath, exists = fs.existsSync) => {
+  if (!exists(fastDeployScript)) {
+    throw new Error(
+      'the selected la-docker-compose release has no fast deploy ' +
+        '(scripts/bundle/fast-deploy.sh): pick a newer one in the project'
+    );
+  }
   if (!deployCmd.dockerCompose) {
     throw new Error('fast deploy is only for docker-compose deploys');
   }
@@ -83,7 +92,7 @@ const fastDeployCmd = (deployCmd, ansibleUser, invPath) => {
     }
   }
   const args = ansiblewArgs(deployCmd, true, ansibleUser).trim();
-  return `bash ${ladockerDir}/scripts/bundle/fast-deploy.sh --inventory-dir ${invPath} ` +
+  return `bash ${fastDeployScript} --inventory-dir ${invPath} ` +
     `--cache-dir ${bundleCacheDir} -- --alainstall=/home/ubuntu/ansible/ala-install ${args}`;
 };
 

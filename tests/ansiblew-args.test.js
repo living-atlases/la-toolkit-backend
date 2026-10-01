@@ -24,7 +24,7 @@ test('ansiblewArgs keeps the plain ansible-playbook form', (t) => {
 });
 
 test('fastDeployCmd hands ansiblew\'s own line to fast-deploy.sh', (t) => {
-  const cmd = fastDeployCmd(base, 'ubuntu', '/inv/p/p-inventories/');
+  const cmd = fastDeployCmd(base, 'ubuntu', '/inv/p/p-inventories/', () => true);
   t.is(
     cmd,
     'bash /home/ubuntu/ansible/la-docker-compose/scripts/bundle/fast-deploy.sh' +
@@ -39,6 +39,11 @@ test('fastDeployCmd refuses what a bundle cannot do', (t) => {
   for (const bad of [
     {dockerCompose: false}, {dryRun: true}, {tags: ['x']}, {skipTags: ['x']}, {limitToServers: ['h']},
   ]) {
-    t.throws(() => fastDeployCmd({...base, ...bad}, 'u', '/inv/'), undefined, JSON.stringify(bad));
+    t.throws(() => fastDeployCmd({...base, ...bad}, 'u', '/inv/', () => true), undefined, JSON.stringify(bad));
   }
+});
+
+test('fastDeployCmd refuses a la-docker-compose release without fast-deploy.sh', (t) => {
+  const e = t.throws(() => fastDeployCmd(base, 'u', '/inv/', () => false));
+  t.regex(e.message, /no fast deploy/);
 });
