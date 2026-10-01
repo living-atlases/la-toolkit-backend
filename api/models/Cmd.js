@@ -9,7 +9,7 @@ module.exports = {
   tableName: 'cmds',
   attributes: {
     // Basic
-    // Types: ansible, deploy, preDeploy, postDeploy, laPipelines, bash
+    // Types: ansible, deploy, preDeploy, postDeploy, laPipelines, bash, fastDeploy
     type: {
       type: 'string',
       allowNull: false,
@@ -20,6 +20,7 @@ module.exports = {
         'postDeploy',
         'laPipelines',
         'bash',
+        'fastDeploy',
       ],
     },
     properties: {type: 'json', allowNull: false},
