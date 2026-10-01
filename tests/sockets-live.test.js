@@ -60,7 +60,9 @@ function httpJson(method, path, body) {
       { host: 'localhost', port: PORT, path, method, headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } },
       (res) => {
         let out = '';
-        res.on('data', (c) => (out += c));
+        res.on('data', (c) => {
+          out += c;
+        });
         res.on('end', () => resolve({ status: res.statusCode, body: out }));
       }
     );
@@ -120,4 +122,28 @@ test.serial('a socket that did not subscribe hears nothing', async (t) => {
   t.is((await httpJson('POST', '/api/v1/add-projects', { projects: [p] })).status, 200);
   t.is(await pushed, 'nothing');
   socket.close();
+});
+
+function socketPost(socket, url, data) {
+  return new Promise((resolve) => {
+    socket.emit('post', { method: 'post', url, headers: {}, data }, (res) => resolve(res));
+  });
+}
+
+test.serial('presence: others see which project a browser has open, until it closes', async (t) => {
+  const a = connect();
+  const b = connect();
+  await Promise.all([nextEvent(a, 'connect'), nextEvent(b, 'connect')]);
+  await socketGet(a, '/api/v1/projects-subs');
+  await socketGet(b, '/api/v1/projects-subs');
+
+  let seen = nextEvent(b, 'presence');
+  const r = await socketPost(a, '/api/v1/presence', { projectId: 'p1', mode: 'edit' });
+  t.is(r.statusCode, 200);
+  t.deepEqual(await seen, [{ id: a.id, projectId: 'p1', mode: 'edit' }]);
+
+  seen = nextEvent(b, 'presence');
+  a.close();
+  t.deepEqual(await seen, []);
+  b.close();
 });
