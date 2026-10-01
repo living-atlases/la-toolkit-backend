@@ -18,6 +18,7 @@
 //   derived: { genConf },                    // recomputed by clients: last wins
 //   rows: { servers|clusters|services|serviceDeploys|variables: {
 //     create: [row], update: [{id, set: {field: {from, to}}}], remove: [id] } },
+//   seen: { clusters|serviceDeploys: [id] },  // rows the client had read
 // }
 // writes = { project: {field: value},
 //            rows: { collection: {create: [row], update: [{id, set: {field: value}}], remove: [id]} } }
@@ -232,8 +233,11 @@ function mergePatch(current, patch, opts = {}) {
   }
   for (const [c, refs] of Object.entries(REFS)) {
     const updates = new Map(((writes.rows[c] || {}).update || []).map((u) => [String(u.id), u.set]));
+    // Rows the client had read and kept on purpose (orphans the MCP leaves
+    // for a restore) are its call; only a row it never saw is a conflict.
+    const seen = new Set((((patch.seen || {})[c]) || []).map(String));
     for (const row of current[c] || []) {
-      if (removed[c].has(String(row.id))) {
+      if (removed[c].has(String(row.id)) || seen.has(String(row.id))) {
         continue;
       }
       const merged = { ...row, ...(updates.get(String(row.id)) || {}) };
