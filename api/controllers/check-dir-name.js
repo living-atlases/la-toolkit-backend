@@ -1,5 +1,6 @@
 const p = require('path');
 const fs = require('fs');
+const { notifyProjects } = require('../libs/notify-projects');
 
 module.exports = {
   friendlyName: 'Check if dir name is available',
@@ -57,6 +58,7 @@ module.exports = {
         );
         // noinspection JSUnresolvedFunction
         await Project.updateOne({ id: id }).set({ dirName: result });
+        notifyProjects();
       }
     } else {
       result = dirName;

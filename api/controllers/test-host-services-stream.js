@@ -15,6 +15,7 @@ const {
   logErr,
 } = require('../libs/utils.js');
 const {localPasswordsPath} = require('../libs/project-utils.js');
+const { notifyProjects } = require('../libs/notify-projects');
 
 let preCmd = sails.config.preCmd;
 if (preCmd !== '') {
@@ -140,6 +141,7 @@ let updateServiceDeployStatus = async (checksResults, checks, server, debug = fa
     });
     if (debug) console.log(`SD updated for ${server}`);
   }));
+  notifyProjects();
   if (debug) console.log(`End of csv to json and update of ${server}`);
 };
 

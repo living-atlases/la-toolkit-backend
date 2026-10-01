@@ -1,3 +1,5 @@
+const { notifyProjects } = require('../libs/notify-projects');
+
 // noinspection JSUnresolvedFunction
 module.exports = {
   friendlyName: "Update project",
@@ -85,12 +87,8 @@ module.exports = {
     // noinspection JSUnresolvedFunction
     await Project.updateOne({ id: projectId }).set(projectValues);
     let projects = await sails.helpers.populateProject();
-    // Notify subs socket clients
-    Project.publish(
-      projects.map((p) => p.id),
-      projects,
-      this.req
-    );
+    // Notify the browsers (projects-subs)
+    notifyProjects();
     return this.res.json({ projects: projects });
   },
 };

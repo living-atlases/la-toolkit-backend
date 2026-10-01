@@ -15,6 +15,7 @@ const log = (preCmd, cmd) => {
 // Shared with gen-ssh-conf (gh-7): the config must be rebuilt whenever the
 // assh YAMLs change, not only on connectivity checks.
 const {asshReConfig} = require('../libs/assh.js');
+const { notifyProjects } = require('../libs/notify-projects');
 
 const pingTest = async (server) => {
   let preCmd = sails.config.preCmd;
@@ -311,6 +312,7 @@ module.exports = {
           osName: serverResult[server.name]['os'].name,
           osVersion: serverResult[server.name]['os'].version,
         });
+      notifyProjects();
 
       // Log the results for debugging
       console.log(`Server ${server.name}: ping=${serverResult[server.name]['ping']}, ssh=${serverResult[server.name]['ssh']}, sudo=${serverResult[server.name]['sudo']}`);
