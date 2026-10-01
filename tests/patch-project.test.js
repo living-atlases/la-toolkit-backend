@@ -11,7 +11,7 @@ test.before(() => {
       {
         hooks: { grunt: false },
         log: { level: 'warn' },
-        port: 13374,
+        port: 13377,
         // Own directory: ava runs files in parallel (see update-project.test.js).
         datastores: { default: { adapter: 'sails-disk', dir: '.tmp/localDiskDb-patch-project' } },
         models: { migrate: 'drop' },

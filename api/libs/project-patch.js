@@ -57,6 +57,8 @@ const REFS = {
 };
 
 const isBlank = (v) => v === undefined || v === null;
+const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 
 // Deep equality where a missing key and null are the same (old Mongo rows
 // lack keys the client sends as null).
@@ -77,6 +79,20 @@ function eq(a, b) {
     return true;
   }
   return a === b;
+}
+
+// Whether what is stored still is the `from` the client saw. A key the
+// stored object lacks, and stored sub-keys the client does not know (an
+// sshKey saved with an old `fingerprint`), are not changes made by anyone:
+// they would make every edit of that field conflict on old rows.
+function matchesFrom(stored, present, from) {
+  if (!present) {
+    return true;
+  }
+  if (isPlainObject(stored) && isPlainObject(from)) {
+    return Object.keys(from).every((k) => matchesFrom(stored[k], Object.prototype.hasOwnProperty.call(stored, k), from[k]));
+  }
+  return eq(stored, from);
 }
 
 // Whether a stored row already says what a created one says. Only the
@@ -111,7 +127,7 @@ function mergePatch(current, patch, opts = {}) {
     if (eq(cur, change.to)) {
       continue;
     }
-    if (PROJECT_SOFT.includes(f) || eq(cur, change.from)) {
+    if (PROJECT_SOFT.includes(f) || matchesFrom(cur, has(current, f), change.from)) {
       writes.project[f] = change.to;
     } else {
       conflicts.push(`project.${f}`);
@@ -180,7 +196,7 @@ function mergePatch(current, patch, opts = {}) {
         if (eq(cur, change.to)) {
           continue;
         }
-        if (ROW_SOFT[c].includes(f) || eq(cur, change.from)) {
+        if (ROW_SOFT[c].includes(f) || matchesFrom(cur, has(existing, f), change.from)) {
           set[f] = change.to;
         } else {
           conflicts.push(`${c}/${id}.${f}`);
