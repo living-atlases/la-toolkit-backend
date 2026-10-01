@@ -1,5 +1,6 @@
 const {runDetachedWithViewer} = require('../libs/ttyd-utils.js');
 const {logsProdFolder, resultsFile, logsFile, dateSuffix} = require('../libs/utils.js');
+const { notifyProjects } = require('../libs/notify-projects');
 
 module.exports = {
   friendlyName: 'ansible with ttyd',
@@ -171,6 +172,8 @@ module.exports = {
         cmd: cmdCreated.id,
       }).fetch();
       cmdEntry.cmd = cmdCreated;
+      // A new run in the project history.
+      notifyProjects();
 
       // Run the deploy DETACHED from the terminal, with the console as a mere
       // live-follow viewer of its log. A dropped websocket can no longer SIGHUP

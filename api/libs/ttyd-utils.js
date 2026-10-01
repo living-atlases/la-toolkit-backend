@@ -9,6 +9,7 @@ const {delay, exitCodeFile, deployPidFile, logsProdFolder, logsProdDevLocation, 
 const findPidFromPort = require("find-pid-from-port")
 const {parse: shellParse} = require('shell-quote');
 const perf = require('execution-time')();
+const { notifyProjects } = require('./notify-projects');
 
 const portPool = new PortPool(
   sails.config.ttydMinPort,
@@ -173,6 +174,7 @@ const ttyd = async (
           }
         );
       }
+      notifyProjects();
     });
     return ttyd.pid;
   } catch (werr) {
@@ -314,6 +316,8 @@ const spawnDetached = async (
         });
       }
       writeExitCode(logsPrefix, logsSuffix, code);
+      // The run finished: its history entry now has a duration and a result.
+      notifyProjects();
     });
 
     // A spawn-level failure (e.g. ENOENT, EACCES) never reaches 'close' with a
@@ -332,6 +336,7 @@ const spawnDetached = async (
         });
       }
       writeExitCode(logsPrefix, logsSuffix, 1);
+      notifyProjects();
     });
 
     return child.pid;

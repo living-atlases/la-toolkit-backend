@@ -73,6 +73,8 @@ module.exports.routes = {
   "POST /api/v1/add-projects": { action: "add-projects" },
   "POST /api/v1/add-project": { action: "add-project" },
   "PATCH /api/v1/update-project": { action: "update-project" },
+  "PATCH /api/v1/patch-project": { action: "patch-project" },
+  "POST /api/v1/presence": { action: "presence" },
   "DELETE /api/v1/delete-project": { action: "delete-project" },
   "GET /api/v1/get-env": { action: "get-env" },
   "POST /api/v1/branding-deploy": { action: "branding-deploy" },

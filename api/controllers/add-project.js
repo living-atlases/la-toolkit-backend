@@ -1,3 +1,5 @@
+const { notifyProjects } = require('../libs/notify-projects');
+
 module.exports = {
   friendlyName: 'Add project',
 
@@ -23,9 +25,8 @@ module.exports = {
       project: inputs.project
     });
     let projects = await sails.helpers.populateProject();
-    // Notify subs socket clients
-    // https://sailsjs.com/documentation/reference/web-sockets/resourceful-pub-sub/publish
-    Project.publish(projects.map(p => p.id), projects, this.req);
+    // Notify the browsers (projects-subs)
+    notifyProjects();
     return this.res.json({ projects: projects });
   },
 };

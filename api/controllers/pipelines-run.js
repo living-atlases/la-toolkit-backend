@@ -3,6 +3,7 @@ const {
 } = require('../libs/project-utils.js');
 const {runDetachedWithViewer} = require('../libs/ttyd-utils.js');
 const {dateSuffix, logsProdFolder, logsFile} = require('../libs/utils.js');
+const { notifyProjects } = require('../libs/notify-projects');
 
 module.exports = {
 
@@ -108,6 +109,8 @@ module.exports = {
         cmd: cmdCreated.id,
       }).fetch();
       cmdEntry.cmd = cmdCreated;
+      // A new run in the project history.
+      notifyProjects();
 
       // Detached + log viewer, like the ansible deploy: closing the console (or
       // losing its websocket) no longer aborts the run, and it can be stopped

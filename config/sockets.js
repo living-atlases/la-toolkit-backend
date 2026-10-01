@@ -60,13 +60,11 @@ module.exports.sockets = {
   *                                                                          *
   ***************************************************************************/
 
-  // afterDisconnect: function(session, socket, done) {
-  //
-  //   // By default: do nothing.
-  //   // (but always trigger the callback)
-  //   return done();
-  //
-  // },
+  // A closed browser no longer has its project open (libs/presence).
+  afterDisconnect: function(session, socket, done) {
+    require('../api/libs/presence').drop(socket.id);
+    return done();
+  },
 
 
   /***************************************************************************

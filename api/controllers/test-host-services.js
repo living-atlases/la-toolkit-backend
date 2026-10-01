@@ -15,6 +15,7 @@ const {
   logErr,
 } = require('../libs/utils.js');
 const {localPasswordsPath} = require('../libs/project-utils.js');
+const { notifyProjects } = require('../libs/notify-projects');
 
 let preCmd = sails.config.preCmd;
 if (preCmd !== '') {
@@ -154,6 +155,7 @@ let updateServiceDeployStatus = async (checksResults, checks, server, debug = fa
     });
     if (debug) console.log(`SD updated for ${server}`);
   }));
+  notifyProjects();
   /* Disabled for now
   for (let s in sStatus) {
     await Service.updateOne({id: s}).set({

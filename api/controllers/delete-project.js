@@ -1,3 +1,5 @@
+const { notifyProjects } = require('../libs/notify-projects');
+
 module.exports = {
   friendlyName: "Delete project",
 
@@ -33,12 +35,8 @@ module.exports = {
       cascade: true,
     });
     let projects = await sails.helpers.populateProject();
-    // Notify subs socket clients
-    Project.publish(
-      projects.map((p) => p.id),
-      projects,
-      this.req
-    );
+    // Notify the browsers (projects-subs)
+    notifyProjects();
     return this.res.json({ projects: projects });
   },
 };
