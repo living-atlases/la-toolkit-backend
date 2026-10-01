@@ -68,12 +68,23 @@ const ansiblewArgs = (deployCmd, useAnsiblew, ansibleUser) => {
 const ladockerDir = '/home/ubuntu/ansible/la-docker-compose';
 const bundleCacheDir = '/home/ubuntu/ansible/la-inventories/.bundle-cache';
 const fastDeployScript = `${ladockerDir}/scripts/bundle/fast-deploy.sh`;
+const dockerSocket = '/var/run/docker.sock';
 
 // The fast deploy line: la-docker-compose's fast-deploy.sh runs the project's ansiblew with
 // these same arguments (recording, not running, the playbook) to render and apply bundles.
 // What a bundle cannot do is refused here, before anything starts: a dry run, a partial
 // deploy (tags, limit) and a non docker-compose line.
 const fastDeployCmd = (deployCmd, ansibleUser, invPath, exists = fs.existsSync) => {
+  // Off by default in the toolkit's docker-compose.yml: say how to turn it on, not a docker error.
+  if (!exists(dockerSocket)) {
+    throw new Error(
+      'fast deploy is not enabled in this toolkit: it needs the host\'s docker socket. In the ' +
+        'toolkit\'s docker-compose.yml, uncomment the /var/run/docker.sock volume of la-toolkit ' +
+        'and restart it with DOCKER_GID=$(getent group docker | cut -d: -f3) docker compose up -d. ' +
+        'The socket is root on that host and the toolkit has no login: only on a toolkit that is ' +
+        'not exposed'
+    );
+  }
   if (!exists(fastDeployScript)) {
     throw new Error(
       'the selected la-docker-compose release has no fast deploy ' +
@@ -96,4 +107,4 @@ const fastDeployCmd = (deployCmd, ansibleUser, invPath, exists = fs.existsSync) 
     `--cache-dir ${bundleCacheDir} -- --alainstall=/home/ubuntu/ansible/ala-install ${args}`;
 };
 
-module.exports = {ansiblewArgs, fastDeployCmd, bundleCacheDir};
+module.exports = {ansiblewArgs, fastDeployCmd, bundleCacheDir, dockerSocket};

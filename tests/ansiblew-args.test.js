@@ -1,6 +1,6 @@
 const test = require('ava');
 
-const {ansiblewArgs, fastDeployCmd, bundleCacheDir} = require('../api/libs/ansiblew-args.js');
+const {ansiblewArgs, fastDeployCmd, bundleCacheDir, dockerSocket} = require('../api/libs/ansiblew-args.js');
 
 const base = {
   debug: false, onlyProperties: false, dryRun: false, continueEvenIfFails: false,
@@ -44,6 +44,13 @@ test('fastDeployCmd refuses what a bundle cannot do', (t) => {
 });
 
 test('fastDeployCmd refuses a la-docker-compose release without fast-deploy.sh', (t) => {
-  const e = t.throws(() => fastDeployCmd(base, 'u', '/inv/', () => false));
+  const e = t.throws(() => fastDeployCmd(base, 'u', '/inv/', (f) => f === dockerSocket));
   t.regex(e.message, /no fast deploy/);
+});
+
+test('fastDeployCmd without the docker socket says how to enable it', (t) => {
+  const e = t.throws(() => fastDeployCmd(base, 'u', '/inv/', (f) => f !== dockerSocket));
+  t.regex(e.message, /not enabled in this toolkit/);
+  t.regex(e.message, /uncomment the \/var\/run\/docker\.sock volume/);
+  t.regex(e.message, /DOCKER_GID=\$\(getent group docker/);
 });
