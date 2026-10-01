@@ -65,3 +65,15 @@ test('gen-ssh-conf invokes asshReConfig after writing the assh YAMLs', (t) => {
   t.regex(src, /require\('\.\.\/libs\/assh\.js'\)/);
   t.regex(src, /^\s*await asshReConfig\(\);/m);
 });
+
+test('gen-ssh-conf keeps idle ssh connections alive during long deploys', (t) => {
+  // A docker pull/build prints nothing for minutes; without keepalives a
+  // connection dropped by a NAT or firewall blocks ansible forever.
+  const src = fs.readFileSync(
+    path.join(__dirname, '../api/controllers/gen-ssh-conf.js'),
+    'utf8'
+  );
+  t.regex(src, /^\s*t\.defaults\.ServerAliveInterval = \d+;/m);
+  t.regex(src, /^\s*t\.defaults\.ServerAliveCountMax = \d+;/m);
+  t.regex(src, /^\s*t\.defaults\.TCPKeepAlive = 'yes';/m);
+});

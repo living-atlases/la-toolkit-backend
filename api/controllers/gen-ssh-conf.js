@@ -19,6 +19,13 @@ const basicAsshConf = () => {
   } else {
     t.defaults.StrictHostKeyChecking = 'accept-new';
   }
+  // Keep long, output-less ansible tasks (docker pull/build) from dying on an
+  // idle timeout somewhere in the path (gateway/NAT/firewall): without these a
+  // dropped connection is never noticed and the ssh client blocks in read()
+  // forever, hanging the whole deploy. ConnectTimeout only covers the handshake.
+  t.defaults.ServerAliveInterval = 30;
+  t.defaults.ServerAliveCountMax = 6;
+  t.defaults.TCPKeepAlive = 'yes';
 //  t.defaults.ControlMaster = 'auto';
 //  t.defaults.ControlPath = '/home/ubuntu/.ssh/%h-%p-%r.sock';
 //  t.defaults.ControlPersist = '90m';
