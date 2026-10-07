@@ -1,3 +1,4 @@
+const cp = require('child_process');
 const fs = require('fs');
 
 // The arguments a deploy passes to the generated ansiblew (or to ansible-playbook directly
@@ -74,6 +75,13 @@ const dockerSocket = '/var/run/docker.sock';
 // these same arguments (recording, not running, the playbook) to render and apply bundles.
 // What a bundle cannot do is refused here, before anything starts: a dry run, a partial
 // deploy (tags, limit) and a non docker-compose line.
+// Whether a path exists where the deploy commands run: the backend's own filesystem in
+// production, the la-toolkit-dev container in development (preCmd is its docker exec).
+const existsWhereCmdsRun = (preCmd, spawnSync = cp.spawnSync) => (path) =>
+  preCmd
+    ? spawnSync('sh', ['-c', `${preCmd} test -e ${path}`]).status === 0
+    : fs.existsSync(path);
+
 const fastDeployCmd = (deployCmd, ansibleUser, invPath, exists = fs.existsSync) => {
   // Off by default in the toolkit's docker-compose.yml: say how to turn it on, not a docker error.
   if (!exists(dockerSocket)) {
@@ -107,4 +115,4 @@ const fastDeployCmd = (deployCmd, ansibleUser, invPath, exists = fs.existsSync) 
     `--cache-dir ${bundleCacheDir} -- --alainstall=/home/ubuntu/ansible/ala-install ${args}`;
 };
 
-module.exports = {ansiblewArgs, fastDeployCmd, bundleCacheDir, dockerSocket};
+module.exports = {ansiblewArgs, fastDeployCmd, existsWhereCmdsRun, bundleCacheDir, dockerSocket};

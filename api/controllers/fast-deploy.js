@@ -4,7 +4,7 @@ const {
 } = require('../libs/project-utils.js');
 const {runDetachedWithViewer} = require('../libs/ttyd-utils.js');
 const {dateSuffix, logsProdFolder, logsFile, logsTypeF} = require('../libs/utils.js');
-const {fastDeployCmd} = require('../libs/ansiblew-args.js');
+const {fastDeployCmd, existsWhereCmdsRun} = require('../libs/ansiblew-args.js');
 const {notifyProjects} = require('../libs/notify-projects');
 
 // Fast deploy of a docker-compose portal (la-docker-compose TASK-50, toolkit TASK-31): the
@@ -57,7 +57,12 @@ module.exports = {
 
     let cmd;
     try {
-      cmd = fastDeployCmd(inputs.cmd, p.genConf['LA_variable_ansible_user'], invPath);
+      cmd = fastDeployCmd(
+        inputs.cmd,
+        p.genConf['LA_variable_ansible_user'],
+        invPath,
+        existsWhereCmdsRun(sails.config.preCmd)
+      );
     } catch (e) {
       return exits.badRequest(e.message);
     }
