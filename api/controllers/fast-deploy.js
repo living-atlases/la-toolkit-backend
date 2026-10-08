@@ -7,7 +7,7 @@ const {dateSuffix, logsProdFolder, logsFile, logsTypeF} = require('../libs/utils
 const {fastDeployCmd, existsWhereCmdsRun} = require('../libs/ansiblew-args.js');
 const {notifyProjects} = require('../libs/notify-projects');
 
-// Fast deploy of a docker-compose portal (la-docker-compose TASK-50, toolkit TASK-31): the
+// Fast deploy of a docker-compose portal : the
 // bundles Ansible renders, cached, applied without Ansible by
 // la-docker-compose/scripts/bundle/fast-deploy.sh. Same request as ansiblew (a DeployCmd),
 // same detached run + log viewer, deploy-cancel and cmd-results; its logs are a bash run's.
