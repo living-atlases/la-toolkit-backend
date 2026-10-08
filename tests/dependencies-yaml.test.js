@@ -74,3 +74,28 @@ test('every constraint in dependencies.yaml is parseable', (t) => {
     }
   }
 });
+
+test('la-toolkit 1.8.0 needs la-docker-compose 1.11.2, for the fast deploy', (t) => {
+  // The key is 'docker-compose' (LAServiceName.docker_compose); see the
+  // comment above the docker-compose entries.
+  const constraintOf = (version) => {
+    for (const [range, reqs] of Object.entries(deps['la-toolkit'])) {
+      if (semver.satisfies(version, toNodeRange(range))) {
+        const req = reqs.find((r) => r['docker-compose'] !== undefined);
+        if (req) return req['docker-compose'];
+      }
+    }
+    return null;
+  };
+  t.is(constraintOf('1.8.0'), '>= 1.11.2');
+  t.is(constraintOf('1.9.3'), '>= 1.11.2');
+  t.is(constraintOf('1.7.1'), null);
+});
+
+test('every la-toolkit version falls in exactly one bucket', (t) => {
+  for (const version of ['1.0.22', '1.5.9', '1.7.0', '1.7.1', '1.8.0', '2.0.0']) {
+    const hits = Object.keys(deps['la-toolkit'])
+      .filter((range) => semver.satisfies(version, toNodeRange(range)));
+    t.true(hits.length <= 1, `${version} matches ${hits.join(', ')}`);
+  }
+});

@@ -478,9 +478,18 @@ la-toolkit:
 
   # Hybrid portals (VM + docker-compose legs in one ansiblew run) need the
   # ansiblew --ladocker + positional-services support added in 1.8.33
-  '>= 1.7.1':
+  '>= 1.7.1 < 1.8.0':
     - ala-install: '>= 2.4.0'
     - la-generator: '>= 1.8.33'
+
+  # Fast deploy runs la-docker-compose's scripts/bundle/fast-deploy.sh. It is
+  # there since 1.11.0, but before 1.11.2 a deploy from the toolkit (which
+  # passes skip_services as a string) silently left out sds. Only checked on
+  # projects that use docker compose: a VM-only portal has no release selected.
+  '>= 1.8.0':
+    - ala-install: '>= 2.4.0'
+    - la-generator: '>= 1.8.33'
+    - docker-compose: '>= 1.11.2'
 
 # The key is 'docker-compose' and not 'la-docker-compose' because the toolkit
 # normalizes unknown keys through LAServiceName, where the service is spelled
