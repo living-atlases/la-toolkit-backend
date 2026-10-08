@@ -49,6 +49,7 @@ module.exports.routes = {
     skipAssets: false,
   },
   "POST /api/v1/ansiblew": { action: "ansiblew" },
+  "POST /api/v1/fast-deploy": { action: "fast-deploy" },
   "POST /api/v1/cmd-results": { action: "cmd-results" },
   "GET /api/v1/get-generator-versions": { action: "get-generator-versions" },
   "POST /api/v1/get-deps-versions": { action: "get-deps-versions" },

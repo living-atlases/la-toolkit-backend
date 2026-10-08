@@ -1,4 +1,5 @@
 const {runDetachedWithViewer} = require('../libs/ttyd-utils.js');
+const {ansiblewArgs} = require('../libs/ansiblew-args.js');
 const {logsProdFolder, resultsFile, logsFile, dateSuffix} = require('../libs/utils.js');
 const { notifyProjects } = require('../libs/notify-projects');
 
@@ -62,65 +63,8 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    let cmd = inputs.baseCmd;
-    // let mainProjectPath = inputs.mainProjectPath;
     let projectPath = inputs.projectPath;
-    let aw = inputs.useAnsiblew;
-    let sep = aw ? '=' : ' ';
-
-    if (inputs.cmd.debug) {
-      cmd = cmd + (aw ? ' --debug' : ' --vvvv');
-    }
-    if (inputs.cmd.onlyProperties) {
-      cmd = cmd + (aw ? ' --properties' : ' --tags properties');
-    }
-    if (inputs.cmd.dryRun) {
-      cmd = cmd + (aw ? '' : ' --check');
-    }
-    if (!inputs.cmd.dryRun) {
-      cmd = cmd + (aw ? ' --nodryrun' : '');
-    }
-    if (inputs.cmd.continueEvenIfFails) {
-      cmd = cmd + (aw ? ' --continue' : '');
-    }
-    if (inputs.cmd.tags.length > 0) {
-      cmd = cmd + ` --tags${sep}${inputs.cmd.tags.join(',')}`;
-    }
-    if (inputs.cmd.skipTags.length > 0) {
-      cmd =
-        cmd +
-        ` --skip${aw ? '' : '-tags'}${sep}${inputs.cmd.skipTags.join(',')}`;
-    }
-    if (inputs.cmd.limitToServers.length > 0) {
-      cmd = cmd + ` --limit${sep}${inputs.cmd.limitToServers.join(',')}`;
-    }
-
-    // Docker-compose deploys: target la-docker-compose (site.yml against the
-    // docker_compose group, all-in-one) instead of the per-service ala-install
-    // playbooks. Granularity is a deny-list passed as skip_services.
-    if (aw && inputs.cmd.dockerCompose) {
-      cmd = cmd + ` --ladocker=/home/ubuntu/ansible/la-docker-compose`;
-      let extra = 'auto_deploy=true';
-      // Mirror the la-docker-compose Jenkinsfile SKIP_SERVICES default. The legacy `sds`
-      // (sds-webapp2) and `sensitive-data-service` now deploy cleanly (sds data files repaired,
-      // species category/zone refs normalized), so they are no longer deferred. Only
-      // `sds-static-home` (next-gen static home) stays deferred. Tokens use the names
-      // la-docker-compose recognises (inventory group / desc key), not the toolkit's internal names.
-      const composeDeferred = ['sds-static-home'];
-      const skips = [
-        ...new Set([...(inputs.cmd.skipServices || []), ...composeDeferred]),
-      ];
-      if (skips.length > 0) {
-        extra = `${extra} skip_services=${skips.join(',')}`;
-      }
-      cmd = cmd + ` --extra="${extra}"`;
-    }
-
-    cmd = cmd + ` --user ${inputs.ansibleUser}`;
-
-    if (aw) {
-      cmd = cmd + ` ${inputs.cmd.deployServices.join(' ')}`;
-    }
+    let cmd = inputs.baseCmd + ansiblewArgs(inputs.cmd, inputs.useAnsiblew, inputs.ansibleUser);
 
     let env = {};
 

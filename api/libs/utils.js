@@ -70,14 +70,16 @@ const logErr = (err) => {
 const logsTypeF = (cmdType) => {
   let isBrandingDeploy = cmdType === 'brandingDeploy';
   let isLAPipelines = cmdType === 'laPipelines'
-  let isBashCmd = cmdType === 'bash' || isLAPipelines || isBrandingDeploy;
-  return isBrandingDeploy ? "branding-deploy" : isLAPipelines ? "la-pipelines" : isBashCmd ? "bash" : "ansible";
+  let isFastDeploy = cmdType === 'fastDeploy';
+  let isBashCmd = cmdType === 'bash' || isLAPipelines || isBrandingDeploy || isFastDeploy;
+  return isBrandingDeploy ? "branding-deploy" : isLAPipelines ? "la-pipelines" : isFastDeploy ? "fast-deploy" : isBashCmd ? "bash" : "ansible";
 }
 
+// fastDeploy runs ansible only to render, inside containers: no recap of the deploy itself.
 const isBashCmdF = (cmdType) => {
   let isBrandingDeploy = cmdType === 'brandingDeploy';
   let isLAPipelines = cmdType === 'laPipelines'
-  return cmdType === 'bash' || isLAPipelines || isBrandingDeploy;
+  return cmdType === 'bash' || isLAPipelines || isBrandingDeploy || cmdType === 'fastDeploy';
 }
 
 const dateSuffix = () => {
