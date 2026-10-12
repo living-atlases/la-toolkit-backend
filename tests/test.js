@@ -160,7 +160,9 @@ test.before((/* t */) => {
       projectsDir: '/var/tmp/la-toolkit/config/',
       logsDir: '/var/tmp/la-toolkit/logs/',
       baseBrandingLocation: '/data/la-generator/base-branding',
-      preCmd: 'docker exec -u ubuntu la-toolkit',
+      // A dev setup runs ttyd in the la-toolkit container; inside the image
+      // (the CI smoke test) it runs directly: LA_TOOLKIT_TEST_PRECMD=''.
+      preCmd: process.env.LA_TOOLKIT_TEST_PRECMD ?? 'docker exec -u ubuntu la-toolkit',
       ttydMinPort: 20011,
       ttydMaxPort: 20100,
     },
