@@ -6,7 +6,9 @@ const { ObjectId } = require('mongodb');
 // (a browser, the MCP over plain HTTP), and a socket that subscribes joins
 // that room instead of per-record rooms frozen at subscription time.
 
-const DELAY = 30;
+// Wide enough that a burst with a database write in the middle stays one burst
+// on a loaded CI agent (30 ms split it in two there).
+const DELAY = 250;
 let pushes = [];
 let joins = [];
 
