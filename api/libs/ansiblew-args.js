@@ -55,6 +55,12 @@ const ansiblewArgs = (deployCmd, useAnsiblew, ansibleUser) => {
     if (skips.length > 0) {
       extra = `${extra} skip_services=${skips.join(',')}`;
     }
+    // la-docker-compose stops a deploy that would leave a host without some of its
+    // services (validate-service-consistency) unless this is set: the caller asked for it
+    // after moving services off the host.
+    if (deployCmd.allowServiceRemoval) {
+      extra = `${extra} allow_service_removal=true`;
+    }
     cmd = cmd + ` --extra="${extra}"`;
   }
 

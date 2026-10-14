@@ -16,6 +16,20 @@ test('ansiblewArgs builds the docker-compose deploy line', (t) => {
   );
 });
 
+test('ansiblewArgs lets a docker-compose deploy remove services only when asked', (t) => {
+  t.notRegex(ansiblewArgs(base, true, 'ubuntu'), /allow_service_removal/);
+  t.is(
+    ansiblewArgs({...base, allowServiceRemoval: true}, true, 'ubuntu'),
+    ' --nodryrun --ladocker=/home/ubuntu/ansible/la-docker-compose' +
+      ' --extra="auto_deploy=true skip_services=sds-static-home allow_service_removal=true" --user ubuntu all'
+  );
+  // Only la-docker-compose has the safety gate; a VM deploy ignores it.
+  t.notRegex(
+    ansiblewArgs({...base, dockerCompose: false, allowServiceRemoval: true}, true, 'ubuntu'),
+    /allow_service_removal/
+  );
+});
+
 test('ansiblewArgs keeps the plain ansible-playbook form', (t) => {
   t.is(
     ansiblewArgs({...base, dockerCompose: false, dryRun: true, tags: ['a'], limitToServers: ['h1']}, false, 'u'),
