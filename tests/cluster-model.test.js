@@ -86,3 +86,12 @@ test('Cluster model JSON schema is valid', (t) => {
   t.true(Cluster.attributes.projectId !== undefined);
   t.true(Cluster.attributes.serverId !== undefined);
 });
+
+test('Cluster stage defaults to production and only takes known stages', (t) => {
+  const Cluster = require('../api/models/Cluster.js');
+
+  // The client reads a missing stage as production; the default keeps new rows the same.
+  const stage = Cluster.attributes.stage;
+  t.is(stage.defaultsTo, 'production');
+  t.deepEqual(stage.isIn, ['production', 'staging']);
+});

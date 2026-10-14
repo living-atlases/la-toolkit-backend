@@ -17,6 +17,14 @@ module.exports = {
       isIn: ["vm", "dockerSwarm", "k8s", "dockerCompose"],
     },
 
+    // A compose cluster with real data (production) or one whose services are
+    // still being tried (staging). Production hosts never resolve staging names.
+    stage: {
+      type: "string",
+      defaultsTo: "production",
+      isIn: ["production", "staging"],
+    },
+
     // Relations
     projectId: {
       model: "project",
