@@ -3,25 +3,29 @@
 #
 # See: https://github.com/AtlasOfLivingAustralia/documentation/wiki/Dependencies
 #
-# "Nextgen" ALA app releases require platform capabilities that the community Living Atlas stack
-# does not provide yet. The la-toolkit reads this file (like dependencies.yaml) and shows a lint
-# warning so these versions are NOT selected until support lands. This file is fetched from GitHub
-# master at runtime, so it can be updated without releasing a new toolkit.
+# "Nextgen" ALA app releases need something extra from the portal (a Bootstrap 5 branding, a
+# published container image...). The la-toolkit reads this file (like dependencies.yaml) and shows
+# a lint warning saying what these versions need, and which version to use without it. This file
+# is fetched from GitHub master at runtime, so it can be updated without releasing a new toolkit.
 #
 # Schema:
 #   nextgen-compat:
 #     <service>:
-#       from: '<version constraint>'   # versions considered nextgen / not yet supported
-#       last-safe: '<version>'         # last community-supported version (shown in the warning)
+#       from: '<version constraint>'   # versions that need what <reason> describes
+#       last-safe: '<version>'         # last published version that works without it (shown in
+#                                      # the warning)
 #       reason: <reason-key>           # maps to an explanation in the toolkit
 #
 # Service names must match dependencies.yaml (collectory, ala-hub, logger, alerts, ...).
 #
 # reason keys currently understood by the toolkit:
-#   bootstrap5-branding -> app switched to the new ala-bootstrap5 branding (brand-2023), which
-#                          fetches .mustache templates. The community branding (commonui-bs3) ships
-#                          only .html templates, so these versions fail (HTTP 500) until a
-#                          bootstrap5-capable branding (footer.mustache/header.mustache) exists.
+#   bootstrap5-branding -> app switched to the ala-bootstrap5 plugin, which fetches .mustache
+#                          templates (header, footer, assets, banner) from the branding. They work
+#                          with a branding that ships a Bootstrap 5 build with those templates
+#                          (e.g. gbif.es runs logger 4.7.0 and collectory 6.3.0 on
+#                          https://datos.gbif.es/brand-2025-vite-bs5/bs5). A Bootstrap 3 only
+#                          branding (commonui-bs3, .html templates) makes them fail (HTTP 500), so
+#                          with one of those use last-safe.
 #   no-community-image  -> no published livingatlases container image exists for that version range
 #                          (e.g. doi/sds legacy tags below the first containerised release), so the
 #                          toolkit steers the deployer to a version that can actually be pulled.
@@ -39,6 +43,14 @@ nextgen-compat:
   alerts:
     from: '> 5.2.4'
     last-safe: '5.2.4'
+    reason: bootstrap5-branding
+
+  # collectory switched to ala-bootstrap5 after 6.2.2 (first release: 6.3.0). 6.2.2 was never
+  # tagged nor published, so last-safe is 6.0.0, the last ala-bootstrap3 release with a community
+  # image.
+  collectory:
+    from: '> 6.2.2'
+    last-safe: '6.0.0'
     reason: bootstrap5-branding
 
   # doi-service: ALA moved these apps to the nextgen build/CI. The community stack runs them from
